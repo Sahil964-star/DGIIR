@@ -1,0 +1,4 @@
+version: '3.8'
+
+services:
+  # TODO: Placeholder for MongoDB, Redis, MinIO, Backend, Frontend
