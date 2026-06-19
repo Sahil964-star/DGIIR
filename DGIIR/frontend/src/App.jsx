@@ -5,6 +5,7 @@ import { ThemeProvider } from './context/ThemeContext';
 import { AuthProvider } from './context/AuthContext';
 import ProtectedRoute from './routes/ProtectedRoute';
 import LoginPage from './auth/pages/LoginPage';
+import RegisterPage from './auth/pages/RegisterPage';
 
 const queryClient = new QueryClient();
 
@@ -22,9 +23,10 @@ function App() {
         <AuthProvider>
           <BrowserRouter>
             <Routes>
-              {/* Primary Auth Route */}
+              {/* Primary Auth Routes */}
               <Route path="/" element={<LoginPage />} />
               <Route path="/login" element={<Navigate to="/" replace />} />
+              <Route path="/register" element={<RegisterPage />} />
 
               {/* Protected Routes (Require Authentication) */}
               <Route element={<ProtectedRoute />}>

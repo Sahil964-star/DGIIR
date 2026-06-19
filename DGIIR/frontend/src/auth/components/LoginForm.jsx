@@ -155,6 +155,11 @@ const LoginForm = () => {
             
             <Button 
               type="button" 
+              onClick={() => {
+                if (selectedRole === 'citizen') {
+                  navigate('/register', { state: { role: selectedRole } });
+                }
+              }}
               variant="outline" 
               fullWidth
               className="text-green-700 border-green-200 hover:border-green-300 hover:bg-green-50 dark:text-green-400 dark:border-green-800/50 dark:hover:bg-green-900/20 font-semibold py-3.5"
