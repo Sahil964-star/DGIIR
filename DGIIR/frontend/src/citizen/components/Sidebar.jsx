@@ -14,15 +14,15 @@ const Sidebar = () => {
   ];
 
   return (
-    <div className="w-[260px] bg-white h-screen fixed left-0 top-0 border-r border-gray-100 flex flex-col pt-6 pb-6 px-4 z-10">
+    <div className="w-[260px] bg-white dark:bg-gray-800 h-screen fixed left-0 top-0 border-r border-gray-100 dark:border-gray-700 flex flex-col pt-6 pb-6 px-4 z-10 transition-colors">
       {/* Logo & Brand */}
       <div className="flex items-center gap-3 px-2 mb-10">
         <div className="bg-dgiir-green-700 text-white p-2 rounded-xl">
           <ShieldAlert className="w-6 h-6" />
         </div>
         <div>
-          <h1 className="font-bold text-gray-900 leading-tight">DGIIR</h1>
-          <p className="text-[10px] text-gray-500 font-medium tracking-wide">
+          <h1 className="font-bold text-gray-900 dark:text-white leading-tight">DGIIR</h1>
+          <p className="text-[10px] text-gray-500 dark:text-gray-400 font-medium tracking-wide">
             Delhi Governance Intelligence<br/>& Incident Response
           </p>
         </div>
@@ -37,8 +37,8 @@ const Sidebar = () => {
             className={({ isActive }) =>
               `flex items-center gap-3 px-3 py-3 rounded-xl transition-colors ${
                 isActive
-                  ? 'bg-dgiir-green-50 text-dgiir-green-700 font-medium'
-                  : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
+                  ? 'bg-dgiir-green-50 dark:bg-dgiir-green-900/30 text-dgiir-green-700 dark:text-dgiir-green-400 font-medium'
+                  : 'text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 hover:text-gray-900 dark:hover:text-white'
               }`
             }
           >
@@ -50,12 +50,12 @@ const Sidebar = () => {
 
       {/* Need Help Card */}
       <div className="mt-auto pt-6">
-        <div className="bg-gray-50 rounded-2xl p-4 text-center border border-gray-100">
-          <div className="bg-white w-10 h-10 rounded-full flex items-center justify-center mx-auto mb-3 shadow-sm">
-            <HelpCircle className="w-5 h-5 text-dgiir-green-700" />
+        <div className="bg-gray-50 dark:bg-gray-900 rounded-2xl p-4 text-center border border-gray-100 dark:border-gray-700 transition-colors">
+          <div className="bg-white dark:bg-gray-800 w-10 h-10 rounded-full flex items-center justify-center mx-auto mb-3 shadow-sm transition-colors">
+            <HelpCircle className="w-5 h-5 text-dgiir-green-700 dark:text-dgiir-green-500" />
           </div>
-          <h3 className="text-sm font-semibold text-gray-900 mb-1">Need Help?</h3>
-          <p className="text-xs text-gray-500 mb-3">Our support team is available 24/7</p>
+          <h3 className="text-sm font-semibold text-gray-900 dark:text-white mb-1">Need Help?</h3>
+          <p className="text-xs text-gray-500 dark:text-gray-400 mb-3">Our support team is available 24/7</p>
           <Button variant="primary" size="sm" className="w-full">
             Contact Support
           </Button>

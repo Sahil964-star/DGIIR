@@ -9,7 +9,7 @@ import SupportCard from '../components/SupportCard';
 
 const CitizenDashboard = () => {
   return (
-    <div className="min-h-screen bg-gray-50 flex">
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 transition-colors duration-200 flex">
       <Sidebar />
       
       <div className="flex-1 ml-[260px] flex flex-col">
@@ -34,13 +34,13 @@ const CitizenDashboard = () => {
         </main>
 
         {/* Footer */}
-        <footer className="mt-auto py-6 px-8 border-t border-gray-200 text-center xl:text-left flex flex-col md:flex-row justify-between items-center gap-4">
-          <p className="text-sm text-gray-500">
+        <footer className="mt-auto py-6 px-8 border-t border-gray-200 dark:border-gray-700 text-center xl:text-left flex flex-col md:flex-row justify-between items-center gap-4 transition-colors">
+          <p className="text-sm text-gray-500 dark:text-gray-400">
             &copy; {new Date().getFullYear()} Government of NCT of Delhi
           </p>
-          <div className="flex gap-6 text-sm text-gray-500">
-            <a href="#" className="hover:text-gray-900 transition-colors">Privacy Policy</a>
-            <a href="#" className="hover:text-gray-900 transition-colors">Terms of Service</a>
+          <div className="flex gap-6 text-sm text-gray-500 dark:text-gray-400">
+            <a href="#" className="hover:text-gray-900 dark:hover:text-white transition-colors">Privacy Policy</a>
+            <a href="#" className="hover:text-gray-900 dark:hover:text-white transition-colors">Terms of Service</a>
           </div>
         </footer>
       </div>

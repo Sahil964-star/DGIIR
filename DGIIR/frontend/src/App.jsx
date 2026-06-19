@@ -2,13 +2,15 @@ import React from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import CitizenDashboard from './citizen/pages/CitizenDashboard';
+import { ThemeProvider } from './shared/context/ThemeContext';
 
 const queryClient = new QueryClient();
 
 function App() {
   return (
-    <QueryClientProvider client={queryClient}>
-      <BrowserRouter>
+    <ThemeProvider>
+      <QueryClientProvider client={queryClient}>
+        <BrowserRouter>
         <Routes>
           <Route path="/" element={<Navigate to="/dashboard" replace />} />
           <Route path="/dashboard" element={<CitizenDashboard />} />
@@ -17,6 +19,7 @@ function App() {
         </Routes>
       </BrowserRouter>
     </QueryClientProvider>
+    </ThemeProvider>
   );
 }
 

@@ -4,10 +4,10 @@ import Button from '../../shared/components/Button';
 
 const HeroBanner = () => {
   return (
-    <div className="bg-gradient-to-r from-dgiir-green-50 to-dgiir-green-100 rounded-[20px] p-8 sm:p-10 flex flex-col md:flex-row items-center justify-between overflow-hidden relative">
+    <div className="bg-gradient-to-r from-dgiir-green-50 to-dgiir-green-100 dark:from-dgiir-green-900/40 dark:to-dgiir-green-800/40 rounded-[20px] p-8 sm:p-10 flex flex-col md:flex-row items-center justify-between overflow-hidden relative transition-colors">
       <div className="z-10 relative">
-        <h2 className="text-3xl font-bold text-gray-900 mb-3">See It. Report It. Improve It.</h2>
-        <p className="text-gray-600 mb-8 max-w-md text-lg">Help us build a better Delhi. Report civic issues quickly and track their resolution in real-time.</p>
+        <h2 className="text-3xl font-bold text-gray-900 dark:text-white mb-3">See It. Report It. Improve It.</h2>
+        <p className="text-gray-600 dark:text-gray-300 mb-8 max-w-md text-lg">Help us build a better Delhi. Report civic issues quickly and track their resolution in real-time.</p>
         <Button variant="primary" size="lg" icon={Plus} className="shadow-sm">
           File a New Complaint
         </Button>

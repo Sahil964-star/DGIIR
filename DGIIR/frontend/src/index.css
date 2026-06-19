@@ -1,5 +1,7 @@
 @import "tailwindcss";
 
+@custom-variant dark (&:is(.dark *));
+
 @theme {
   --color-dgiir-green-50: #f0fdf4;
   --color-dgiir-green-100: #dcfce7;
@@ -18,6 +20,6 @@
 
 @layer base {
   body {
-    @apply bg-white text-gray-900 antialiased;
+    @apply bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 antialiased transition-colors duration-200;
   }
 }
