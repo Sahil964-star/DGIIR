@@ -19,6 +19,13 @@ import RequestSubmittedPage from './auth/officer/pages/RequestSubmittedPage';
 import TrackRequestPage from './auth/officer/pages/TrackRequestPage';
 import OfficerOnboardingPage from './auth/officer/pages/OfficerOnboardingPage';
 
+// Operations Auth Pages
+import OperationsLoginPage from './auth/operations/pages/OperationsLoginPage';
+import OpsRequestAccessPage from './auth/operations/pages/RequestAccessPage';
+import OpsRequestSubmittedPage from './auth/operations/pages/RequestSubmittedPage';
+import OpsTrackRequestPage from './auth/operations/pages/TrackRequestPage';
+import OperationsSetupPage from './auth/operations/pages/OperationsSetupPage';
+
 // Dashboard Pages
 import CitizenDashboard from './citizen/pages/CitizenDashboard';
 import OperationsDashboard from './dashboard/pages/OperationsDashboard';
@@ -45,6 +52,13 @@ function App() {
               <Route path="/officer/request-submitted" element={<RequestSubmittedPage />} />
               <Route path="/officer/track-request" element={<TrackRequestPage />} />
               <Route path="/officer/onboarding" element={<OfficerOnboardingPage />} />
+
+              {/* Operations Auth Pipeline */}
+              <Route path="/operations/login" element={<OperationsLoginPage />} />
+              <Route path="/operations/request-access" element={<OpsRequestAccessPage />} />
+              <Route path="/operations/request-submitted" element={<OpsRequestSubmittedPage />} />
+              <Route path="/operations/track-request" element={<OpsTrackRequestPage />} />
+              <Route path="/operations/setup" element={<OperationsSetupPage />} />
 
               {/* Protected Routes (Require Authentication) */}
               <Route element={<ProtectedRoute />}>

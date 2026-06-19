@@ -160,13 +160,15 @@ const LoginForm = () => {
                   navigate('/register', { state: { role: selectedRole } });
                 } else if (selectedRole === 'officer') {
                   navigate('/officer/request-access');
+                } else if (selectedRole === 'operations') {
+                  navigate('/operations/request-access');
                 }
               }}
               variant="outline" 
               fullWidth
               className="text-green-700 border-green-200 hover:border-green-300 hover:bg-green-50 dark:text-green-400 dark:border-green-800/50 dark:hover:bg-green-900/20 font-semibold py-3.5"
             >
-              {selectedRole === 'officer' ? 'Request Access' : 'Create New Account'}
+              {selectedRole === 'officer' || selectedRole === 'operations' ? 'Request Access' : 'Create New Account'}
             </Button>
           </motion.div>
         )}
