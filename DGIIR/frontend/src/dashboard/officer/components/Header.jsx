@@ -12,8 +12,8 @@ const Header = ({ officerProfile }) => {
           <Menu className="w-6 h-6" />
         </button>
         <div>
-          <h2 className="text-lg font-bold text-slate-900 dark:text-white">Officer Dashboard</h2>
-          <p className="text-xs text-slate-500 dark:text-slate-400">Manage assigned incidents efficiently.</p>
+          <h2 className="text-lg font-bold text-slate-900 dark:text-white">Field Officer Dashboard</h2>
+          <p className="text-xs text-slate-500 dark:text-slate-400">Good Morning, {officerProfile?.name?.split(' ')[0] || 'Rajesh'} • <span className="text-orange-600 dark:text-orange-400 font-medium">2 incidents require immediate attention</span></p>
         </div>
       </div>
 

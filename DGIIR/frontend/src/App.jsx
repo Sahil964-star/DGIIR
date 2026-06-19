@@ -43,14 +43,14 @@ function App() {
                   <Route path="/dashboard/operations" element={<OperationsDashboard />} />
                   <Route path="/dashboard/operations/*" element={<Navigate to="/dashboard/operations" replace />} />
 
-                  {/* Officer Routes */}
-                  <Route path="/dashboard/officer" element={<OfficerDashboard />} />
-                  <Route path="/dashboard/officer/*" element={<Navigate to="/dashboard/officer" replace />} />
-
                   {/* CM Routes */}
                   <Route path="/dashboard/cm" element={<CMDashboard />} />
                   <Route path="/dashboard/cm/*" element={<Navigate to="/dashboard/cm" replace />} />
                 </Route>
+
+                {/* Officer Routes - Uses its own specialized layout (Sidebar & Header) */}
+                <Route path="/dashboard/officer" element={<OfficerDashboard />} />
+                <Route path="/dashboard/officer/*" element={<Navigate to="/dashboard/officer" replace />} />
               </Route>
 
               {/* Default Fallback Route */}

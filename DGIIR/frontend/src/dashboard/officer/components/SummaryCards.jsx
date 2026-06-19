@@ -30,35 +30,35 @@ const SummaryCards = ({ stats }) => {
   return (
     <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
       <SummaryCard
-        title="Assigned"
+        title="Assigned Cases"
         value={stats.assigned}
         icon={ClipboardList}
-        color={{ bg: 'bg-blue-50 dark:bg-blue-900/20', text: 'text-blue-600 dark:text-blue-400' }}
-        subtitle={{ text: '+2 from yesterday', color: 'text-slate-500 dark:text-slate-400' }}
+        color={{ bg: 'bg-blue-50/80 dark:bg-blue-900/20', text: 'text-blue-600 dark:text-blue-400' }}
+        subtitle={{ text: '4 updated since yesterday', color: 'text-slate-500 dark:text-slate-400' }}
         delay={0.1}
       />
       <SummaryCard
         title="Due Today"
         value={stats.dueToday}
         icon={Clock}
-        color={{ bg: 'bg-orange-50 dark:bg-orange-900/20', text: 'text-orange-600 dark:text-orange-400' }}
-        subtitle={{ text: '2 Critical', color: 'text-orange-600 dark:text-orange-400' }}
+        color={{ bg: 'bg-orange-50/80 dark:bg-orange-900/20', text: 'text-orange-600 dark:text-orange-400' }}
+        subtitle={{ text: '2 require site visits', color: 'text-orange-600 dark:text-orange-400' }}
         delay={0.2}
       />
       <SummaryCard
         title="Overdue"
         value={stats.overdue}
         icon={AlertTriangle}
-        color={{ bg: 'bg-red-50 dark:bg-red-900/20', text: 'text-red-600 dark:text-red-400' }}
-        subtitle={{ text: 'Immediate action needed', color: 'text-red-600 dark:text-red-400' }}
+        color={{ bg: 'bg-red-50/80 dark:bg-red-900/20', text: 'text-red-600 dark:text-red-400' }}
+        subtitle={{ text: 'Need immediate action', color: 'text-red-600 dark:text-red-400' }}
         delay={0.3}
       />
       <SummaryCard
-        title="Performance Score"
+        title="Resolution Score"
         value={`${stats.performanceScore}%`}
         icon={Trophy}
-        color={{ bg: 'bg-green-50 dark:bg-green-900/20', text: 'text-green-600 dark:text-green-400' }}
-        subtitle={{ text: 'Good — Keep it up', color: 'text-green-600 dark:text-green-400' }}
+        color={{ bg: 'bg-green-50/80 dark:bg-green-900/20', text: 'text-green-600 dark:text-green-400' }}
+        subtitle={{ text: 'Above department average', color: 'text-green-600 dark:text-green-400' }}
         delay={0.4}
       />
     </div>

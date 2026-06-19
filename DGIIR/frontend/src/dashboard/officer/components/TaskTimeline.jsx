@@ -25,26 +25,35 @@ const TaskTimeline = ({ tasks }) => {
       <div className="relative border-l-2 border-slate-100 dark:border-slate-800 ml-3 space-y-6">
         {tasks.map((task, index) => {
           const styles = getStatusStyles(task.status);
+          const isNextTask = task.status !== 'Completed' && index === tasks.findIndex(t => t.status !== 'Completed');
+
           return (
             <motion.div 
               key={index}
               initial={{ opacity: 0, x: 20 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ duration: 0.3, delay: 0.1 * index }}
-              className="relative pl-6"
+              className={`relative pl-6 ${isNextTask ? 'bg-blue-50/50 dark:bg-blue-900/10 p-3 -ml-3 rounded-lg border border-blue-100 dark:border-blue-900/30 ring-4 ring-blue-50 dark:ring-blue-900/10' : ''}`}
             >
-              <div className={`absolute -left-[9px] top-1.5 w-4 h-4 rounded-full ring-4 ${styles.dot}`}></div>
+              <div className={`absolute ${isNextTask ? '-left-[21px] top-[18px]' : '-left-[9px] top-1.5'} w-4 h-4 rounded-full ring-4 ${styles.dot}`}></div>
               <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-2">
                 <div>
                   <div className="flex items-center gap-2 mb-1">
                     <span className="text-sm font-semibold text-slate-900 dark:text-white">{task.time}</span>
                     <span className="text-sm text-slate-600 dark:text-slate-300 font-medium">{task.title}</span>
+                    {isNextTask && (
+                      <span className="text-[10px] font-bold text-blue-700 dark:text-blue-400 bg-blue-100 dark:bg-blue-900/40 px-2 py-0.5 rounded uppercase tracking-wider ml-1">
+                        Next Task
+                      </span>
+                    )}
                   </div>
                   <p className="text-xs text-slate-500 dark:text-slate-400">{task.location}</p>
                 </div>
-                <span className={`text-[10px] px-2 py-1 rounded font-medium whitespace-nowrap ${styles.text}`}>
-                  {task.status}
-                </span>
+                {!isNextTask && (
+                  <span className={`text-[10px] px-2 py-1 rounded font-medium whitespace-nowrap ${styles.text}`}>
+                    {task.status}
+                  </span>
+                )}
               </div>
             </motion.div>
           );

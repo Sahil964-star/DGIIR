@@ -1,22 +1,22 @@
 import React from 'react';
 import { NavLink } from 'react-router-dom';
-import { LayoutDashboard, FileText, CheckSquare, Clock, CheckCircle2, ShieldCheck, Bell, User } from 'lucide-react';
-import { motion } from 'framer-motion';
+import { LayoutDashboard, FileText, CheckSquare, Map, CheckCircle2, ShieldCheck, Bell, User, HelpCircle } from 'lucide-react';
 
 const Sidebar = ({ officerProfile }) => {
   const navItems = [
     { name: 'Dashboard', icon: LayoutDashboard, path: '/dashboard/officer' },
     { name: 'My Incidents', icon: FileText, path: '/dashboard/officer/incidents' },
     { name: 'Today\'s Tasks', icon: CheckSquare, path: '/dashboard/officer/tasks' },
-    { name: 'SLA & Deadlines', icon: Clock, path: '/dashboard/officer/sla' },
+    { name: 'Map View', icon: Map, path: '/dashboard/officer/map' },
     { name: 'Completed', icon: CheckCircle2, path: '/dashboard/officer/completed' },
-    { name: 'Verification Status', icon: ShieldCheck, path: '/dashboard/officer/verification' },
+    { name: 'Verification Queue', icon: ShieldCheck, path: '/dashboard/officer/verification' },
     { name: 'Notifications', icon: Bell, path: '/dashboard/officer/notifications', badge: 5 },
     { name: 'Profile', icon: User, path: '/dashboard/officer/profile' },
+    { name: 'Help & Support', icon: HelpCircle, path: '/dashboard/officer/support' },
   ];
 
   return (
-    <aside className="w-64 h-screen bg-slate-900 text-slate-300 flex flex-col fixed left-0 top-0 border-r border-slate-800 hidden md:flex z-20">
+    <aside className="w-[280px] h-screen bg-slate-900 text-slate-300 flex flex-col fixed left-0 top-0 border-r border-slate-800 hidden md:flex z-20">
       <div className="p-6 flex items-center gap-3 border-b border-slate-800">
         <div className="w-8 h-8 bg-green-600 rounded flex items-center justify-center text-white font-bold text-xl">
           D

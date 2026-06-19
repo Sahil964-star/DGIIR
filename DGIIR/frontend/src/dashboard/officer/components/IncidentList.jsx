@@ -1,5 +1,5 @@
 import React from 'react';
-import { MapPin, Calendar, Clock } from 'lucide-react';
+import { MapPin, Calendar, Clock, AlertTriangle, Users } from 'lucide-react';
 import { motion } from 'framer-motion';
 
 const getStatusColor = (status) => {
@@ -12,7 +12,6 @@ const getStatusColor = (status) => {
   }
 };
 
-// Priority labels renamed: High → Critical, Medium → At Risk, Low → Stable
 const getPriorityConfig = (priority) => {
   switch (priority) {
     case 'High':   return { label: 'Critical', dot: 'bg-red-500',    text: 'text-red-600 dark:text-red-400' };
@@ -43,30 +42,27 @@ const IncidentCard = ({ incident, delay }) => {
             {incident.status}
           </span>
         </div>
-        <div className={`flex items-center gap-1.5 text-xs font-semibold ${priority.text}`}>
-          <span className={`w-2 h-2 rounded-full ${priority.dot}`}></span>
-          {priority.label}
-        </div>
       </div>
 
-      {/* Title */}
-      <h4 className="text-base font-semibold text-slate-900 dark:text-white group-hover:text-green-600 dark:group-hover:text-green-400 transition-colors leading-snug mb-3">
+      {/* Title & Department */}
+      <h4 className="text-base font-semibold text-slate-900 dark:text-white group-hover:text-green-600 dark:group-hover:text-green-400 transition-colors leading-snug">
         {incident.title}
       </h4>
+      <p className="text-sm font-medium text-slate-700 dark:text-slate-300 mt-1 mb-3">{incident.department}</p>
 
       {/* Meta row */}
-      <div className="flex flex-wrap gap-x-5 gap-y-1 text-xs text-slate-500 dark:text-slate-400 pt-3 border-t border-slate-100 dark:border-gray-800">
-        <div className="flex items-center gap-1.5">
-          <MapPin className="w-3.5 h-3.5 shrink-0" />
-          <span>{incident.location}</span>
+      <div className="flex flex-wrap gap-x-5 gap-y-2 text-xs text-slate-500 dark:text-slate-400 pt-3 border-t border-slate-100 dark:border-gray-800">
+        <div className={`flex items-center gap-1.5 font-semibold ${priority.text}`}>
+          <AlertTriangle className="w-3.5 h-3.5 shrink-0" />
+          <span>{priority.label} Priority</span>
         </div>
-        <div className="flex items-center gap-1.5">
-          <Calendar className="w-3.5 h-3.5 shrink-0" />
-          <span>Assigned {incident.assignedDate}</span>
-        </div>
-        <div className={`flex items-center gap-1.5 ${isOverdue ? 'font-semibold text-red-600 dark:text-red-400' : ''}`}>
+        <div className={`flex items-center gap-1.5 ${isOverdue ? 'font-semibold text-red-600 dark:text-red-400' : 'font-semibold text-slate-700 dark:text-slate-300'}`}>
           <Clock className={`w-3.5 h-3.5 shrink-0 ${isOverdue ? 'text-red-500' : ''}`} />
-          <span>Due {incident.dueDate}</span>
+          <span>{isOverdue ? 'Overdue' : `12 Hours Remaining`}</span>
+        </div>
+        <div className="flex items-center gap-1.5 font-medium text-slate-600 dark:text-slate-400">
+          <Users className="w-3.5 h-3.5 shrink-0" />
+          <span>148 Citizens Impacted</span>
         </div>
       </div>
     </motion.div>
@@ -75,13 +71,13 @@ const IncidentCard = ({ incident, delay }) => {
 
 const IncidentList = ({ incidents }) => {
   return (
-    <div className="bg-[#f8fafc] dark:bg-gray-900/50 rounded-xl p-5 border border-slate-200 dark:border-gray-800">
+    <div className="bg-white dark:bg-slate-900 rounded-xl p-5 border border-slate-200 dark:border-slate-800 shadow-sm h-full flex flex-col">
       <div className="flex items-center justify-between mb-4">
         <div>
-          <h3 className="text-base font-bold text-slate-900 dark:text-white">Assigned Incidents</h3>
+          <h3 className="text-lg font-bold text-slate-900 dark:text-white">Assigned Incidents</h3>
           <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">{incidents.length} total · sorted by urgency</p>
         </div>
-        <select className="text-xs bg-white dark:bg-gray-800 border border-slate-200 dark:border-gray-700 rounded-lg px-3 py-1.5 text-slate-600 dark:text-slate-300 focus:outline-none focus:ring-2 focus:ring-green-500">
+        <select className="text-xs bg-slate-50 dark:bg-gray-800 border border-slate-200 dark:border-gray-700 rounded-lg px-3 py-1.5 text-slate-600 dark:text-slate-300 focus:outline-none focus:ring-2 focus:ring-green-500">
           <option>All Status</option>
           <option>In Progress</option>
           <option>Assigned</option>
@@ -89,15 +85,11 @@ const IncidentList = ({ incidents }) => {
         </select>
       </div>
 
-      <div className="space-y-3">
+      <div className="space-y-3 flex-1 overflow-y-auto pr-1">
         {incidents.map((incident, index) => (
           <IncidentCard key={incident.id} incident={incident} delay={0.07 * index} />
         ))}
       </div>
-
-      <button className="w-full mt-4 py-2 text-sm text-green-600 dark:text-green-400 font-medium hover:bg-green-50 dark:hover:bg-green-900/20 rounded-lg transition-colors">
-        View All Incidents →
-      </button>
     </div>
   );
 };
