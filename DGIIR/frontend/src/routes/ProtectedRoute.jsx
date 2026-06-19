@@ -6,6 +6,11 @@ import Loader from '../shared/components/Loader';
 const ProtectedRoute = ({ allowedRoles = [] }) => {
   const { user, role, token, isLoading } = useAuth();
 
+  // DEV BYPASS: Temporarily allow all access during frontend development
+  if (import.meta.env.VITE_DEV_BYPASS_AUTH === 'true') {
+    return <Outlet />;
+  }
+
   if (isLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-slate-50 dark:bg-slate-900">

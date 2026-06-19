@@ -1,15 +1,16 @@
 import React from 'react';
 import { NavLink } from 'react-router-dom';
-import { Home, ClipboardList, Search, User, Bell, HelpCircle, ShieldAlert } from 'lucide-react';
+import { Home, ClipboardList, Search, User, Bell, HelpCircle, ShieldAlert, PlusCircle } from 'lucide-react';
 import Button from '../../shared/components/Button';
 
 const Sidebar = () => {
   const navItems = [
-    { icon: Home, label: 'Home', path: '/dashboard' },
+    { icon: Home, label: 'Dashboard', path: '/dashboard' },
+    { icon: PlusCircle, label: 'Report Issue', path: '/report' },
     { icon: ClipboardList, label: 'My Complaints', path: '/complaints' },
     { icon: Search, label: 'Track Complaint', path: '/track' },
-    { icon: User, label: 'Profile', path: '/profile' },
     { icon: Bell, label: 'Notifications', path: '/notifications' },
+    { icon: User, label: 'Profile', path: '/profile' },
     { icon: HelpCircle, label: 'Help & Support', path: '/support' },
   ];
 
@@ -35,7 +36,7 @@ const Sidebar = () => {
             key={item.path}
             to={item.path}
             className={({ isActive }) =>
-              `flex items-center gap-3 px-3 py-3 rounded-xl transition-colors ${
+              `flex items-center gap-3 px-3 py-3 rounded-xl transition-all duration-300 ${
                 isActive
                   ? 'bg-dgiir-green-50 dark:bg-dgiir-green-900/30 text-dgiir-green-700 dark:text-dgiir-green-400 font-medium'
                   : 'text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 hover:text-gray-900 dark:hover:text-white'
@@ -56,7 +57,7 @@ const Sidebar = () => {
           </div>
           <h3 className="text-sm font-semibold text-gray-900 dark:text-white mb-1">Need Help?</h3>
           <p className="text-xs text-gray-500 dark:text-gray-400 mb-3">Our support team is available 24/7</p>
-          <Button variant="primary" size="sm" className="w-full">
+          <Button variant="primary" size="sm" className="w-full hover:brightness-110 transition-all duration-300">
             Contact Support
           </Button>
         </div>

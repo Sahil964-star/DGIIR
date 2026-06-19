@@ -1,10 +1,10 @@
-import React, { useContext } from 'react';
-import { ThemeContext } from '../../context/ThemeContext';
+import React from 'react';
+import { useTheme } from '../../shared/context/ThemeContext';
 import { Sun, Moon } from 'lucide-react';
 import { motion } from 'framer-motion';
 
 const ThemeToggle = () => {
-  const { isDarkMode, toggleTheme } = useContext(ThemeContext);
+  const { isDarkMode, toggleTheme } = useTheme();
 
   return (
     <motion.button

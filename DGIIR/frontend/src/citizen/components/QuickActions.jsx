@@ -4,53 +4,55 @@ import { ClipboardList, Search, Folder, AlertTriangle } from 'lucide-react';
 const QuickActions = () => {
   const actions = [
     {
-      title: 'File a Complaint',
-      description: 'Report civic issues in your area',
+      title: 'File Complaint',
+      description: 'Report a civic issue',
       icon: ClipboardList,
-      color: 'text-dgiir-green-600 dark:text-dgiir-green-400',
-      bgColor: 'bg-dgiir-green-50 dark:bg-dgiir-green-900/30',
-      borderColor: 'hover:border-dgiir-green-200 dark:hover:border-dgiir-green-700'
+      color: 'text-green-600 dark:text-green-400',
+      bgColor: 'bg-green-50 dark:bg-green-900/30',
+      borderColor: 'hover:border-green-300 dark:hover:border-green-600'
     },
     {
       title: 'Track Complaint',
-      description: 'Check status of your reports',
+      description: 'Check issue status',
       icon: Search,
       color: 'text-blue-600 dark:text-blue-400',
       bgColor: 'bg-blue-50 dark:bg-blue-900/30',
-      borderColor: 'hover:border-blue-200 dark:hover:border-blue-700'
+      borderColor: 'hover:border-blue-300 dark:hover:border-blue-600'
     },
     {
       title: 'My Complaints',
-      description: 'View your previous reports',
+      description: 'View past reports',
       icon: Folder,
-      color: 'text-purple-600 dark:text-purple-400',
-      bgColor: 'bg-purple-50 dark:bg-purple-900/30',
-      borderColor: 'hover:border-purple-200 dark:hover:border-purple-700'
+      color: 'text-slate-600 dark:text-slate-400',
+      bgColor: 'bg-slate-50 dark:bg-slate-800',
+      borderColor: 'hover:border-slate-300 dark:hover:border-slate-600'
     },
     {
-      title: 'Report Urgent Issue',
-      description: 'For immediate assistance needed',
+      title: 'Emergency Issue',
+      description: 'Immediate assistance',
       icon: AlertTriangle,
-      color: 'text-orange-600 dark:text-orange-400',
-      bgColor: 'bg-orange-50 dark:bg-orange-900/30',
-      borderColor: 'hover:border-orange-200 dark:hover:border-orange-700'
+      color: 'text-red-600 dark:text-red-400',
+      bgColor: 'bg-red-50 dark:bg-red-900/30',
+      borderColor: 'hover:border-red-300 dark:hover:border-red-600'
     }
   ];
 
   return (
-    <div className="mt-8">
-      <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-4">Quick Actions</h3>
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+    <div className="mt-6">
+      <h3 className="text-lg font-bold text-slate-900 dark:text-white mb-4">Quick Actions</h3>
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 items-stretch">
         {actions.map((action, index) => (
           <button 
             key={index}
-            className={`flex flex-col text-left bg-white dark:bg-gray-800 p-5 rounded-2xl border border-gray-100 dark:border-gray-700 shadow-sm transition-all duration-200 hover:-translate-y-1 hover:shadow-md ${action.borderColor}`}
+            className={`flex items-center text-left bg-white dark:bg-slate-800 p-4 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm transition-colors ${action.borderColor}`}
           >
-            <div className={`w-12 h-12 rounded-xl ${action.bgColor} flex items-center justify-center mb-4`}>
-              <action.icon className={`w-6 h-6 ${action.color}`} />
+            <div className={`w-10 h-10 rounded-lg ${action.bgColor} flex items-center justify-center shrink-0 mr-4`}>
+              <action.icon className={`w-5 h-5 ${action.color}`} />
             </div>
-            <h4 className="font-semibold text-gray-900 dark:text-white mb-1">{action.title}</h4>
-            <p className="text-sm text-gray-500 dark:text-gray-400">{action.description}</p>
+            <div>
+              <h4 className="font-semibold text-slate-900 dark:text-white text-sm">{action.title}</h4>
+              <p className="text-xs text-slate-500 dark:text-slate-400">{action.description}</p>
+            </div>
           </button>
         ))}
       </div>
