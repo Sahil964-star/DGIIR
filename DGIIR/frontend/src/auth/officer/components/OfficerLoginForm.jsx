@@ -67,7 +67,14 @@ const OfficerLoginForm = () => {
             <span className="text-slate-600 dark:text-slate-300 whitespace-nowrap">Remember Me <span className="hidden sm:inline">("Maintain persistent session key")</span></span>
           </label>
           
-          <a href="#forgot" className="text-green-600 hover:text-green-700 dark:text-green-500 font-semibold ml-auto whitespace-nowrap">
+          <a 
+            href="#forgot" 
+            onClick={(e) => {
+              e.preventDefault();
+              navigate('/forgot-password', { state: { role: 'officer' } });
+            }}
+            className="text-green-600 hover:text-green-700 dark:text-green-500 font-semibold ml-auto whitespace-nowrap"
+          >
             Forgot Password?
           </a>
         </div>

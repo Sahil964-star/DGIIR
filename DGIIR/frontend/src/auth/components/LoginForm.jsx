@@ -119,7 +119,15 @@ const LoginForm = () => {
             )}
           </AnimatePresence>
           
-          <a href="#forgot" className="text-green-600 hover:text-green-700 dark:text-green-500 font-semibold ml-auto whitespace-nowrap">
+          <a 
+            href="#forgot" 
+            onClick={(e) => {
+              e.preventDefault();
+              if (selectedRole === 'cm') return;
+              navigate('/forgot-password', { state: { role: selectedRole } });
+            }}
+            className="text-green-600 hover:text-green-700 dark:text-green-500 font-semibold ml-auto whitespace-nowrap"
+          >
             Forgot Password?
           </a>
         </div>

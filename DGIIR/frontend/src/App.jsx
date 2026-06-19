@@ -26,6 +26,12 @@ import OpsRequestSubmittedPage from './auth/operations/pages/RequestSubmittedPag
 import OpsTrackRequestPage from './auth/operations/pages/TrackRequestPage';
 import OperationsSetupPage from './auth/operations/pages/OperationsSetupPage';
 
+// Password Reset Pages
+import ForgotPasswordPage from './auth/password-reset/pages/ForgotPasswordPage';
+import OTPVerificationPage from './auth/password-reset/pages/OTPVerificationPage';
+import ResetPasswordPage from './auth/password-reset/pages/ResetPasswordPage';
+import ResetSuccessPage from './auth/password-reset/pages/ResetSuccessPage';
+
 // Dashboard Pages
 import CitizenDashboard from './citizen/pages/CitizenDashboard';
 import OperationsDashboard from './dashboard/pages/OperationsDashboard';
@@ -59,6 +65,12 @@ function App() {
               <Route path="/operations/request-submitted" element={<OpsRequestSubmittedPage />} />
               <Route path="/operations/track-request" element={<OpsTrackRequestPage />} />
               <Route path="/operations/setup" element={<OperationsSetupPage />} />
+
+              {/* Password Reset Pipeline */}
+              <Route path="/forgot-password" element={<ForgotPasswordPage />} />
+              <Route path="/forgot-password/verify" element={<OTPVerificationPage />} />
+              <Route path="/forgot-password/reset" element={<ResetPasswordPage />} />
+              <Route path="/forgot-password/success" element={<ResetSuccessPage />} />
 
               {/* Protected Routes (Require Authentication) */}
               <Route element={<ProtectedRoute />}>
