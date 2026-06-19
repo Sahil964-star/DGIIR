@@ -22,10 +22,17 @@
 
   html { font-family: 'Inter', sans-serif; }
   body {
-    @apply bg-bg text-slate-800 antialiased;
+    @apply antialiased bg-bg text-slate-800 dark:bg-bg-dark dark:text-slate-200 transition-colors duration-300;
   }
-  .dark body {
-    @apply bg-bg-dark text-slate-200;
+}
+
+@layer utilities {
+  .custom-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+  .custom-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
   }
 }
 
