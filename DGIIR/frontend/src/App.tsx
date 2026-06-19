@@ -52,9 +52,7 @@ import CitizenDashboard from './citizen/pages/CitizenDashboard';
 // @ts-ignore
 import OperationsDashboard from './dashboard/pages/OperationsDashboard';
 // @ts-ignore
-import OfficerDashboard from './dashboard/pages/OfficerDashboard';
-// @ts-ignore
-import CMDashboard from './dashboard/pages/CMDashboard';
+import OfficerDashboard from './dashboard/officer/pages/OfficerDashboard';
 
 // Intake / CM Dashboard (from origin/main)
 import DashboardLayout from './layouts/DashboardLayout';
@@ -105,25 +103,25 @@ export default function App() {
           <Route path="/dashboard/operations" element={<OperationsDashboard />} />
           <Route path="/dashboard/operations/*" element={<Navigate to="/dashboard/operations" replace />} />
 
-          {/* Officer Routes */}
-          <Route path="/dashboard/officer" element={<OfficerDashboard />} />
-          <Route path="/dashboard/officer/*" element={<Navigate to="/dashboard/officer" replace />} />
-
           {/* CM Routes */}
           <Route path="/dashboard/cm" element={<Navigate to="/overview" replace />} />
           <Route path="/dashboard/cm/*" element={<Navigate to="/overview" replace />} />
         </Route>
-      </Route>
 
-      {/* CM Dashboard layout routes (from origin/main) */}
-      <Route path="/overview" element={<DashboardLayout />}>
-        <Route index element={<OverviewPage />} />
-      </Route>
-      <Route path="/complaints" element={<DashboardLayout />}>
-        <Route index element={<ComplaintsPage />} />
-      </Route>
-      <Route path="/reports" element={<DashboardLayout />}>
-        <Route index element={<ReportsPage />} />
+        {/* CM Dashboard layout routes (from origin/main) */}
+        <Route path="/overview" element={<DashboardLayout />}>
+          <Route index element={<OverviewPage />} />
+        </Route>
+        <Route path="/complaints" element={<DashboardLayout />}>
+          <Route index element={<ComplaintsPage />} />
+        </Route>
+        <Route path="/reports" element={<DashboardLayout />}>
+          <Route index element={<ReportsPage />} />
+        </Route>
+
+        {/* Officer Routes - Uses its own specialized layout (Sidebar & Header) */}
+        <Route path="/dashboard/officer" element={<OfficerDashboard />} />
+        <Route path="/dashboard/officer/*" element={<Navigate to="/dashboard/officer" replace />} />
       </Route>
 
       {/* Default Fallback Route */}

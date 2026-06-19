@@ -1,66 +1,64 @@
 import React from 'react';
-import Card from '../../shared/components/Card';
-import Button from '../../shared/components/Button';
-import { AlertTriangle, Clock, CheckCircle } from 'lucide-react';
+import HeroBanner from '../components/HeroBanner';
+import CitizenSummary from '../components/CitizenSummary';
+import QuickActions from '../components/QuickActions';
+import ComplaintList from '../components/ComplaintList';
+import RecentUpdates from '../components/RecentUpdates';
+import HowItWorks from '../components/HowItWorks';
+import SupportCard from '../components/SupportCard';
 
 const CitizenDashboard = () => {
   return (
-    <div className="space-y-6">
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+    <div className="space-y-6 py-4">
+      {/* Welcome Greeting */}
+      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-slate-900 dark:text-white tracking-tight">Citizen Dashboard</h1>
-          <p className="text-slate-600 dark:text-slate-400">Welcome back. Here is an overview of your reports.</p>
+          <h1 className="text-2xl md:text-3xl font-bold text-slate-900 dark:text-white flex items-center gap-2">
+            Citizen Dashboard
+          </h1>
+          <p className="text-slate-500 dark:text-slate-400 mt-1">Delhi Public Grievance Tracking Portal</p>
         </div>
-        <Button className="w-full sm:w-auto">
-          <AlertTriangle className="mr-2" size={20} />
-          Report New Issue
-        </Button>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <Card className="p-6">
-          <div className="flex items-center space-x-4">
-            <div className="p-3 bg-amber-50 dark:bg-amber-500/10 rounded-xl text-amber-600">
-              <Clock size={24} />
-            </div>
-            <div>
-              <p className="text-sm font-medium text-slate-500 dark:text-slate-400">Pending</p>
-              <h3 className="text-2xl font-bold text-slate-900 dark:text-white">2</h3>
-            </div>
-          </div>
-        </Card>
+      {/* Main Content Area */}
+      <div className="flex flex-col xl:flex-row gap-8 lg:gap-10">
         
-        <Card className="p-6">
-          <div className="flex items-center space-x-4">
-            <div className="p-3 bg-green-50 dark:bg-green-500/10 rounded-xl text-green-600">
-              <CheckCircle size={24} />
-            </div>
-            <div>
-              <p className="text-sm font-medium text-slate-500 dark:text-slate-400">Resolved</p>
-              <h3 className="text-2xl font-bold text-slate-900 dark:text-white">5</h3>
-            </div>
+        {/* Left Column */}
+        <div className="flex-1 min-w-0 flex flex-col gap-6">
+          <HeroBanner />
+          {/* Mobile Only Recent Updates */}
+          <div className="block xl:hidden">
+            <RecentUpdates />
           </div>
-        </Card>
+          <CitizenSummary />
+          <QuickActions />
+          <ComplaintList />
+        </div>
+
+        {/* Right Information Panel */}
+        <div className="w-full xl:w-[320px] shrink-0 flex flex-col gap-6">
+          {/* Desktop Only Recent Updates */}
+          <div className="hidden xl:block">
+            <RecentUpdates />
+          </div>
+          <SupportCard />
+          <HowItWorks />
+        </div>
         
-        <Card className="p-6">
-          <div className="flex items-center space-x-4">
-            <div className="p-3 bg-slate-50 dark:bg-gray-800 rounded-xl text-slate-600 dark:text-slate-400">
-              <AlertTriangle size={24} />
-            </div>
-            <div>
-              <p className="text-sm font-medium text-slate-500 dark:text-slate-400">Total Reports</p>
-              <h3 className="text-2xl font-bold text-slate-900 dark:text-white">7</h3>
-            </div>
-          </div>
-        </Card>
       </div>
 
-      <Card className="p-6 mt-6">
-        <h2 className="text-lg font-semibold text-slate-900 dark:text-white mb-4">Recent Reports</h2>
-        <div className="text-center py-12 text-slate-500 dark:text-slate-400">
-          No recent reports to display.
+      {/* Footer */}
+      <footer className="mt-8 py-6 border-t border-slate-200 dark:border-slate-800 text-center md:text-left flex flex-col md:flex-row justify-between items-center gap-4 transition-colors">
+        <div className="text-sm text-slate-600 dark:text-slate-400">
+          <p className="font-semibold">&copy; {new Date().getFullYear()} Government of NCT of Delhi</p>
+          <p className="text-xs text-slate-500 dark:text-slate-500 mt-1">DGIIR Platform</p>
         </div>
-      </Card>
+        <div className="flex flex-wrap justify-center md:justify-end gap-x-6 gap-y-2 text-sm text-slate-600 dark:text-slate-400">
+          <a href="#" className="hover:text-slate-900 dark:hover:text-slate-200 transition-colors">Privacy Policy</a>
+          <a href="#" className="hover:text-slate-900 dark:hover:text-slate-200 transition-colors">Terms of Service</a>
+          <a href="#" className="hover:text-slate-900 dark:hover:text-slate-200 transition-colors">Contact Us</a>
+        </div>
+      </footer>
     </div>
   );
 };

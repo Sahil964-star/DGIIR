@@ -1,10 +1,10 @@
-import React, { useContext } from 'react';
+import React from 'react';
 import TrustCards from './TrustCards';
 import { Building2, Landmark, Home } from 'lucide-react';
-import { ThemeContext } from '../../context/ThemeContext';
+import { useTheme } from '../../shared/context/ThemeContext';
 
 const BrandingPanel = ({ variant = 'login' }) => {
-  const { isDarkMode } = useContext(ThemeContext);
+  const { isDarkMode } = useTheme();
 
   return (
     <div className="hidden lg:flex flex-col justify-between w-[45%] bg-[#f8fcf9] dark:bg-slate-900 p-12 text-slate-900 dark:text-white relative overflow-hidden">

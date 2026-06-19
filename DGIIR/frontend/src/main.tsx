@@ -4,7 +4,9 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools'
 import { BrowserRouter } from 'react-router-dom'
 import App from './App.tsx'
-import { ThemeProvider } from './context/ThemeContext'
+// @ts-ignore
+import { ThemeProvider } from './shared/context/ThemeContext'
+// @ts-ignore
 import { AuthProvider } from './context/AuthContext'
 import './index.css'
 

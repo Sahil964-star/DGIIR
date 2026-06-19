@@ -1,11 +1,11 @@
-import React, { useContext } from 'react';
+import React from 'react';
 import { motion } from 'framer-motion';
 import { Shield } from 'lucide-react';
-import { ThemeContext } from '../../../context/ThemeContext';
+import { useTheme } from '../../../shared/context/ThemeContext';
 import SecurityIndicators from './SecurityIndicators';
 
 const OperationsBrandingPanel = () => {
-  const { isDarkMode } = useContext(ThemeContext);
+  const { isDarkMode } = useTheme();
 
   return (
     <div className="hidden lg:flex w-[45%] flex-col justify-between p-12 relative overflow-hidden bg-emerald-900 dark:bg-[#080f1e]">
