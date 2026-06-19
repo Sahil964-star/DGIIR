@@ -16,11 +16,79 @@
   --color-dgiir-green-950: #052e16;
   --radius-xl: 16px;
   --radius-2xl: 20px;
+
+  /* Custom theme extensions ported from tailwind.config.js for Tailwind CSS v4 */
+  --font-sans: 'Inter', 'system-ui', 'sans-serif';
+  
+  --color-brand-50: #eff6ff;
+  --color-brand-100: #dbeafe;
+  --color-brand-200: #bfdbfe;
+  --color-brand-300: #93c5fd;
+  --color-brand-400: #60a5fa;
+  --color-brand-500: #3b82f6;
+  --color-brand-600: #2563eb;
+  --color-brand-700: #1d4ed8;
+  --color-brand-800: #1e40af;
+  --color-brand-900: #1e3a8a;
+
+  --color-resolved: #0e9f6e;
+  --color-resolved-light: #d1fae5;
+  --color-inprogress: #ff8a00;
+  --color-inprogress-light: #fff3e0;
+  --color-overdue: #e02424;
+  --color-overdue-light: #fee2e2;
+
+  --color-surface: #ffffff;
+  --color-surface-dark: #1e2130;
+
+  --color-bg: #f3f4f6;
+  --color-bg-dark: #141622;
+
+  --color-sidebar: #ffffff;
+  --color-sidebar-dark: #1a1d2e;
+
+  --shadow-card: 0 1px 3px 0 rgb(0 0 0 / 0.08), 0 1px 2px -1px rgb(0 0 0 / 0.06);
+  --shadow-card-md: 0 4px 6px -1px rgb(0 0 0 / 0.08), 0 2px 4px -2px rgb(0 0 0 / 0.06);
+
+  --animate-fade-in: fadeIn 0.4s ease-out;
+  --animate-slide-up: slideUp 0.3s ease-out;
+  --animate-pulse-soft: pulseSoft 2s ease-in-out infinite;
+
+  @keyframes fadeIn {
+    0% { opacity: 0; }
+    100% { opacity: 1; }
+  }
+  @keyframes slideUp {
+    0% { opacity: 0; transform: translateY(8px); }
+    100% { opacity: 1; transform: translateY(0); }
+  }
+  @keyframes pulseSoft {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.6; }
+  }
 }
 
 @layer base {
+  :root {
+    --scrollbar-thumb: #cbd5e1;
+    --scrollbar-track: #f1f5f9;
+  }
+  .dark {
+    --scrollbar-thumb: #334155;
+    --scrollbar-track: #1e2130;
+  }
+
+  * {
+    scrollbar-width: thin;
+    scrollbar-color: var(--scrollbar-thumb) var(--scrollbar-track);
+  }
+  *::-webkit-scrollbar { width: 6px; height: 6px; }
+  *::-webkit-scrollbar-track { background: var(--scrollbar-track); }
+  *::-webkit-scrollbar-thumb { background: var(--scrollbar-thumb); border-radius: 3px; }
+
+  html { font-family: 'Inter', sans-serif; }
   body {
-    @apply antialiased bg-slate-50 text-slate-900 dark:bg-[#0f172a] dark:text-slate-100 transition-colors duration-300;
+    @apply antialiased bg-bg text-slate-800 dark:bg-bg-dark dark:text-slate-200 transition-colors duration-300;
   }
 }
 
@@ -32,4 +100,47 @@
     -ms-overflow-style: none;
     scrollbar-width: none;
   }
+}
+
+@layer components {
+  /* ── Card ──────────────────────────────────────────────────────────────── */
+  .card {
+    @apply bg-white dark:bg-surface-dark rounded-2xl shadow-card border border-slate-100 dark:border-slate-700/50 p-5;
+  }
+
+  /* ── Stat Pill ──────────────────────────────────────────────────────────── */
+  .stat-pill {
+    @apply inline-flex items-center gap-1 text-xs font-semibold px-2 py-0.5 rounded-full;
+  }
+
+  /* ── Nav Item ───────────────────────────────────────────────────────────── */
+  .nav-item {
+    @apply flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm font-medium text-slate-600 dark:text-slate-400
+           hover:bg-brand-50 hover:text-brand-600 dark:hover:bg-slate-700/50 dark:hover:text-white
+           transition-all duration-200 cursor-pointer;
+  }
+  .nav-item.active {
+    @apply bg-brand-50 text-brand-700 dark:bg-slate-700/60 dark:text-white font-semibold;
+  }
+
+  /* ── Risk badge ─────────────────────────────────────────────────────────── */
+  .risk-healthy  { @apply bg-emerald-500; }
+  .risk-watch    { @apply bg-amber-400; }
+  .risk-concern  { @apply bg-orange-500; }
+  .risk-critical { @apply bg-red-600; }
+
+  /* ── Skeleton loader ────────────────────────────────────────────────────── */
+  .skeleton {
+    @apply bg-slate-200 dark:bg-slate-700 animate-pulse rounded-lg;
+  }
+}
+
+/* ── Fade-in on mount ───────────────────────────────────────────────────────── */
+.page-enter {
+  animation: fadeIn 0.35s ease-out;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(6px); }
+  to   { opacity: 1; transform: translateY(0); }
 }

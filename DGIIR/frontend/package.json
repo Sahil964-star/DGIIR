@@ -5,24 +5,37 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "vite build",
-    "preview": "vite preview"
+    "build": "tsc && vite build",
+    "preview": "vite preview",
+    "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0"
   },
   "dependencies": {
     "@tanstack/react-query": "^5.101.0",
-    "axios": "^1.18.0",
+    "@tanstack/react-query-devtools": "^5.101.0",
+    "axios": "^1.7.2",
     "framer-motion": "^12.40.0",
-    "lucide-react": "^1.21.0",
+    "leaflet": "^1.9.4",
+    "lucide-react": "^0.400.0",
     "react": "^19.2.7",
     "react-dom": "^19.2.7",
-    "react-router-dom": "^7.18.0"
+    "react-router-dom": "^7.18.0",
+    "recharts": "^2.12.7"
   },
   "devDependencies": {
     "@tailwindcss/vite": "^4.3.1",
+    "@types/leaflet": "^1.9.12",
+    "@types/react": "^19.0.8",
+    "@types/react-dom": "^19.0.3",
+    "@typescript-eslint/eslint-plugin": "^7.13.1",
+    "@typescript-eslint/parser": "^7.13.1",
     "@vitejs/plugin-react": "^6.0.2",
     "autoprefixer": "^10.5.0",
+    "eslint": "^8.57.0",
+    "eslint-plugin-react-hooks": "^4.6.2",
+    "eslint-plugin-react-refresh": "^0.4.7",
     "postcss": "^8.5.15",
     "tailwindcss": "^4.3.1",
+    "typescript": "^5.2.2",
     "vite": "^8.0.16"
   }
 }
