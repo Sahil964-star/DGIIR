@@ -3,18 +3,22 @@ import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { ThemeProvider } from './context/ThemeContext';
 import { AuthProvider } from './context/AuthContext';
+
+// Routes & Layout
 import ProtectedRoute from './routes/ProtectedRoute';
+import Layout from './shared/components/Layout';
+
+// Auth Pages
 import LoginPage from './auth/pages/LoginPage';
 import RegisterPage from './auth/pages/RegisterPage';
 
-const queryClient = new QueryClient();
+// Dashboard Pages
+import CitizenDashboard from './citizen/pages/CitizenDashboard';
+import OperationsDashboard from './dashboard/pages/OperationsDashboard';
+import OfficerDashboard from './dashboard/pages/OfficerDashboard';
+import CMDashboard from './dashboard/pages/CMDashboard';
 
-// Mock Component for Authorized Routes
-const MockDashboard = ({ title }) => (
-  <div className="min-h-screen flex items-center justify-center bg-slate-50 dark:bg-[#0f172a] text-slate-900 dark:text-white transition-colors duration-300">
-    <h1 className="text-3xl font-bold">{title} Dashboard</h1>
-  </div>
-);
+const queryClient = new QueryClient();
 
 function App() {
   return (
@@ -30,10 +34,23 @@ function App() {
 
               {/* Protected Routes (Require Authentication) */}
               <Route element={<ProtectedRoute />}>
-                <Route path="/citizen" element={<MockDashboard title="Citizen" />} />
-                <Route path="/dashboard/operations" element={<MockDashboard title="Operations" />} />
-                <Route path="/dashboard/officer" element={<MockDashboard title="Field Officer" />} />
-                <Route path="/dashboard/cm" element={<MockDashboard title="Chief Minister" />} />
+                <Route element={<Layout />}>
+                  {/* Citizen Routes */}
+                  <Route path="/citizen" element={<CitizenDashboard />} />
+                  <Route path="/citizen/*" element={<Navigate to="/citizen" replace />} />
+
+                  {/* Operations Routes */}
+                  <Route path="/dashboard/operations" element={<OperationsDashboard />} />
+                  <Route path="/dashboard/operations/*" element={<Navigate to="/dashboard/operations" replace />} />
+
+                  {/* Officer Routes */}
+                  <Route path="/dashboard/officer" element={<OfficerDashboard />} />
+                  <Route path="/dashboard/officer/*" element={<Navigate to="/dashboard/officer" replace />} />
+
+                  {/* CM Routes */}
+                  <Route path="/dashboard/cm" element={<CMDashboard />} />
+                  <Route path="/dashboard/cm/*" element={<Navigate to="/dashboard/cm" replace />} />
+                </Route>
               </Route>
 
               {/* Default Fallback Route */}
