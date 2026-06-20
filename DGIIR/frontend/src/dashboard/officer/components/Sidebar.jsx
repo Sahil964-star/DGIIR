@@ -1,8 +1,23 @@
 import React from 'react';
-import { NavLink } from 'react-router-dom';
-import { LayoutDashboard, FileText, CheckSquare, Map, CheckCircle2, ShieldCheck, Bell, User, HelpCircle } from 'lucide-react';
+import { NavLink, useNavigate } from 'react-router-dom';
+import { LayoutDashboard, FileText, CheckSquare, Map, CheckCircle2, ShieldCheck, Bell, User, HelpCircle, LogOut } from 'lucide-react';
+import { useQueryClient } from '@tanstack/react-query';
+import { useAuth } from '../../../hooks/useAuth';
 
 const Sidebar = ({ officerProfile }) => {
+  const navigate = useNavigate();
+  const queryClient = useQueryClient();
+  const { logout } = useAuth();
+
+  const handleLogout = () => {
+    logout();
+    localStorage.removeItem('token');
+    localStorage.removeItem('role');
+    localStorage.removeItem('user');
+    queryClient.clear();
+    navigate('/login', { replace: true });
+  };
+
   const navItems = [
     { name: 'Dashboard', icon: LayoutDashboard, path: '/dashboard/officer' },
     { name: 'My Incidents', icon: FileText, path: '/dashboard/officer/incidents' },
@@ -55,7 +70,7 @@ const Sidebar = ({ officerProfile }) => {
       </nav>
 
       <div className="p-4 border-t border-slate-800">
-        <div className="flex items-center gap-3 p-2 rounded-lg bg-slate-800/50">
+        <div className="flex items-center gap-3 p-2 rounded-lg bg-slate-800/50 mb-2">
           <img 
             src={officerProfile.avatar} 
             alt={officerProfile.name} 
@@ -66,6 +81,13 @@ const Sidebar = ({ officerProfile }) => {
             <p className="text-xs text-slate-400 truncate">{officerProfile.designation}</p>
           </div>
         </div>
+        <button 
+          onClick={handleLogout}
+          className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-slate-400 hover:bg-red-500/10 hover:text-red-500 transition-colors"
+        >
+          <LogOut className="w-5 h-5" />
+          <span className="text-sm font-medium">Logout</span>
+        </button>
       </div>
     </aside>
   );

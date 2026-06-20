@@ -1,5 +1,7 @@
-import { NavLink } from 'react-router-dom'
+import { NavLink, useNavigate } from 'react-router-dom'
 import { useEffect, useState } from 'react'
+import { useQueryClient } from '@tanstack/react-query'
+import { useAuth } from '../../hooks/useAuth'
 
 // ─── Icons (inline SVG to keep zero extra deps) ──────────────────────────────
 const HomeIcon = () => (
@@ -52,6 +54,26 @@ export default function Sidebar() {
   const [dark, setDark] = useState(
     () => document.documentElement.classList.contains('dark')
   )
+  
+  const navigate = useNavigate()
+  const queryClient = useQueryClient()
+  const { logout } = useAuth()
+
+  const handleLogout = () => {
+    // 1. GLOBAL STATE CLEANDOWN
+    logout()
+    
+    // 2. AUTHENTICATION MEMORY PURGE
+    localStorage.removeItem('auth_token')
+    localStorage.removeItem('user_role')
+    sessionStorage.clear()
+    
+    // 3. CACHE INVALIDATION
+    queryClient.clear()
+    
+    // 4. COMPONENT ROUTING DISPATCH
+    navigate('/login', { replace: true })
+  }
 
   useEffect(() => {
     if (dark) {
@@ -131,7 +153,10 @@ export default function Sidebar() {
           <span>Settings</span>
         </button>
 
-        <button className="nav-item w-full text-red-500 hover:bg-red-50 hover:text-red-600 dark:hover:bg-red-900/20 dark:text-red-400">
+        <button 
+          onClick={handleLogout}
+          className="nav-item w-full text-red-500 hover:bg-red-50 hover:text-red-600 dark:hover:bg-red-900/20 dark:text-red-400"
+        >
           <LogoutIcon />
           <span>Logout</span>
         </button>
