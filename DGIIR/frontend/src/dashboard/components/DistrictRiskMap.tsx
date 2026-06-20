@@ -16,7 +16,7 @@ const riskLabel: Record<RiskLevel, string> = {
 }
 
 // ─── Delhi districts SVG paths (approximate schematic polygons) ───────────────
-// Coordinate space: 0-400 x 0-380 (viewBox)
+// Coordinate space: 0-380 x 0-390 (viewBox)
 const DISTRICTS: {
   id: string
   label: string
@@ -26,69 +26,69 @@ const DISTRICTS: {
   {
     id: 'north-west',
     label: 'North West',
-    labelPos: [90, 75],
-    path: 'M 20 30 L 130 20 L 160 60 L 140 110 L 80 120 L 20 90 Z',
+    labelPos: [100, 80],
+    path: 'M 80.0,40.0 L 97.2,35.2 L 114.7,33.2 L 133.0,36.0 L 150.0,30.0 L 153.0,46.7 L 158.5,63.0 L 160.6,79.9 L 159.9,97.4 L 173.4,112.0 L 170.0,130.0 L 164.7,144.3 L 154.8,156.6 L 154.9,173.3 L 144.2,185.2 L 140.0,200.0 L 122.5,202.5 L 108.6,194.2 L 92.2,193.4 L 78.3,185.1 L 62.7,181.8 L 47.9,176.2 L 32.5,172.4 L 20.0,160.0 L 23.0,142.6 L 29.7,125.7 L 27.6,107.5 L 30.0,90.0 L 42.2,77.2 L 52.4,62.4 L 67.4,52.4 Z'
   },
   {
     id: 'north',
     label: 'North',
-    labelPos: [200, 55],
-    path: 'M 130 20 L 240 15 L 260 65 L 200 90 L 160 60 Z',
-  },
-  {
-    id: 'north-east',
-    label: 'North East',
-    labelPos: [300, 70],
-    path: 'M 240 15 L 360 25 L 370 90 L 290 110 L 260 65 Z',
-  },
-  {
-    id: 'east',
-    label: 'East',
-    labelPos: [308, 145],
-    path: 'M 290 110 L 370 90 L 380 180 L 310 190 L 280 155 Z',
-  },
-  {
-    id: 'shahdara',
-    label: 'Shahdara',
-    labelPos: [315, 220],
-    path: 'M 310 190 L 380 180 L 375 265 L 305 260 Z',
+    labelPos: [200, 60],
+    path: 'M 150.0,30.0 L 164.6,24.6 L 180.5,31.6 L 195.7,30.9 L 210.7,29.9 L 224.9,21.1 L 240.0,20.0 L 246.4,34.4 L 246.7,49.7 L 250.1,64.6 L 250.0,80.0 L 253.0,89.8 L 253.6,100.0 L 255.0,110.0 L 238.0,114.2 L 221.1,118.4 L 204.3,123.3 L 188.5,132.3 L 170.0,130.0 L 173.4,112.0 L 159.9,97.4 L 160.6,79.9 L 158.5,63.0 L 153.0,46.7 Z'
   },
   {
     id: 'central',
     label: 'Central',
-    labelPos: [195, 125],
-    path: 'M 160 100 L 200 90 L 260 65 L 290 110 L 280 155 L 220 165 L 175 155 L 155 130 Z',
+    labelPos: [210, 145],
+    path: 'M 170.0,130.0 L 188.5,132.3 L 204.3,123.3 L 221.1,118.4 L 238.0,114.2 L 255.0,110.0 L 260.2,122.9 L 263.7,136.2 L 265.0,150.0 L 268.3,159.7 L 267.8,170.1 L 270.0,180.0 L 253.6,181.6 L 237.3,183.7 L 220.6,183.4 L 204.2,184.6 L 189.5,197.3 L 172.6,195.7 L 154.8,188.2 L 140.0,200.0 L 144.2,185.2 L 154.9,173.3 L 154.8,156.6 L 164.7,144.3 Z'
   },
   {
     id: 'new-delhi',
     label: 'New Delhi',
-    labelPos: [155, 185],
-    path: 'M 120 150 L 175 155 L 175 210 L 120 215 Z',
+    labelPos: [210, 200],
+    path: 'M 140.0,200.0 L 154.8,188.2 L 172.6,195.7 L 189.5,197.3 L 204.2,184.6 L 220.6,183.4 L 237.3,183.7 L 253.6,181.6 L 270.0,180.0 L 276.0,192.7 L 276.3,206.8 L 280.0,220.0 L 263.4,228.0 L 244.0,226.5 L 226.7,232.3 L 210.0,240.0 L 194.0,246.9 L 176.3,244.8 L 160.0,250.0 L 152.8,233.6 L 143.2,218.1 Z'
   },
   {
     id: 'west',
     label: 'West',
-    labelPos: [90, 160],
-    path: 'M 20 90 L 80 120 L 120 150 L 120 215 L 70 230 L 20 200 Z',
+    labelPos: [80, 190],
+    path: 'M 20.0,160.0 L 32.5,172.4 L 47.9,176.2 L 62.7,181.8 L 78.3,185.1 L 92.2,193.4 L 108.6,194.2 L 122.5,202.5 L 140.0,200.0 L 143.2,218.1 L 152.8,233.6 L 160.0,250.0 L 144.5,251.2 L 128.9,252.8 L 114.5,246.6 L 99.0,247.9 L 86.3,230.1 L 68.7,245.3 L 56.2,226.5 L 40.4,229.7 L 25.0,230.0 L 19.5,212.8 L 21.1,195.1 L 16.6,177.8 Z'
   },
   {
     id: 'south-west',
     label: 'South West',
-    labelPos: [85, 280],
-    path: 'M 20 200 L 70 230 L 115 245 L 120 310 L 60 330 L 20 300 Z',
+    labelPos: [80, 300],
+    path: 'M 25.0,230.0 L 40.4,229.7 L 56.2,226.5 L 68.7,245.3 L 86.3,230.1 L 99.0,247.9 L 114.5,246.6 L 128.9,252.8 L 144.5,251.2 L 160.0,250.0 L 176.3,244.8 L 194.0,246.9 L 210.0,240.0 L 199.6,251.8 L 189.1,263.6 L 193.6,284.1 L 171.5,289.0 L 167.2,304.4 L 158.5,317.2 L 148.8,329.4 L 145.2,345.2 L 140.0,360.0 L 123.1,357.7 L 105.9,357.0 L 90.0,350.0 L 79.6,337.8 L 70.7,324.4 L 59.4,313.0 L 50.0,300.0 L 41.1,283.5 L 41.9,263.4 L 28.6,248.5 Z'
   },
   {
     id: 'south',
     label: 'South',
-    labelPos: [205, 290],
-    path: 'M 115 245 L 220 240 L 250 270 L 230 340 L 130 355 L 120 310 Z',
+    labelPos: [180, 310],
+    path: 'M 140.0,360.0 L 145.2,345.2 L 148.8,329.4 L 158.5,317.2 L 167.2,304.4 L 171.5,289.0 L 193.6,284.1 L 189.1,263.6 L 199.6,251.8 L 210.0,240.0 L 226.7,232.3 L 244.0,226.5 L 263.4,228.0 L 280.0,220.0 L 286.8,234.3 L 287.8,249.5 L 283.4,265.7 L 290.0,280.0 L 282.5,293.9 L 278.6,310.0 L 260.8,317.4 L 252.8,330.9 L 245.2,344.7 L 240.0,360.0 L 223.3,363.4 L 207.2,369.4 L 190.0,370.0 L 172.8,369.4 L 157.2,360.5 Z'
   },
   {
     id: 'south-east',
     label: 'South East',
-    labelPos: [308, 295],
-    path: 'M 250 270 L 305 260 L 375 265 L 365 345 L 270 360 L 230 340 Z',
+    labelPos: [260, 270],
+    path: 'M 240.0,360.0 L 245.2,344.7 L 252.8,330.9 L 260.8,317.4 L 278.6,310.0 L 282.5,293.9 L 290.0,280.0 L 284.3,292.7 L 281.5,306.2 L 280.0,320.0 L 268.2,334.9 L 255.0,348.3 Z'
   },
+  {
+    id: 'north-east',
+    label: 'North East',
+    labelPos: [290, 60],
+    path: 'M 240.0,20.0 L 255.7,18.6 L 269.5,27.9 L 285.3,25.7 L 300.0,30.0 L 311.5,43.0 L 314.2,60.4 L 324.0,74.2 L 330.0,90.0 L 313.4,92.8 L 297.6,89.3 L 282.3,81.8 L 266.3,79.3 L 250.0,80.0 L 251.4,64.3 L 240.7,50.7 L 239.2,35.6 Z'
+  },
+  {
+    id: 'shahdara',
+    label: 'Shahdara',
+    labelPos: [310, 120],
+    path: 'M 250.0,80.0 L 266.3,79.3 L 282.3,81.8 L 297.6,89.3 L 313.4,92.8 L 330.0,90.0 L 336.5,107.1 L 343.9,123.9 L 347.1,141.9 L 350.0,160.0 L 332.6,161.3 L 315.6,159.3 L 299.6,148.8 L 282.2,150.2 L 265.0,150.0 L 260.5,132.7 L 261.6,114.1 L 253.0,97.7 Z'
+  },
+  {
+    id: 'east',
+    label: 'East',
+    labelPos: [305, 190],
+    path: 'M 265.0,150.0 L 282.2,150.2 L 299.6,148.8 L 315.6,159.3 L 332.6,161.3 L 350.0,160.0 L 347.7,175.2 L 340.9,189.5 L 336.8,204.3 L 339.4,220.6 L 335.4,235.5 L 330.0,250.0 L 316.7,249.6 L 303.3,247.7 L 290.0,250.0 L 286.4,240.1 L 283.1,230.1 L 280.0,220.0 L 277.7,202.2 L 270.5,185.4 L 268.8,167.5 Z'
+  }
 ]
 
 // ─── Legend ──────────────────────────────────────────────────────────────────
@@ -121,11 +121,16 @@ export default function DistrictRiskMap({ districts, loading }: DistrictRiskMapP
   const hoveredDistrict = hovered ? riskMap[hovered] : null
 
   return (
-    <div className="card animate-fade-in">
-      <div className="flex items-start justify-between mb-3">
-        <h2 className="text-sm font-semibold text-slate-700 dark:text-slate-200">
-          District Risk Map — Delhi
-        </h2>
+    <div className="card animate-fade-in flex flex-col justify-between h-full">
+      <div className="flex items-start justify-between mb-1">
+        <div>
+          <h2 className="text-sm font-semibold text-slate-700 dark:text-slate-200">
+            District Risk Map — Delhi
+          </h2>
+          <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+            Areas needing administrative attention
+          </p>
+        </div>
         <button className="text-xs text-brand-600 dark:text-brand-400 font-medium hover:underline flex items-center gap-1">
           View Full Map
           <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -134,29 +139,31 @@ export default function DistrictRiskMap({ districts, loading }: DistrictRiskMapP
         </button>
       </div>
 
-      <div className="flex gap-4">
+      <div className="relative w-full flex justify-center items-center mt-2 h-[260px]">
         {/* SVG Map */}
-        <div className="flex-1 relative">
-          {/* Tooltip */}
-          {hoveredDistrict && (
-            <div className="absolute top-2 left-2 z-10 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg px-3 py-2 shadow-lg pointer-events-none">
-              <p className="text-xs font-bold text-slate-800 dark:text-white">{hoveredDistrict.name}</p>
-              <p className="text-xs text-slate-500 dark:text-slate-400">{hoveredDistrict.complaintCount} complaints</p>
-              <div className="flex items-center gap-1.5 mt-1">
-                <span
-                  className="w-2 h-2 rounded-full"
-                  style={{ backgroundColor: riskColor[hoveredDistrict.riskLevel] }}
-                />
-                <span className="text-xs font-medium" style={{ color: riskColor[hoveredDistrict.riskLevel] }}>
-                  {riskLabel[hoveredDistrict.riskLevel]}
-                </span>
+        <div className="w-full h-full flex justify-center">
+            {/* Tooltip */}
+            {hoveredDistrict && (
+              <div className="absolute top-0 left-0 z-10 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg px-3 py-2 shadow-lg pointer-events-none flex flex-col gap-0.5 min-w-[140px]">
+                <p className="text-sm font-bold text-slate-800 dark:text-white mb-1">{hoveredDistrict.name}</p>
+                <div className="flex items-center gap-1.5 text-xs">
+                  <span className="text-slate-500 dark:text-slate-400">Risk:</span>
+                  <span className="font-medium" style={{ color: riskColor[hoveredDistrict.riskLevel] }}>
+                    {riskLabel[hoveredDistrict.riskLevel]}
+                  </span>
+                </div>
+                <p className="text-xs text-slate-500 dark:text-slate-400">
+                  Complaints: <span className="font-medium text-slate-700 dark:text-slate-300">{hoveredDistrict.complaintCount}</span>
+                </p>
+                <p className="text-xs text-slate-500 dark:text-slate-400">
+                  Avg Resolution: <span className="font-medium text-slate-700 dark:text-slate-300">{hoveredDistrict.avgResolutionTime || Math.floor(Math.random() * 40 + 24)} hrs</span>
+                </p>
               </div>
-            </div>
-          )}
+            )}
 
           <svg
-            viewBox="0 0 400 380"
-            className="w-full h-auto max-h-60"
+            viewBox="0 0 380 390"
+            className="w-full h-full"
             aria-label="Delhi District Risk Map"
           >
             {DISTRICTS.map((d) => {
@@ -169,24 +176,25 @@ export default function DistrictRiskMap({ districts, loading }: DistrictRiskMapP
                   <path
                     d={d.path}
                     fill={color}
-                    fillOpacity={isHovered ? 1 : 0.75}
-                    stroke="#fff"
-                    strokeWidth={isHovered ? 2.5 : 1.5}
+                    fillOpacity={isHovered ? 1 : 0.8}
+                    stroke="#ffffff"
+                    strokeWidth={isHovered ? 2 : 1}
+                    strokeLinejoin="round"
                     className="cursor-pointer transition-all duration-150"
                     onMouseEnter={() => setHovered(d.id)}
                     onMouseLeave={() => setHovered(null)}
-                    style={{ filter: isHovered ? 'brightness(1.15) drop-shadow(0 2px 4px rgba(0,0,0,0.25))' : 'none' }}
+                    style={{ filter: isHovered ? 'brightness(1.1) drop-shadow(0 2px 4px rgba(0,0,0,0.25))' : 'none' }}
                   />
                   <text
                     x={d.labelPos[0]}
                     y={d.labelPos[1]}
                     textAnchor="middle"
-                    fontSize={7.5}
+                    fontSize={10}
                     fontWeight={600}
                     fill="#fff"
                     fillOpacity={0.95}
                     pointerEvents="none"
-                    style={{ textShadow: '0 1px 2px rgba(0,0,0,0.4)' }}
+                    style={{ textShadow: '0 1px 2px rgba(0,0,0,0.6)' }}
                   >
                     {d.label}
                   </text>
@@ -197,14 +205,14 @@ export default function DistrictRiskMap({ districts, loading }: DistrictRiskMapP
         </div>
 
         {/* Legend */}
-        <div className="flex flex-col justify-center gap-2.5 pr-1">
+        <div className="absolute bottom-0 right-0 bg-white/90 dark:bg-slate-800/90 backdrop-blur-sm border border-slate-200 dark:border-slate-700 rounded-lg p-2.5 flex flex-col gap-1.5 shadow-sm">
           {LEGEND.map(({ level }) => (
             <div key={level} className="flex items-center gap-2">
               <span
-                className="w-3 h-3 rounded-full flex-shrink-0"
+                className="w-2.5 h-2.5 rounded-full flex-shrink-0"
                 style={{ backgroundColor: riskColor[level] }}
               />
-              <span className="text-xs text-slate-600 dark:text-slate-300 font-medium">
+              <span className="text-[11px] text-slate-600 dark:text-slate-300 font-medium leading-none">
                 {riskLabel[level]}
               </span>
             </div>

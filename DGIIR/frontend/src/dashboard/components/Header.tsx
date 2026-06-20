@@ -38,7 +38,7 @@ export default function Header() {
           {getGreeting()}, Chief Minister
         </h1>
         <p className="text-sm text-slate-500 dark:text-slate-400 mt-0.5">
-          Here is the status of complaints.
+          Live overview of citizen grievances, service delivery performance, and district-level priorities across Delhi.
         </p>
       </div>
 

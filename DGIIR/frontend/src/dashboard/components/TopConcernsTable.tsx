@@ -41,7 +41,7 @@ export default function TopConcernsTable({ concerns, loading }: TopConcernsTable
   }
 
   return (
-    <div className="card animate-fade-in">
+    <div className="card animate-fade-in h-full flex flex-col">
       <h2 className="text-sm font-semibold text-slate-700 dark:text-slate-200 mb-4">
         Top 10 Most Important Concerns
       </h2>

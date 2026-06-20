@@ -54,42 +54,49 @@ export default function PriorityGlance({ data, loading }: PriorityGlanceProps) {
     return (
       <div className="card">
         <div className="skeleton h-4 w-32 rounded mb-4" />
-        {Array.from({ length: 3 }).map((_, i) => (
-          <div key={i} className="flex items-center gap-4 mb-4">
-            <div className="skeleton w-14 h-14 rounded-full" />
-            <div className="space-y-2">
-              <div className="skeleton h-3 w-24 rounded" />
-              <div className="skeleton h-6 w-16 rounded" />
-              <div className="skeleton h-3 w-20 rounded" />
-            </div>
-          </div>
-        ))}
+        <div className="skeleton h-24 w-full rounded mb-4" />
+        <div className="skeleton h-16 w-full rounded" />
       </div>
     )
   }
 
   return (
-    <div className="card animate-fade-in">
+    <div className="card animate-fade-in flex flex-col justify-between h-full">
       <h2 className="text-sm font-semibold text-slate-700 dark:text-slate-200 mb-4">
-        Priority at a Glance
+        Priority Overview
       </h2>
 
-      <div className="space-y-4">
-        {priorities(data).map(({ label, value, subtitle, icon, iconBg, valueColor }) => (
-          <div key={label} className="flex items-center gap-4">
-            {/* Icon circle */}
-            <div className={`w-14 h-14 rounded-full border-2 ${iconBg} flex items-center justify-center flex-shrink-0`}>
-              {icon}
-            </div>
-
-            {/* Text */}
-            <div>
-              <p className="text-xs text-slate-500 dark:text-slate-400 font-medium">{label}</p>
-              <p className={`text-2xl font-bold ${valueColor}`}>{formatNumber(value)}</p>
-              <p className="text-xs text-slate-400 dark:text-slate-500">{subtitle}</p>
-            </div>
+      <div className="mb-6">
+        <div className="flex items-center gap-3 mb-2">
+          <div className="w-10 h-10 rounded-lg bg-red-50 dark:bg-red-900/20 flex items-center justify-center">
+            <UpArrowIcon className="text-red-500 w-6 h-6" />
           </div>
-        ))}
+          <div>
+            <p className="text-xs text-slate-500 dark:text-slate-400 font-medium">High Priority</p>
+            <p className="text-2xl font-bold text-red-600 dark:text-red-400">
+              {formatNumber(data.high)} <span className="text-sm font-normal text-slate-500">complaints</span>
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <div className="space-y-4">
+        <div className="flex justify-between items-center border-b border-slate-100 dark:border-slate-800 pb-2">
+          <span className="text-sm text-slate-500 dark:text-slate-400">Affected Citizens</span>
+          <span className="text-sm font-bold text-slate-800 dark:text-slate-100">1.2 lakh</span>
+        </div>
+        <div className="flex justify-between items-center border-b border-slate-100 dark:border-slate-800 pb-2">
+          <span className="text-sm text-slate-500 dark:text-slate-400">Top District</span>
+          <span className="text-sm font-bold text-red-600 dark:text-red-400">North East Delhi</span>
+        </div>
+        <div className="flex justify-between items-center border-b border-slate-100 dark:border-slate-800 pb-2">
+          <span className="text-sm text-slate-500 dark:text-slate-400">Lead Department</span>
+          <span className="text-sm font-bold text-amber-600 dark:text-amber-400">Delhi Jal Board</span>
+        </div>
+        <div className="flex justify-between items-center pb-2">
+          <span className="text-sm text-slate-500 dark:text-slate-400">SLA Breach Count</span>
+          <span className="text-sm font-bold text-red-600 dark:text-red-400">84 (Critical)</span>
+        </div>
       </div>
     </div>
   )

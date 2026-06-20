@@ -2,7 +2,7 @@ import React from 'react';
 import { motion } from 'framer-motion';
 
 const Card = ({ children, className = '', noPadding = false, animate = false, ...props }) => {
-  const baseClasses = `bg-white dark:bg-slate-900 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-800/80 overflow-hidden transition-colors ${noPadding ? '' : 'p-6'}`;
+  const baseClasses = `bg-white dark:bg-slate-900 rounded-lg shadow-[0_2px_8px_rgba(0,0,0,0.04)] border border-slate-200/40 dark:border-slate-800/40 overflow-hidden transition-colors ${noPadding ? '' : 'p-5'}`;
 
   if (animate) {
     return (

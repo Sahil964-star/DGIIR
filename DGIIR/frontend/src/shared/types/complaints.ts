@@ -33,6 +33,7 @@ export interface DistrictRisk {
   name: string;
   riskLevel: RiskLevel;
   complaintCount: number;
+  avgResolutionTime?: number;
 }
 
 // ─── Resolution Time ─────────────────────────────────────────────────────────

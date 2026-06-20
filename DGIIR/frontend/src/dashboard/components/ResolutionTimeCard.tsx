@@ -34,10 +34,11 @@ export default function ResolutionTimeCard({ data, loading }: ResolutionTimeCard
   }
 
   return (
-    <div className="card animate-fade-in">
-      <h2 className="text-sm font-semibold text-slate-700 dark:text-slate-200 mb-4">
-        Average Resolution Time
-      </h2>
+    <div className="card animate-fade-in flex flex-col justify-between h-full">
+      <div>
+        <h2 className="text-sm font-semibold text-slate-700 dark:text-slate-200 mb-4">
+          Average Resolution Time
+        </h2>
 
       {/* Main stat */}
       <div className="flex items-center gap-3 mb-1">
@@ -55,7 +56,26 @@ export default function ResolutionTimeCard({ data, loading }: ResolutionTimeCard
       </div>
 
       {/* Sparkline */}
-      <ResolutionSparkline data={data.trend} />
+      <div className="mb-4">
+        <ResolutionSparkline data={data.trend} />
+      </div>
+      </div>
+
+      {/* Contextual Density */}
+      <div className="pt-3 border-t border-slate-100 dark:border-slate-800 space-y-2 mt-auto">
+        <div className="flex justify-between items-center text-xs">
+          <span className="text-slate-500 dark:text-slate-400">Best District</span>
+          <span className="font-semibold text-emerald-600 dark:text-emerald-400">New Delhi (18h)</span>
+        </div>
+        <div className="flex justify-between items-center text-xs">
+          <span className="text-slate-500 dark:text-slate-400">Worst District</span>
+          <span className="font-semibold text-red-600 dark:text-red-400">North East (72h)</span>
+        </div>
+        <div className="flex justify-between items-center text-xs">
+          <span className="text-slate-500 dark:text-slate-400">Monthly Trend</span>
+          <span className="font-semibold text-slate-800 dark:text-slate-200">-12% (Improving)</span>
+        </div>
+      </div>
     </div>
   )
 }

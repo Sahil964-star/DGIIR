@@ -5,6 +5,7 @@ interface StatCardProps {
   title: string
   value: number
   subtitle?: string
+  contextText?: string
   pct?: number
   accentColor: 'blue' | 'green' | 'amber' | 'red'
   icon: React.ReactNode
@@ -19,7 +20,7 @@ const accentMap = {
 }
 
 export default function StatCard({
-  id, title, value, subtitle, pct, accentColor, icon, loading = false,
+  id, title, value, subtitle, contextText, pct, accentColor, icon, loading = false,
 }: StatCardProps) {
   const accent = accentMap[accentColor]
 
@@ -39,8 +40,8 @@ export default function StatCard({
   return (
     <div id={id} className="card flex items-center gap-4 hover:shadow-card-md transition-shadow duration-200 animate-slide-up">
       {/* Icon circle */}
-      <div className={`w-12 h-12 rounded-xl ${accent.bg} border ${accent.border} flex items-center justify-center flex-shrink-0`}>
-        <div className={accent.value}>{icon}</div>
+      <div className={`w-10 h-10 rounded-lg ${accent.bg} border ${accent.border} flex items-center justify-center flex-shrink-0`}>
+        <div className={`${accent.value} scale-[0.85]`}>{icon}</div>
       </div>
 
       {/* Text */}
@@ -54,6 +55,11 @@ export default function StatCard({
         {(subtitle || pct !== undefined) && (
           <p className="text-xs text-slate-400 dark:text-slate-500 mt-0.5">
             {pct !== undefined ? formatPercent(pct) : subtitle}
+          </p>
+        )}
+        {contextText && (
+          <p className="text-xs text-slate-500 dark:text-slate-400 mt-1 italic">
+            {contextText}
           </p>
         )}
       </div>

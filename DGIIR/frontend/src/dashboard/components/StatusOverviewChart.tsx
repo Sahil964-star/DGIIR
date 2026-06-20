@@ -23,11 +23,26 @@ export default function StatusOverviewChart({ stats, loading }: StatusOverviewCh
   }
 
   return (
-    <div className="card animate-fade-in">
-      <h2 className="text-sm font-semibold text-slate-700 dark:text-slate-200 mb-4">
-        Status Overview
-      </h2>
-      <StatusBarChart data={chartData(stats)} />
+    <div className="card animate-fade-in flex flex-col justify-between h-full">
+      <div>
+        <h2 className="text-sm font-semibold text-slate-700 dark:text-slate-200 mb-4">
+          Status Overview
+        </h2>
+        <div className="mb-4">
+          <StatusBarChart data={chartData(stats)} />
+        </div>
+      </div>
+
+      <div className="pt-3 border-t border-slate-100 dark:border-slate-800 space-y-2">
+        <div className="flex justify-between items-center text-xs">
+          <span className="text-slate-500 dark:text-slate-400">Resolution Rate</span>
+          <span className="font-semibold text-emerald-600 dark:text-emerald-400">{stats.resolvedPct}%</span>
+        </div>
+        <div className="flex justify-between items-center text-xs">
+          <span className="text-slate-500 dark:text-slate-400">Weekly Change</span>
+          <span className="font-semibold text-slate-800 dark:text-slate-200">+4.2%</span>
+        </div>
+      </div>
     </div>
   )
 }

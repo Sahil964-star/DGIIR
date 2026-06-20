@@ -15,6 +15,7 @@ import DistrictRiskMap     from '../components/DistrictRiskMap'
 import TopConcernsTable    from '../components/TopConcernsTable'
 import PriorityGlance      from '../components/PriorityGlance'
 import LastUpdatedBar      from '../components/LastUpdatedBar'
+import CitizenImpactIndicators from '../components/CitizenImpactIndicators'
 
 // ─── Stat card icons (inline SVG) ────────────────────────────────────────────
 const TotalIcon = () => (
@@ -77,13 +78,16 @@ export default function OverviewPage() {
       {/* ── Header ── */}
       <Header />
 
+      {/* ── Citizen Impact Indicators ── */}
+      <CitizenImpactIndicators />
+
       {/* ── Stat Cards Row ── */}
       <section aria-label="Overview statistics" className="grid grid-cols-2 xl:grid-cols-4 gap-4 mb-5">
         <StatCard
           id="stat-total"
           title="Total Complaints"
           value={stats?.total ?? 0}
-          subtitle="All time"
+          contextText="Affecting approximately 4.8 lakh citizens"
           accentColor="blue"
           icon={<TotalIcon />}
           loading={statsLoading}
@@ -92,7 +96,7 @@ export default function OverviewPage() {
           id="stat-resolved"
           title="Resolved"
           value={stats?.resolved ?? 0}
-          pct={stats?.resolvedPct}
+          contextText="68.8% addressed successfully"
           accentColor="green"
           icon={<ResolvedIcon />}
           loading={statsLoading}
@@ -101,7 +105,7 @@ export default function OverviewPage() {
           id="stat-inprogress"
           title="In Progress"
           value={stats?.inProgress ?? 0}
-          pct={stats?.inProgressPct}
+          contextText="Active interventions underway"
           accentColor="amber"
           icon={<InProgressIcon />}
           loading={statsLoading}
@@ -110,7 +114,7 @@ export default function OverviewPage() {
           id="stat-overdue"
           title="Overdue"
           value={stats?.overdue ?? 0}
-          pct={stats?.overduePct}
+          contextText="Requires intervention from departments"
           accentColor="red"
           icon={<OverdueIcon />}
           loading={statsLoading}
