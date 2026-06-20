@@ -25,8 +25,8 @@ const PriorityAlerts = () => {
   ];
 
   return (
-    <div className="bg-white dark:bg-slate-900 rounded-xl p-5 border border-slate-200 dark:border-slate-800 shadow-sm h-full">
-      <h3 className="text-lg font-bold text-slate-900 dark:text-white mb-4">Priority Alerts</h3>
+    <div className="h-full flex flex-col pt-2">
+      <h3 className="text-xl font-bold text-slate-900 dark:text-white mb-6">Priority Alerts</h3>
       <div className="space-y-4">
         {alerts.map((alert, index) => (
           <motion.div 
@@ -34,12 +34,12 @@ const PriorityAlerts = () => {
             initial={{ opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}
             transition={{ duration: 0.2, delay: 0.1 * index }}
-            className={`p-3 rounded-lg flex items-start gap-3 border ${
+            className={`p-4 rounded-2xl flex items-start gap-4 ${
               alert.type === 'high_priority' 
-                ? 'bg-red-50 border-red-100 dark:bg-red-900/20 dark:border-red-900/30' 
+                ? 'bg-red-50/80 dark:bg-red-900/10' 
                 : alert.type === 'rejection'
-                ? 'bg-orange-50 border-orange-100 dark:bg-orange-900/20 dark:border-orange-900/30'
-                : 'bg-yellow-50 border-yellow-100 dark:bg-yellow-900/20 dark:border-yellow-900/30'
+                ? 'bg-orange-50/80 dark:bg-orange-900/10'
+                : 'bg-yellow-50/80 dark:bg-yellow-900/10'
             }`}
           >
             {alert.type === 'high_priority' ? (
@@ -50,17 +50,17 @@ const PriorityAlerts = () => {
               <AlertTriangle className="w-5 h-5 text-yellow-600 dark:text-yellow-400 shrink-0 mt-0.5" />
             )}
             <div>
-              <p className={`text-sm font-semibold ${
+              <p className={`text-sm font-semibold leading-snug ${
                 alert.type === 'high_priority' ? 'text-red-800 dark:text-red-300' : 
                 alert.type === 'rejection' ? 'text-orange-800 dark:text-orange-300' :
                 'text-yellow-800 dark:text-yellow-300'
               }`}>
                 {alert.message}
               </p>
-              <p className={`text-[10px] mt-1 font-medium ${
-                alert.type === 'high_priority' ? 'text-red-600/80 dark:text-red-400/80' : 
-                alert.type === 'rejection' ? 'text-orange-600/80 dark:text-orange-400/80' :
-                'text-yellow-600/80 dark:text-yellow-400/80'
+              <p className={`text-xs mt-1.5 font-medium ${
+                alert.type === 'high_priority' ? 'text-red-600/70 dark:text-red-400/70' : 
+                alert.type === 'rejection' ? 'text-orange-600/70 dark:text-orange-400/70' :
+                'text-yellow-600/70 dark:text-yellow-400/70'
               }`}>
                 {alert.date}
               </p>

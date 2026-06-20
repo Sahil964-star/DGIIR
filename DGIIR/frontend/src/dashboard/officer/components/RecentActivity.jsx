@@ -43,27 +43,27 @@ const activities = [
 
 const RecentActivity = () => {
   return (
-    <div className="bg-white dark:bg-slate-900 rounded-xl p-5 border border-slate-200 dark:border-slate-800 shadow-sm h-full">
+    <div className="h-full flex flex-col pt-2">
       <div className="flex items-center justify-between mb-4">
-        <h3 className="text-lg font-bold text-slate-900 dark:text-white">Recent Activity</h3>
+        <h3 className="text-xl font-bold text-slate-900 dark:text-white">Recent Activity</h3>
       </div>
-      <div className="space-y-4">
+      <div className="flex-1">
         {activities.map((activity, index) => (
           <motion.div
             key={activity.id}
             initial={{ opacity: 0, x: -10 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.2, delay: 0.04 * index }}
-            className="flex items-start gap-4 p-3 rounded-lg border border-slate-100 dark:border-slate-800 hover:border-slate-200 dark:hover:border-slate-700 bg-slate-50 dark:bg-slate-800/50 transition-colors"
+            className="flex items-start gap-4 py-4 px-2 border-b border-slate-200 dark:border-gray-800/60 last:border-0 hover:bg-slate-50 dark:hover:bg-slate-800/30 transition-colors rounded-xl -mx-2"
           >
-            <div className={`p-2 rounded-xl shrink-0 ${activity.iconBg}`}>
-              <activity.icon className={`w-4 h-4 ${activity.iconColor}`} />
+            <div className={`p-2.5 rounded-full shrink-0 ${activity.iconBg}`}>
+              <activity.icon className={`w-5 h-5 ${activity.iconColor}`} />
             </div>
-            <div className="min-w-0 flex-1">
+            <div className="min-w-0 flex-1 pt-0.5">
               <p className="text-sm font-semibold text-slate-900 dark:text-white leading-tight">{activity.title}</p>
-              <p className="text-xs font-medium text-slate-500 dark:text-slate-400 mt-1">{activity.description}</p>
+              <p className="text-xs font-medium text-slate-500 dark:text-slate-400 mt-1.5">{activity.description}</p>
             </div>
-            <span className="text-[10px] font-semibold text-slate-400 dark:text-slate-500 whitespace-nowrap shrink-0">{activity.time}</span>
+            <span className="text-[11px] font-semibold text-slate-400 dark:text-slate-500 whitespace-nowrap shrink-0 pt-0.5">{activity.time}</span>
           </motion.div>
         ))}
       </div>

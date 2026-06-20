@@ -13,62 +13,45 @@ const CitizenFeedback = ({ verification }) => {
       initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.3, delay: 0.1 }}
-      className="bg-white dark:bg-gray-900 rounded-xl border border-green-200 dark:border-green-900/40 shadow-sm overflow-hidden h-full flex flex-col"
+      className="h-full flex flex-col pt-2"
     >
-      {/* Header */}
-      <div className="bg-green-50 dark:bg-green-900/20 px-4 py-2 border-b border-green-100 dark:border-green-900/30">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <div className="p-1 bg-green-600 rounded-lg">
-              <ShieldCheck className="w-3.5 h-3.5 text-white" />
-            </div>
-            <div>
-              <h3 className="text-sm font-bold text-slate-900 dark:text-white">Citizen Verification</h3>
-              <p className="text-[10px] text-slate-500 dark:text-slate-400">DGIIR Accountability</p>
-            </div>
-          </div>
-          <span className="text-lg font-bold text-green-600 dark:text-green-400">{verifiedPct}%</span>
-        </div>
+      <div className="flex items-center justify-between mb-6">
+        <h3 className="text-xl font-bold text-slate-900 dark:text-white">Citizen Verification</h3>
+        <span className="text-lg font-bold text-green-600 dark:text-green-400">{verifiedPct}% Verified</span>
       </div>
 
-      <div className="p-3 space-y-2 flex-1 flex flex-col justify-center">
+      <div className="space-y-6 flex-1 flex flex-col">
         {/* Stacked Progress Bar */}
-        <div className="w-full bg-slate-100 dark:bg-gray-800 rounded-full h-1.5 flex overflow-hidden mb-1">
-          <motion.div className="bg-green-500 h-1.5" initial={{ width: 0 }} animate={{ width: `${verifiedPct}%` }} transition={{ duration: 0.8, delay: 0.2, ease: 'easeOut' }} />
-          <motion.div className="bg-orange-400 h-1.5" initial={{ width: 0 }} animate={{ width: `${pendingPct}%` }} transition={{ duration: 0.8, delay: 0.4, ease: 'easeOut' }} />
-          <motion.div className="bg-red-500 h-1.5" initial={{ width: 0 }} animate={{ width: `${rejectedPct}%` }} transition={{ duration: 0.8, delay: 0.6, ease: 'easeOut' }} />
+        <div className="w-full bg-slate-100 dark:bg-gray-800 h-2 flex overflow-hidden rounded-full mb-2">
+          <motion.div className="bg-green-500 h-2" initial={{ width: 0 }} animate={{ width: `${verifiedPct}%` }} transition={{ duration: 0.8, delay: 0.2, ease: 'easeOut' }} />
+          <motion.div className="bg-orange-400 h-2" initial={{ width: 0 }} animate={{ width: `${pendingPct}%` }} transition={{ duration: 0.8, delay: 0.4, ease: 'easeOut' }} />
+          <motion.div className="bg-red-500 h-2" initial={{ width: 0 }} animate={{ width: `${rejectedPct}%` }} transition={{ duration: 0.8, delay: 0.6, ease: 'easeOut' }} />
         </div>
 
         {/* Status Rows */}
-        <div className="space-y-1.5">
-          <div className="flex items-center justify-between px-3 py-1.5 rounded-lg bg-green-50 dark:bg-green-900/20 border border-green-100 dark:border-green-900/30">
-            <div className="flex items-center gap-2">
+        <div className="flex flex-wrap gap-4">
+          <div className="flex-1 min-w-[120px]">
+            <div className="flex items-center gap-2 mb-1">
               <CheckCircle2 className="w-4 h-4 text-green-600 dark:text-green-400" />
-              <div>
-                <span className="text-sm font-semibold text-green-800 dark:text-green-300">Citizen Verified</span>
-              </div>
+              <span className="text-sm font-semibold text-slate-700 dark:text-slate-300">Verified</span>
             </div>
-            <span className="text-lg font-bold text-green-700 dark:text-green-400">{verification.verified}</span>
+            <span className="text-3xl font-bold text-slate-900 dark:text-white">{verification.verified}</span>
           </div>
 
-          <div className="flex items-center justify-between px-3 py-1.5 rounded-lg bg-orange-50 dark:bg-orange-900/20 border border-orange-100 dark:border-orange-900/30">
-            <div className="flex items-center gap-2">
+          <div className="flex-1 min-w-[120px]">
+            <div className="flex items-center gap-2 mb-1">
               <Clock className="w-4 h-4 text-orange-600 dark:text-orange-400" />
-              <div>
-                <span className="text-sm font-semibold text-orange-800 dark:text-orange-300">Pending Verification</span>
-              </div>
+              <span className="text-sm font-semibold text-slate-700 dark:text-slate-300">Pending</span>
             </div>
-            <span className="text-lg font-bold text-orange-700 dark:text-orange-400">{verification.pending}</span>
+            <span className="text-3xl font-bold text-slate-900 dark:text-white">{verification.pending}</span>
           </div>
 
-          <div className="flex items-center justify-between px-3 py-1.5 rounded-lg bg-red-50 dark:bg-red-900/20 border border-red-100 dark:border-red-900/30">
-            <div className="flex items-center gap-2">
+          <div className="flex-1 min-w-[120px]">
+            <div className="flex items-center gap-2 mb-1">
               <XCircle className="w-4 h-4 text-red-600 dark:text-red-400" />
-              <div>
-                <span className="text-sm font-semibold text-red-800 dark:text-red-300">Rejected by Citizen</span>
-              </div>
+              <span className="text-sm font-semibold text-slate-700 dark:text-slate-300">Rejected</span>
             </div>
-            <span className="text-lg font-bold text-red-700 dark:text-red-400">{verification.rejected}</span>
+            <span className="text-3xl font-bold text-slate-900 dark:text-white">{verification.rejected}</span>
           </div>
         </div>
 
@@ -77,11 +60,11 @@ const CitizenFeedback = ({ verification }) => {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ delay: 0.5 }}
-            className="px-3 py-1.5 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-900/40 rounded-lg flex items-center gap-2 mt-1"
+            className="flex items-start gap-2 mt-4"
           >
-            <XCircle className="w-3.5 h-3.5 text-red-600 dark:text-red-400 shrink-0" />
-            <p className="text-xs text-red-700 dark:text-red-400 font-medium">
-              {verification.rejected} closure{verification.rejected > 1 ? 's' : ''} rejected — follow-up required.
+            <XCircle className="w-5 h-5 text-red-500 shrink-0 mt-0.5" />
+            <p className="text-sm text-slate-700 dark:text-slate-300">
+              <span className="font-bold text-slate-900 dark:text-white">{verification.rejected} closure{verification.rejected > 1 ? 's' : ''} rejected</span> — follow-up required.
             </p>
           </motion.div>
         )}

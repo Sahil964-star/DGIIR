@@ -86,9 +86,9 @@ const IncidentWorkspace = ({ incident }) => {
   const canSubmit = resolutionNotes.trim().length > 10 && afterPhotoUploaded;
 
   return (
-    <div className="bg-white dark:bg-gray-900 rounded-xl border border-slate-200 dark:border-gray-800 shadow-sm flex flex-col h-full">
+    <div className="flex flex-col h-full">
       {/* Header */}
-      <div className="px-5 py-3.5 border-b border-slate-100 dark:border-gray-800 shrink-0">
+      <div className="py-2 shrink-0">
         <div className="flex items-center justify-between mb-1">
           <div className="flex items-center gap-2">
             <span className="text-[11px] font-mono text-slate-400">{activeIncident.id}</span>
@@ -101,7 +101,7 @@ const IncidentWorkspace = ({ incident }) => {
       </div>
 
       {/* Incident Intelligence Strip */}
-      <div className="px-5 py-3 border-b border-slate-50 dark:border-gray-800/50 bg-slate-50/50 dark:bg-gray-800/30 shrink-0">
+      <div className="py-4 border-y border-slate-200 dark:border-gray-800/60 shrink-0 my-2">
         <div className="grid grid-cols-2 gap-y-2 gap-x-4">
           <div className="flex items-center gap-1.5 text-xs text-slate-600 dark:text-slate-400">
             <Clock className="w-3.5 h-3.5 text-slate-400" />
@@ -123,7 +123,7 @@ const IncidentWorkspace = ({ incident }) => {
       </div>
 
       {/* Scrollable body */}
-      <div className="flex-1 overflow-y-auto p-5 space-y-4 min-h-0">
+      <div className="flex-1 overflow-y-auto py-5 space-y-8 min-h-0 pr-2">
 
         {/* Map + Location */}
         <div>
@@ -137,11 +137,11 @@ const IncidentWorkspace = ({ incident }) => {
 
         {/* Citizen Report */}
         <div>
-          <div className="flex items-center gap-1.5 mb-1.5">
-            <MessageCircle className="w-3.5 h-3.5 text-slate-400" />
-            <span className="text-[11px] font-semibold text-slate-600 dark:text-slate-400 uppercase tracking-wide">Citizen Report</span>
+          <div className="flex items-center gap-1.5 mb-2.5">
+            <MessageCircle className="w-4 h-4 text-slate-400" />
+            <span className="text-sm font-semibold text-slate-700 dark:text-slate-300">Citizen Report</span>
           </div>
-          <div className="bg-slate-50 dark:bg-gray-800/60 p-3 rounded-lg border border-slate-100 dark:border-gray-800">
+          <div>
             <p className="text-sm text-slate-700 dark:text-slate-300 leading-relaxed italic">"{activeIncident.citizenNotes}"</p>
             <div className="mt-1.5 flex items-center gap-1.5 text-[10px] text-slate-400">
               <Clock className="w-3 h-3" />
@@ -152,9 +152,9 @@ const IncidentWorkspace = ({ incident }) => {
 
         {/* Evidence Photos */}
         <div>
-          <div className="flex items-center gap-1.5 mb-1.5">
-            <ImageIcon className="w-3.5 h-3.5 text-slate-400" />
-            <span className="text-[11px] font-semibold text-slate-600 dark:text-slate-400 uppercase tracking-wide">Evidence Photos</span>
+          <div className="flex items-center gap-1.5 mb-3">
+            <ImageIcon className="w-4 h-4 text-slate-400" />
+            <span className="text-sm font-semibold text-slate-700 dark:text-slate-300">Evidence Photos</span>
           </div>
           <div className="grid grid-cols-2 gap-3">
             <div>
@@ -183,7 +183,10 @@ const IncidentWorkspace = ({ incident }) => {
 
         {/* Resolution Notes */}
         <div>
-          <p className="text-[11px] font-semibold text-slate-600 dark:text-slate-400 uppercase tracking-wide mb-1.5">Resolution Notes</p>
+          <div className="flex items-center gap-1.5 mb-3">
+            <Layers className="w-4 h-4 text-slate-400" />
+            <span className="text-sm font-semibold text-slate-700 dark:text-slate-300">Resolution Notes</span>
+          </div>
           <textarea
             value={resolutionNotes}
             onChange={(e) => setResolutionNotes(e.target.value)}
@@ -197,7 +200,7 @@ const IncidentWorkspace = ({ incident }) => {
       </div>
 
       {/* Closure Actions — sticky at bottom */}
-      <div className="px-5 pb-4 pt-3 border-t border-slate-100 dark:border-gray-800 shrink-0 space-y-2">
+      <div className="pb-2 pt-4 border-t border-slate-200 dark:border-gray-800/60 shrink-0 space-y-3">
         {/* Primary CTA — Submit for Closure */}
         <motion.button
           whileHover={{ scale: canSubmit ? 1.02 : 1 }}

@@ -2,25 +2,23 @@ import React from 'react';
 import { ClipboardList, Clock, AlertTriangle, Trophy } from 'lucide-react';
 import { motion } from 'framer-motion';
 
-const SummaryCard = ({ title, value, icon: Icon, color, subtitle, delay }) => {
+const SummaryCard = ({ title, value, icon: Icon, color, subtitle, delay, showDivider }) => {
   return (
     <motion.div
-      initial={{ opacity: 0, y: 20 }}
+      initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.3, delay }}
-      className="bg-white dark:bg-gray-900 border border-slate-200 dark:border-gray-800 rounded-xl p-5 shadow-sm"
+      transition={{ duration: 0.4, delay }}
+      className={`flex-1 min-w-[200px] flex items-start gap-5 ${showDivider ? 'lg:border-r lg:border-slate-200 lg:dark:border-gray-800/60 lg:pr-8' : ''}`}
     >
-      <div className="flex items-start justify-between">
-        <div>
-          <p className="text-xs font-medium text-slate-500 dark:text-slate-400 mb-1 uppercase tracking-wide">{title}</p>
-          <h3 className="text-3xl font-bold text-slate-900 dark:text-white">{value}</h3>
-          {subtitle && (
-            <p className={`text-xs mt-2 font-medium ${subtitle.color}`}>{subtitle.text}</p>
-          )}
-        </div>
-        <div className={`p-3 rounded-xl ${color.bg}`}>
-          <Icon className={`w-5 h-5 ${color.text}`} />
-        </div>
+      <div className={`p-3.5 rounded-full ${color.bg}`}>
+        <Icon className={`w-6 h-6 ${color.text}`} />
+      </div>
+      <div>
+        <p className="text-sm font-medium text-slate-500 dark:text-slate-400 mb-1">{title}</p>
+        <h3 className="text-4xl font-bold tracking-tight text-slate-900 dark:text-white">{value}</h3>
+        {subtitle && (
+          <p className={`text-xs mt-2 font-medium ${subtitle.color}`}>{subtitle.text}</p>
+        )}
       </div>
     </motion.div>
   );
@@ -28,7 +26,7 @@ const SummaryCard = ({ title, value, icon: Icon, color, subtitle, delay }) => {
 
 const SummaryCards = ({ stats }) => {
   return (
-    <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+    <div className="flex flex-wrap gap-y-8 gap-x-8 lg:gap-x-12 py-6 border-b border-slate-200 dark:border-gray-800/50 mb-8">
       <SummaryCard
         title="Assigned Cases"
         value={stats.assigned}
@@ -36,6 +34,7 @@ const SummaryCards = ({ stats }) => {
         color={{ bg: 'bg-blue-50/80 dark:bg-blue-900/20', text: 'text-blue-600 dark:text-blue-400' }}
         subtitle={{ text: '4 updated since yesterday', color: 'text-slate-500 dark:text-slate-400' }}
         delay={0.1}
+        showDivider={true}
       />
       <SummaryCard
         title="Due Today"
@@ -44,6 +43,7 @@ const SummaryCards = ({ stats }) => {
         color={{ bg: 'bg-orange-50/80 dark:bg-orange-900/20', text: 'text-orange-600 dark:text-orange-400' }}
         subtitle={{ text: '2 require site visits', color: 'text-orange-600 dark:text-orange-400' }}
         delay={0.2}
+        showDivider={true}
       />
       <SummaryCard
         title="Overdue"
@@ -52,6 +52,7 @@ const SummaryCards = ({ stats }) => {
         color={{ bg: 'bg-red-50/80 dark:bg-red-900/20', text: 'text-red-600 dark:text-red-400' }}
         subtitle={{ text: 'Need immediate action', color: 'text-red-600 dark:text-red-400' }}
         delay={0.3}
+        showDivider={true}
       />
       <SummaryCard
         title="Resolution Score"
@@ -60,6 +61,7 @@ const SummaryCards = ({ stats }) => {
         color={{ bg: 'bg-green-50/80 dark:bg-green-900/20', text: 'text-green-600 dark:text-green-400' }}
         subtitle={{ text: 'Above department average', color: 'text-green-600 dark:text-green-400' }}
         delay={0.4}
+        showDivider={false}
       />
     </div>
   );

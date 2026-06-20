@@ -27,11 +27,11 @@ const IncidentCard = ({ incident, delay }) => {
 
   return (
     <motion.div
-      initial={{ opacity: 0, x: -16 }}
+      initial={{ opacity: 0, x: -10 }}
       animate={{ opacity: 1, x: 0 }}
-      transition={{ duration: 0.3, delay }}
-      className={`bg-white dark:bg-gray-900 border rounded-xl p-4 hover:border-green-500 dark:hover:border-green-500 transition-all cursor-pointer group ${
-        isOverdue ? 'border-red-200 dark:border-red-900/50' : 'border-slate-200 dark:border-gray-800'
+      transition={{ duration: 0.4, delay }}
+      className={`group py-5 border-b last:border-0 transition-colors cursor-pointer px-4 -mx-4 rounded-2xl hover:bg-slate-100/50 dark:hover:bg-slate-800/30 ${
+        isOverdue ? 'border-red-200/50 dark:border-red-900/30' : 'border-slate-200 dark:border-gray-800/60'
       }`}
     >
       {/* Top row */}
@@ -71,7 +71,7 @@ const IncidentCard = ({ incident, delay }) => {
 
 const IncidentList = ({ incidents }) => {
   return (
-    <div className="bg-white dark:bg-slate-900 rounded-xl p-5 border border-slate-200 dark:border-slate-800 shadow-sm h-full flex flex-col">
+    <div className="h-full flex flex-col pr-4">
       <div className="flex items-center justify-between mb-4">
         <div>
           <h3 className="text-lg font-bold text-slate-900 dark:text-white">Assigned Incidents</h3>
@@ -85,7 +85,7 @@ const IncidentList = ({ incidents }) => {
         </select>
       </div>
 
-      <div className="space-y-3 flex-1 overflow-y-auto pr-1">
+      <div className="flex-1 overflow-y-auto">
         {incidents.map((incident, index) => (
           <IncidentCard key={incident.id} incident={incident} delay={0.07 * index} />
         ))}
