@@ -1,57 +1,57 @@
-import 'dotenv/config';
-import express   from 'express';
-import cors      from 'cors';
-import path      from 'path';
-import { fileURLToPath } from 'url';
-
-import { connectDB }      from './db/mongoose.js';
-import complaintsRouter   from './routes/complaints.js';
-
-const __dirname = path.dirname(fileURLToPath(import.meta.url));
-
-const app  = express();
-const PORT = process.env.PORT || 3001;
-
-// ── CORS — scoped to the Vite dev server ──────────────────────────────────────
-const allowedOrigins = (process.env.ALLOWED_ORIGINS || 'http://localhost:5173').split(',');
-app.use(
-  cors({
-    origin(origin, callback) {
-      // Allow requests with no origin (e.g. curl, Postman, same-origin)
-      if (!origin || allowedOrigins.includes(origin)) {
-        callback(null, true);
-      } else {
-        callback(new Error(`CORS: origin "${origin}" not allowed`));
-      }
-    },
-    methods: ['GET', 'POST', 'OPTIONS'],
-    allowedHeaders: ['Content-Type', 'Authorization'],
-  })
-);
-
-// ── Body parsers ──────────────────────────────────────────────────────────────
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
-
-// ── Serve local uploads (MinIO fallback files) ────────────────────────────────
-const uploadsDir = path.join(__dirname, '..', 'uploads');
-app.use('/uploads', express.static(uploadsDir));
-
-// ── Routes ────────────────────────────────────────────────────────────────────
-app.use('/complaints', complaintsRouter);
-
-// ── Health check ──────────────────────────────────────────────────────────────
-app.get('/health', (_req, res) => res.json({ status: 'ok', ts: new Date().toISOString() }));
-
-// ── Global error handler ──────────────────────────────────────────────────────
-app.use((err, _req, res, _next) => {
-  console.error('[Unhandled]', err.message);
-  res.status(500).json({ error: err.message || 'Internal server error.' });
+import express from 'express';
+import dotenv from 'dotenv';
+import { prisma } from './db/prisma.js';
+import { errorHandler } from './middlewares/errorHandler.js';
+import { requestLogger } from './middlewares/logger.js';
+import { securityHeaders, corsMiddleware, globalRateLimiter } from './middlewares/security.js';
+import { setupSwagger } from './docs/swagger.js';
+// Route imports
+import authRoutes from './routes/auth.routes.js';
+import complaintRoutes from './routes/complaint.routes.js';
+import analyticsRoutes from './routes/analytics.routes.js';
+import metaRoutes from './routes/meta.routes.js';
+import notificationRoutes from './routes/notification.routes.js';
+import officerRoutes from './routes/officer.routes.js';
+dotenv.config();
+const app = express();
+const port = process.env.PORT || 5000;
+// Security & Utility Middlewares
+app.use(securityHeaders);
+app.use(corsMiddleware);
+app.use(globalRateLimiter);
+app.use(express.json({ limit: '10kb' })); // limit body size
+app.use(requestLogger);
+// Setup Swagger UI
+setupSwagger(app);
+// Basic health check
+app.get('/health', (req, res) => {
+    res.status(200).json({ status: 'ok', timestamp: new Date().toISOString() });
 });
-
-// ── Bootstrap ─────────────────────────────────────────────────────────────────
-await connectDB();
-
-app.listen(PORT, () => {
-  console.log(`[Server] Running on http://localhost:${PORT}`);
+// API Routes
+const v1Router = express.Router();
+v1Router.use('/auth', authRoutes);
+v1Router.use('/complaints', complaintRoutes);
+v1Router.use('/analytics', analyticsRoutes);
+v1Router.use('/meta', metaRoutes);
+v1Router.use('/notifications', notificationRoutes);
+v1Router.use('/officer', officerRoutes);
+app.use('/api/v1', v1Router);
+import { startSlaJob } from './jobs/sla.job.js';
+import { startAnalyticsJob } from './jobs/analytics.job.js';
+// Global Error Handler
+app.use(errorHandler);
+// Start Cron Jobs
+startSlaJob();
+startAnalyticsJob();
+// Handle unhandled rejections
+process.on('unhandledRejection', (err) => {
+    console.log('UNHANDLED REJECTION! 💥 Shutting down...');
+    console.log(err.name, err.message);
+    process.exit(1);
 });
+// Start server
+app.listen(port, () => {
+    console.log(`DGIIR Backend running on port ${port}`);
+    console.log(`Swagger UI available at http://localhost:${port}/api/v1/docs`);
+});
+//# sourceMappingURL=index.js.map

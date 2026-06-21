@@ -1,0 +1,87 @@
+import bcrypt from 'bcryptjs';
+import jwt from 'jsonwebtoken';
+import { prisma } from '../db/prisma.js';
+import { AppError } from '../utils/AppError.js';
+import { asyncHandler } from '../utils/asyncHandler.js';
+import { AuthService } from '../services/auth.service.js';
+import { AuditService } from '../services/audit.service.js';
+export const requestOtp = asyncHandler(async (req, res) => {
+    const { phone } = req.body;
+    if (!phone)
+        throw new AppError('Please provide a phone number', 400);
+    await AuthService.requestOtp(phone);
+    res.status(200).json({ status: 'success', message: 'OTP sent successfully' });
+});
+export const verifyOtp = asyncHandler(async (req, res) => {
+    const { phone, otp } = req.body;
+    if (!phone || !otp)
+        throw new AppError('Please provide phone and OTP', 400);
+    const result = await AuthService.verifyOtp(phone, otp);
+    res.status(200).json({
+        status: 'success',
+        data: {
+            accessToken: result.accessToken,
+            refreshToken: result.refreshToken,
+            user: {
+                id: result.user.id,
+                name: result.user.name,
+                role: result.user.role,
+            },
+        },
+    });
+});
+export const loginAdmin = asyncHandler(async (req, res) => {
+    const { email, password } = req.body;
+    if (!email || !password)
+        throw new AppError('Please provide email and password', 400);
+    const user = await prisma.user.findUnique({ where: { email } });
+    if (!user || !user.passwordHash || user.role === 'CITIZEN') {
+        throw new AppError('Invalid email or password', 401);
+    }
+    const isMatch = await bcrypt.compare(password, user.passwordHash);
+    if (!isMatch)
+        throw new AppError('Invalid email or password', 401);
+    const accessToken = AuthService.generateAccessToken(user.id, user.role);
+    const refreshToken = AuthService.generateRefreshToken(user.id, user.role);
+    res.status(200).json({
+        status: 'success',
+        data: { accessToken, refreshToken, user: { id: user.id, name: user.name, role: user.role } },
+    });
+});
+export const refreshToken = asyncHandler(async (req, res) => {
+    const { refreshToken } = req.body;
+    if (!refreshToken)
+        throw new AppError('Please provide a refresh token', 400);
+    const decoded = jwt.verify(refreshToken, process.env.JWT_REFRESH_SECRET || 'fallback_refresh_secret');
+    const user = await prisma.user.findUnique({ where: { id: decoded.id } });
+    if (!user)
+        throw new AppError('User not found', 404);
+    const newAccessToken = AuthService.generateAccessToken(user.id, user.role);
+    res.status(200).json({ status: 'success', data: { accessToken: newAccessToken } });
+});
+export const getMe = asyncHandler(async (req, res) => {
+    const user = await prisma.user.findUnique({
+        where: { id: req.user.id },
+        select: { id: true, name: true, email: true, phone: true, role: true, departmentId: true, districtId: true },
+    });
+    res.status(200).json({ status: 'success', data: { user } });
+});
+export const logout = asyncHandler(async (req, res) => {
+    res.status(200).json({ status: 'success', message: 'Logged out successfully' });
+});
+export const forgotPassword = asyncHandler(async (req, res) => {
+    const { phone } = req.body;
+    if (!phone)
+        throw new AppError('Please provide a phone number', 400);
+    await AuthService.requestOtp(phone);
+    res.status(200).json({ status: 'success', message: 'Password reset OTP sent successfully' });
+});
+export const resetPassword = asyncHandler(async (req, res) => {
+    const { phone, otp, newPassword } = req.body;
+    if (!phone || !otp || !newPassword)
+        throw new AppError('Please provide phone, OTP and new password', 400);
+    const user = await AuthService.resetPassword(phone, otp, newPassword);
+    await AuditService.log(user.id, 'RESET_PASSWORD', 'User', user.id, {});
+    res.status(200).json({ status: 'success', message: 'Password reset successfully' });
+});
+//# sourceMappingURL=auth.controller.js.map

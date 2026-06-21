@@ -1,0 +1,1 @@
+{"version":3,"file":"ConsoleOtpProvider.d.ts","sourceRoot":"","sources":["ConsoleOtpProvider.ts"],"names":[],"mappings":"AAAA,OAAO,KAAK,EAAE,WAAW,EAAE,MAAM,kBAAkB,CAAC;AAEpD,qBAAa,kBAAmB,YAAW,WAAW;IAC9C,OAAO,CAAC,YAAY,EAAE,MAAM,EAAE,GAAG,EAAE,MAAM,GAAG,OAAO,CAAC,IAAI,CAAC;CAKhE"}
