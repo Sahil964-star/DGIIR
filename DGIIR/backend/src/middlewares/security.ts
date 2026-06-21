@@ -2,7 +2,20 @@ import helmet from 'helmet';
 import rateLimit from 'express-rate-limit';
 import cors from 'cors';
 
-export const securityHeaders = helmet();
+const isDev = process.env.NODE_ENV !== 'production';
+
+const helmetOptions: any = {};
+if (isDev) {
+  helmetOptions.contentSecurityPolicy = {
+    useDefaults: true,
+    directives: {
+      "upgrade-insecure-requests": null,
+    },
+  };
+  helmetOptions.crossOriginResourcePolicy = { policy: "cross-origin" };
+}
+
+export const securityHeaders = helmet(helmetOptions);
 
 const whitelist = [
   'http://localhost:3000',
@@ -24,8 +37,11 @@ export const corsMiddleware = cors({
 
     console.warn(`Blocked by CORS: ${origin}`);
 
-    // Development mode
-    return callback(null, true);
+    if (isDev) {
+      return callback(null, true);
+    }
+    
+    return callback(new Error('Not allowed by CORS'));
   },
   credentials: true,
 });

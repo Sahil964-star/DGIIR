@@ -5,6 +5,7 @@ import { errorHandler } from './middlewares/errorHandler.js';
 import { requestLogger } from './middlewares/logger.js';
 import { securityHeaders, corsMiddleware, globalRateLimiter } from './middlewares/security.js';
 import { setupSwagger } from './docs/swagger.js';
+import cookieParser from 'cookie-parser';
 
 // Route imports
 import authRoutes from './routes/auth.routes.js';
@@ -24,6 +25,7 @@ app.use(securityHeaders);
 app.use(corsMiddleware);
 app.use(globalRateLimiter);
 app.use(express.json({ limit: '10kb' })); // limit body size
+app.use(cookieParser());
 app.use(requestLogger);
 
 // Setup Swagger UI

@@ -25,7 +25,8 @@ const router = Router();
  * @swagger
  * /auth/request-otp:
  *   post:
- *     summary: Request OTP for login
+ *     summary: Request OTP for login (Citizens only)
+ *     description: Generates an OTP for citizen login. If the phone number does not exist, an OTP is still generated. Returns 403 for staff numbers.
  *     tags: [Auth]
  *     requestBody:
  *       required: true
@@ -39,9 +40,21 @@ const router = Router();
  *               phone:
  *                 type: string
  *                 example: "9999999999"
+ *           examples:
+ *             CitizenRequest:
+ *               summary: Standard OTP request
+ *               value: { "phone": "9999999999" }
  *     responses:
  *       200:
  *         description: OTP requested successfully
+ *         content:
+ *           application/json:
+ *             examples:
+ *               Success:
+ *                 summary: OTP sent
+ *                 value: { "status": "success", "message": "OTP sent successfully" }
+ *       403:
+ *         description: Forbidden for staff members
  */
 router.post('/request-otp', authRateLimiter, requestOtp);
 
@@ -49,7 +62,8 @@ router.post('/request-otp', authRateLimiter, requestOtp);
  * @swagger
  * /auth/verify-otp:
  *   post:
- *     summary: Verify OTP
+ *     summary: Verify OTP and Login (Citizens only)
+ *     description: Verifies the OTP. If the citizen does not exist, an account is automatically created. Returns access token and sets refresh token in cookie.
  *     tags: [Auth]
  *     requestBody:
  *       required: true
@@ -67,9 +81,23 @@ router.post('/request-otp', authRateLimiter, requestOtp);
  *               otp:
  *                 type: string
  *                 example: "123456"
+ *           examples:
+ *             CitizenVerify:
+ *               summary: Standard OTP verification
+ *               value: { "phone": "9999999999", "otp": "123456" }
  *     responses:
  *       200:
  *         description: OTP verified successfully
+ *         content:
+ *           application/json:
+ *             examples:
+ *               Success:
+ *                 summary: Login successful
+ *                 value: { "status": "success", "data": { "accessToken": "ey...", "user": { "id": "uuid", "name": "Citizen", "role": "CITIZEN" } } }
+ *       400:
+ *         description: Invalid or expired OTP
+ *       403:
+ *         description: Forbidden for staff members
  */
 router.post('/verify-otp', authRateLimiter, verifyOtp);
 
@@ -106,6 +134,7 @@ router.post('/login', authRateLimiter, loginAdmin);
  * /auth/refresh:
  *   post:
  *     summary: Refresh token
+ *     description: Reads the HttpOnly cookie 'refreshToken' and returns a new access token. When testing in Swagger UI, you must first execute the login or verify-otp endpoint to set the cookie in your browser.
  *     tags: [Auth]
  *     responses:
  *       200:

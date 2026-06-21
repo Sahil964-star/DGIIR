@@ -19,10 +19,14 @@ export class AuthService {
     });
   }
 
-  static async requestOtp(phone: string) {
+  static async requestOtp(phone: string, purpose: 'LOGIN' | 'RESET' = 'LOGIN') {
     const user = await prisma.user.findUnique({ where: { phone } });
-    if (!user) {
+    
+    if (purpose === 'RESET' && !user) {
       throw new AppError('User with this phone number not found', 404);
+    }
+    if (purpose === 'LOGIN' && user && user.role !== 'CITIZEN') {
+      throw new AppError('Staff members must login with email and password', 403);
     }
 
     // Generate 6 digit OTP
@@ -32,7 +36,8 @@ export class AuthService {
 
     await prisma.otpVerification.create({
       data: {
-        userId: user.id,
+        phone,
+        userId: user ? user.id : null,
         otpHash,
         expiresAt,
       },
@@ -42,11 +47,22 @@ export class AuthService {
   }
 
   static async verifyOtp(phone: string, otp: string) {
-    const user = await prisma.user.findUnique({ where: { phone } });
-    if (!user) throw new AppError('User not found', 404);
+    let user = await prisma.user.findUnique({ where: { phone } });
+
+    if (user && user.role !== 'CITIZEN') {
+      throw new AppError('Staff members must login with email and password', 403);
+    }
 
     const verification = await prisma.otpVerification.findFirst({
-      where: { userId: user.id, isUsed: false, expiresAt: { gt: new Date() } },
+      where: user ? {
+        OR: [{ phone }, { userId: user.id }],
+        isUsed: false, 
+        expiresAt: { gt: new Date() }
+      } : {
+        phone,
+        isUsed: false,
+        expiresAt: { gt: new Date() }
+      },
       orderBy: { createdAt: 'desc' },
     });
 
@@ -60,6 +76,16 @@ export class AuthService {
       data: { isUsed: true },
     });
 
+    if (!user) {
+      user = await prisma.user.create({
+        data: {
+          phone,
+          name: 'Citizen',
+          role: 'CITIZEN'
+        }
+      });
+    }
+
     return {
       accessToken: this.generateAccessToken(user.id, user.role),
       refreshToken: this.generateRefreshToken(user.id, user.role),
@@ -72,7 +98,11 @@ export class AuthService {
     if (!user) throw new AppError('User not found', 404);
 
     const verification = await prisma.otpVerification.findFirst({
-      where: { userId: user.id, isUsed: false, expiresAt: { gt: new Date() } },
+      where: {
+        OR: [{ phone }, { userId: user.id }],
+        isUsed: false, 
+        expiresAt: { gt: new Date() } 
+      },
       orderBy: { createdAt: 'desc' },
     });
 

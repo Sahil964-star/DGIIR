@@ -199,13 +199,15 @@ model Notification {
 
 model OtpVerification {
   id        String   @id @default(uuid())
-  userId    String
+  phone     String?
+  userId    String?
   otpHash   String
   expiresAt DateTime
   isUsed    Boolean  @default(false)
   createdAt DateTime @default(now())
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user      User?    @relation(fields: [userId], references: [id], onDelete: Cascade)
 
+  @@index([phone, isUsed])
   @@index([userId, isUsed])
 }
 

@@ -9,7 +9,7 @@ export const requestOtp = asyncHandler(async (req, res) => {
     const { phone } = req.body;
     if (!phone)
         throw new AppError('Please provide a phone number', 400);
-    await AuthService.requestOtp(phone);
+    await AuthService.requestOtp(phone, 'LOGIN');
     res.status(200).json({ status: 'success', message: 'OTP sent successfully' });
 });
 export const verifyOtp = asyncHandler(async (req, res) => {
@@ -17,11 +17,16 @@ export const verifyOtp = asyncHandler(async (req, res) => {
     if (!phone || !otp)
         throw new AppError('Please provide phone and OTP', 400);
     const result = await AuthService.verifyOtp(phone, otp);
+    res.cookie('refreshToken', result.refreshToken, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === 'production',
+        sameSite: 'strict',
+        maxAge: 7 * 24 * 60 * 60 * 1000 // 7 days
+    });
     res.status(200).json({
         status: 'success',
         data: {
             accessToken: result.accessToken,
-            refreshToken: result.refreshToken,
             user: {
                 id: result.user.id,
                 name: result.user.name,
@@ -43,13 +48,19 @@ export const loginAdmin = asyncHandler(async (req, res) => {
         throw new AppError('Invalid email or password', 401);
     const accessToken = AuthService.generateAccessToken(user.id, user.role);
     const refreshToken = AuthService.generateRefreshToken(user.id, user.role);
+    res.cookie('refreshToken', refreshToken, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === 'production',
+        sameSite: 'strict',
+        maxAge: 7 * 24 * 60 * 60 * 1000 // 7 days
+    });
     res.status(200).json({
         status: 'success',
-        data: { accessToken, refreshToken, user: { id: user.id, name: user.name, role: user.role } },
+        data: { accessToken, user: { id: user.id, name: user.name, role: user.role } },
     });
 });
 export const refreshToken = asyncHandler(async (req, res) => {
-    const { refreshToken } = req.body;
+    const { refreshToken } = req.cookies;
     if (!refreshToken)
         throw new AppError('Please provide a refresh token', 400);
     const decoded = jwt.verify(refreshToken, process.env.JWT_REFRESH_SECRET || 'fallback_refresh_secret');
@@ -67,13 +78,18 @@ export const getMe = asyncHandler(async (req, res) => {
     res.status(200).json({ status: 'success', data: { user } });
 });
 export const logout = asyncHandler(async (req, res) => {
+    res.clearCookie('refreshToken', {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === 'production',
+        sameSite: 'strict'
+    });
     res.status(200).json({ status: 'success', message: 'Logged out successfully' });
 });
 export const forgotPassword = asyncHandler(async (req, res) => {
     const { phone } = req.body;
     if (!phone)
         throw new AppError('Please provide a phone number', 400);
-    await AuthService.requestOtp(phone);
+    await AuthService.requestOtp(phone, 'RESET');
     res.status(200).json({ status: 'success', message: 'Password reset OTP sent successfully' });
 });
 export const resetPassword = asyncHandler(async (req, res) => {
