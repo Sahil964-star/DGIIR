@@ -1,17 +1,13 @@
 import React, { useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
+import { useQuery } from '@tanstack/react-query';
 import { motion, AnimatePresence } from 'framer-motion';
 import { User, Phone, Mail, Lock, MapPin, CheckCircle2 } from 'lucide-react';
 import Input from '../../shared/components/Input';
 import Button from '../../shared/components/Button';
 import PasswordStrength from './PasswordStrength';
 import OTPVerification from './OTPVerification';
-
-const districts = [
-  "Central Delhi", "East Delhi", "New Delhi", "North Delhi",
-  "North East Delhi", "North West Delhi", "Shahdara",
-  "South Delhi", "South East Delhi", "South West Delhi", "West Delhi"
-];
+import { metaApi } from '../../api/metaApi';
 
 const RegisterForm = () => {
   const navigate = useNavigate();
@@ -20,6 +16,11 @@ const RegisterForm = () => {
   
   const [step, setStep] = useState('form'); // 'form' | 'otp' | 'success'
   const [isLoading, setIsLoading] = useState(false);
+  
+  const { data: districtsData, isLoading: isLoadingDistricts } = useQuery({
+    queryKey: ['districts'],
+    queryFn: metaApi.getDistricts
+  });
   
   // Form State
   const [formData, setFormData] = useState({
@@ -156,10 +157,15 @@ const RegisterForm = () => {
                   value={formData.district}
                   onChange={handleChange}
                   required
+                  disabled={isLoadingDistricts}
                   className="pl-10 w-full bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700 text-slate-900 dark:text-white text-sm rounded-lg focus:ring-green-600 focus:border-green-600 block p-3.5 transition-colors"
                 >
-                  <option value="" disabled>Select District</option>
-                  {districts.map(d => <option key={d} value={d}>{d}</option>)}
+                  <option value="" disabled>
+                    {isLoadingDistricts ? "Loading districts..." : "Select District"}
+                  </option>
+                  {districtsData?.data?.districts?.map(d => (
+                    <option key={d.id} value={d.id}>{d.name}</option>
+                  ))}
                 </select>
               </div>
 

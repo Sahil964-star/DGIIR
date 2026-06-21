@@ -1,28 +1,59 @@
 import axiosClient from './axiosClient';
 
 export const authApi = {
-  login: async ({ email, password, role }) => {
-    const response = await axiosClient.post('/auth/login', { email, password, role });
+  // Staff Login
+  login: async ({ email, password }) => {
+    const response = await axiosClient.post('/auth/login', {
+      email,
+      password,
+    });
     return response.data;
   },
 
-  logout: async () => {
-    const response = await axiosClient.post('/auth/logout');
+  // Citizen OTP Request
+  requestOtp: async (phone) => {
+    const response = await axiosClient.post('/auth/request-otp', {
+      phone,
+    });
     return response.data;
   },
 
+  // Citizen OTP Verification
+  verifyOtp: async ({ phone, otp }) => {
+    const response = await axiosClient.post('/auth/verify-otp', {
+      phone,
+      otp,
+    });
+    return response.data;
+  },
+
+  // Forgot Password
+  forgotPassword: async (phone) => {
+    const response = await axiosClient.post('/auth/forgot-password', {
+      phone,
+    });
+    return response.data;
+  },
+
+  // Reset Password
+  resetPassword: async ({ phone, otp, newPassword }) => {
+    const response = await axiosClient.post('/auth/reset-password', {
+      phone,
+      otp,
+      newPassword,
+    });
+    return response.data;
+  },
+
+  // Current User
   getCurrentUser: async () => {
     const response = await axiosClient.get('/auth/me');
     return response.data;
   },
 
-  requestOtp: async (phone) => {
-    const response = await axiosClient.post('/auth/request-otp', { phone });
-    return response.data;
-  },
-
-  verifyOtp: async ({ phone, otp }) => {
-    const response = await axiosClient.post('/auth/verify-otp', { phone, otp });
+  // Logout
+  logout: async () => {
+    const response = await axiosClient.post('/auth/logout');
     return response.data;
   },
 };

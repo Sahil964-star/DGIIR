@@ -5,19 +5,32 @@ import Input from '../../../shared/components/Input';
 import Button from '../../../shared/components/Button';
 import PasswordStrengthMeter from './PasswordStrengthMeter';
 import { motion } from 'framer-motion';
+import { useMutation } from '@tanstack/react-query';
+import { authApi } from '../../../api/authApi';
 
 const ResetPasswordForm = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const role = location.state?.role || 'citizen';
+  const identifier = location.state?.identifier || '';
+  const otp = location.state?.otp || '';
   
   const [formData, setFormData] = useState({
     password: '',
     confirmPassword: ''
   });
   const [showPassword, setShowPassword] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
+
+  const resetPasswordMutation = useMutation({
+    mutationFn: (data) => authApi.resetPassword(data),
+    onSuccess: () => {
+      navigate('/forgot-password/success', { state: { role } });
+    },
+    onError: (err) => {
+      setError(err.response?.data?.message || 'Failed to reset password. Please try again.');
+    }
+  });
 
   const handleChange = (e) => {
     const { id, value } = e.target;
@@ -41,11 +54,11 @@ const ResetPasswordForm = () => {
       return;
     }
 
-    setIsLoading(true);
-    setTimeout(() => {
-      setIsLoading(false);
-      navigate('/forgot-password/success', { state: { role } });
-    }, 1500);
+    resetPasswordMutation.mutate({
+      phone: identifier,
+      otp,
+      newPassword: formData.password
+    });
   };
 
   return (
@@ -118,7 +131,7 @@ const ResetPasswordForm = () => {
             type="submit" 
             fullWidth 
             variant="primary"
-            isLoading={isLoading}
+            isLoading={resetPasswordMutation.isPending}
             disabled={!formData.password || !formData.confirmPassword}
             className="bg-green-700 hover:bg-green-800 dark:bg-green-600 dark:hover:bg-green-700 text-white font-semibold py-4"
           >

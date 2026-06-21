@@ -1,9 +1,13 @@
 import { useState } from 'react';
+import { useQuery } from '@tanstack/react-query';
 import PhotoUpload from '../components/PhotoUpload';
 import GpsCapture from '../components/GpsCapture';
 import VoiceRecorder from '../components/VoiceRecorder';
 import SuccessCard from '../components/SuccessCard';
-import { submitComplaint } from '../services/complaintApi';
+// @ts-ignore
+import { complaintApi } from '../../api/complaintApi';
+// @ts-ignore
+import { metaApi } from '../../api/metaApi';
 
 interface GpsCoords {
   lat: number;
@@ -14,6 +18,9 @@ interface GpsCoords {
 export default function ComplaintFormPage() {
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
+  const [districtId, setDistrictId] = useState('');
+  const [categoryId, setCategoryId] = useState('');
+  const [address, setAddress] = useState('');
   const [photo, setPhoto] = useState<File | null>(null);
   const [gps, setGps] = useState<GpsCoords | null>(null);
   const [voice, setVoice] = useState<Blob | null>(null);
@@ -22,9 +29,22 @@ export default function ComplaintFormPage() {
   const [error, setError] = useState<string | null>(null);
   const [submittedId, setSubmittedId] = useState<string | null>(null);
 
+  const { data: districtsData, isLoading: isLoadingDistricts } = useQuery<any>({
+    queryKey: ['districts'],
+    queryFn: metaApi.getDistricts
+  });
+
+  const { data: categoriesData, isLoading: isLoadingCategories } = useQuery<any>({
+    queryKey: ['categories'],
+    queryFn: metaApi.getCategories
+  });
+
   const resetForm = () => {
     setTitle('');
     setDescription('');
+    setDistrictId('');
+    setCategoryId('');
+    setAddress('');
     setPhoto(null);
     setGps(null);
     setVoice(null);
@@ -34,8 +54,8 @@ export default function ComplaintFormPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!title.trim() || !description.trim()) {
-      setError('Please provide both a title and a description.');
+    if (!title.trim() || !description.trim() || !districtId || !categoryId) {
+      setError('Please provide all required fields.');
       return;
     }
 
@@ -43,19 +63,29 @@ export default function ComplaintFormPage() {
     setError(null);
 
     try {
-      const response = await submitComplaint({
+      const response = await complaintApi.createComplaint({
         title,
         description,
-        lat: gps?.lat,
-        lng: gps?.lng,
-        accuracy: gps?.accuracy,
-        photo,
-        voice,
+        districtId,
+        categoryId,
+        address: address || undefined,
+        latitude: gps?.lat,
+        longitude: gps?.lng
       });
-      setSubmittedId(response.complaintId);
+      
+      const newComplaintId = response.data?.id || response.id;
+      
+      if (photo || voice) {
+        const formData = new FormData();
+        if (photo) formData.append('media', photo);
+        if (voice) formData.append('media', voice, 'voice.webm');
+        await complaintApi.uploadMedia(newComplaintId, formData);
+      }
+      
+      setSubmittedId(newComplaintId);
     } catch (err: any) {
       console.error(err);
-      const serverErr = err.response?.data?.errors?.[0]?.msg || err.response?.data?.error || 'Failed to submit complaint. Please check your connection.';
+      const serverErr = err.response?.data?.error || err.response?.data?.message || 'Failed to submit complaint. Please check your connection.';
       setError(serverErr);
     } finally {
       setLoading(false);
@@ -104,6 +134,57 @@ export default function ComplaintFormPage() {
                 onChange={(e) => setTitle(e.target.value)}
                 maxLength={200}
                 required
+                className="w-full px-4 py-3 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-100 placeholder-slate-400 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition duration-150"
+              />
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="space-y-1.5">
+                <label className="text-sm font-semibold text-slate-700 dark:text-slate-300">
+                  Category <span className="text-red-500">*</span>
+                </label>
+                <select
+                  value={categoryId}
+                  onChange={(e) => setCategoryId(e.target.value)}
+                  required
+                  disabled={isLoadingCategories}
+                  className="w-full px-4 py-3 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-100 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition duration-150"
+                >
+                  <option value="" disabled>{isLoadingCategories ? 'Loading...' : 'Select Category'}</option>
+                  {categoriesData?.data?.categories?.map((c: any) => (
+                    <option key={c.id} value={c.id}>{c.name}</option>
+                  ))}
+                </select>
+              </div>
+
+              <div className="space-y-1.5">
+                <label className="text-sm font-semibold text-slate-700 dark:text-slate-300">
+                  District <span className="text-red-500">*</span>
+                </label>
+                <select
+                  value={districtId}
+                  onChange={(e) => setDistrictId(e.target.value)}
+                  required
+                  disabled={isLoadingDistricts}
+                  className="w-full px-4 py-3 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-100 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition duration-150"
+                >
+                  <option value="" disabled>{isLoadingDistricts ? 'Loading...' : 'Select District'}</option>
+                  {districtsData?.data?.districts?.map((d: any) => (
+                    <option key={d.id} value={d.id}>{d.name}</option>
+                  ))}
+                </select>
+              </div>
+            </div>
+
+            <div className="space-y-1.5">
+              <label className="text-sm font-semibold text-slate-700 dark:text-slate-300">
+                Landmark / Address
+              </label>
+              <input
+                type="text"
+                placeholder="Optional address details"
+                value={address}
+                onChange={(e) => setAddress(e.target.value)}
                 className="w-full px-4 py-3 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-100 placeholder-slate-400 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition duration-150"
               />
             </div>

@@ -9,6 +9,7 @@ import Button from '../../shared/components/Button';
 import { Mail, Lock, Phone } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import OTPVerification from './OTPVerification';
+import { getRoleLandingPage } from '../../utils/roleUtils';
 
 const LoginForm = () => {
   const [email, setEmail] = useState('');
@@ -34,40 +35,34 @@ const LoginForm = () => {
   const loginMutation = useMutation({
     mutationFn: authApi.login,
     onSuccess: (data) => {
-      const token = data.token || 'mock-jwt-token';
-      const user = data.user || { email, name: 'John Doe' };
+      const token = data.data?.accessToken || data.accessToken || 'mock-jwt-token';
+      const user = data.data?.user || data.user || { email, name: 'John Doe', role: 'CITIZEN' };
       
-      login(user, selectedRole, token);
-
-      switch (selectedRole) {
-        case 'citizen': navigate('/citizen'); break;
-        case 'operations': navigate('/dashboard/operations'); break;
-        case 'officer': navigate('/dashboard/officer'); break;
-        case 'cm': navigate('/dashboard/cm'); break;
-        default: navigate('/');
-      }
+      const actualRole = user.role;
+      login(user, actualRole, token);
+      navigate(getRoleLandingPage(actualRole));
     },
     onError: (error) => {
       console.error('Login failed, using mock flow:', error);
       // Fallback for mock flow without backend
       const token = 'mock-jwt-token-123';
-      const user = { email, name: 'Mock User' };
-      login(user, selectedRole, token);
+      
+      let mockRole = 'CITIZEN';
+      if (selectedRole === 'operations') mockRole = 'OPERATIONS';
+      if (selectedRole === 'officer') mockRole = 'FIELD_OFFICER';
+      if (selectedRole === 'cm') mockRole = 'CHIEF_MINISTER';
 
-      switch (selectedRole) {
-        case 'citizen': navigate('/citizen'); break;
-        case 'operations': navigate('/dashboard/operations'); break;
-        case 'officer': navigate('/dashboard/officer'); break;
-        case 'cm': navigate('/dashboard/cm'); break;
-        default: navigate('/');
-      }
+      const user = { email, name: 'Mock User', role: mockRole };
+      login(user, mockRole, token);
+      navigate(getRoleLandingPage(mockRole));
     }
   });
 
   const handleSubmit = (e) => {
     e.preventDefault();
     if (!email || !password) return;
-    loginMutation.mutate({ email, password, role: selectedRole });
+    // Removed role from payload as backend only expects email and password
+    loginMutation.mutate({ email, password });
   };
 
   const handleRequestOtp = async (e) => {
@@ -93,17 +88,18 @@ const LoginForm = () => {
     try {
       const data = await authApi.verifyOtp({ phone: mobile, otp: otpCode });
       const token = data.data?.accessToken || data.accessToken || 'mock-jwt-token';
-      const user = data.data?.user || data.user || { phone: mobile, name: `Citizen ${mobile.slice(-4)}` };
+      const user = data.data?.user || data.user || { phone: mobile, name: `Citizen ${mobile.slice(-4)}`, role: 'CITIZEN' };
       
-      login(user, 'citizen', token);
-      navigate('/citizen');
+      const actualRole = user.role;
+      login(user, actualRole, token);
+      navigate(getRoleLandingPage(actualRole));
     } catch (error) {
       console.error('Verify OTP failed, using mock bypass:', error);
       // Fallback for demo/dev bypass
       const token = 'mock-jwt-token';
-      const user = { phone: mobile, name: `Citizen ${mobile.slice(-4)}` };
-      login(user, 'citizen', token);
-      navigate('/citizen');
+      const user = { phone: mobile, name: `Citizen ${mobile.slice(-4)}`, role: 'CITIZEN' };
+      login(user, 'CITIZEN', token);
+      navigate(getRoleLandingPage('CITIZEN'));
     } finally {
       setIsLoading(false);
     }

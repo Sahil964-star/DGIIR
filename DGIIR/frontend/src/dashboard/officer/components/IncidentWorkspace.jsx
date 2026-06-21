@@ -1,6 +1,9 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { Camera, Image as ImageIcon, CheckCircle, Clock, MessageCircle, MapPin, Navigation, Layers, Building2, Users, Hash } from 'lucide-react';
 import { motion } from 'framer-motion';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { complaintApi } from '../../../../api/complaintApi';
+import Loader from '../../../../shared/components/Loader';
 
 // Fallback placeholder for images
 const ImageWithFallback = ({ src, alt, className }) => (
@@ -64,26 +67,97 @@ const MapPreview = ({ location }) => (
   </div>
 );
 
-const IncidentWorkspace = ({ incident }) => {
+const IncidentWorkspace = ({ incidentId }) => {
+  const queryClient = useQueryClient();
+  const fileInputRef = useRef(null);
   const [resolutionNotes, setResolutionNotes] = useState('');
-  const [afterPhotoUploaded, setAfterPhotoUploaded] = useState(false);
+  const [afterPhotoFile, setAfterPhotoFile] = useState(null);
 
-  const activeIncident = incident || {
-    id: 'INC-2026-0042',
-    title: 'Water Supply Issue',
-    location: 'Rohini, Sector 7',
-    assignedDate: '20 May 2026',
-    citizenNotes: 'No water supply for the past 2 days. The main pipe seems to be leaking near the park entrance.',
-    category: 'Water & Sanitation',
-    department: 'Delhi Jal Board',
-    severity: 'Critical',
-    clusterId: 'CLU-ROH-042',
-    affectedCitizens: 148,
-    status: 'In Progress',
-    beforePhoto: 'https://images.unsplash.com/photo-1541888079-05eb92ccbb06?auto=format&fit=crop&q=80&w=400&h=250'
+  const { data: incidentResp, isLoading } = useQuery({
+    queryKey: ['complaint', incidentId],
+    queryFn: () => complaintApi.getComplaintById(incidentId),
+    enabled: !!incidentId
+  });
+
+  const updateStatusMutation = useMutation({
+    mutationFn: (statusData) => complaintApi.updateStatus(incidentId, statusData),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['complaint', incidentId] });
+      queryClient.invalidateQueries({ queryKey: ['officerComplaints'] });
+    }
+  });
+
+  const verifyMutation = useMutation({
+    mutationFn: (verifyData) => complaintApi.verifyComplaint(incidentId, verifyData),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['complaint', incidentId] });
+    }
+  });
+
+  const uploadMediaMutation = useMutation({
+    mutationFn: (formData) => complaintApi.uploadMedia(incidentId, formData),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['complaint', incidentId] });
+    }
+  });
+
+  if (isLoading) {
+    return <div className="h-full flex items-center justify-center"><Loader size={32} /></div>;
+  }
+
+  const rawIncident = incidentResp?.data || incidentResp || {};
+  if (!rawIncident.id) {
+    return <div className="h-full flex items-center justify-center text-slate-500">Incident not found.</div>;
+  }
+
+  const activeIncident = {
+    id: rawIncident.id,
+    title: rawIncident.title,
+    location: rawIncident.location || 'Unknown',
+    assignedDate: new Date(rawIncident.createdAt).toLocaleDateString(),
+    citizenNotes: rawIncident.description || 'No description provided.',
+    category: rawIncident.categoryId || 'General',
+    department: 'Assigned Department',
+    severity: rawIncident.severity || 'Medium',
+    affectedCitizens: 0,
+    status: rawIncident.status,
+    beforePhoto: rawIncident.mediaUrls?.[0] || '',
+    afterPhoto: rawIncident.mediaUrls?.[1] || ''
   };
 
-  const canSubmit = resolutionNotes.trim().length > 10 && afterPhotoUploaded;
+  const hasAfterPhoto = !!activeIncident.afterPhoto || !!afterPhotoFile;
+  const canSubmit = resolutionNotes.trim().length > 10 && hasAfterPhoto;
+
+  const handleSubmitClosure = async () => {
+    if (!canSubmit) return;
+    
+    // 1. Upload photo if newly selected
+    if (afterPhotoFile) {
+      const formData = new FormData();
+      formData.append('media', afterPhotoFile);
+      await uploadMediaMutation.mutateAsync(formData);
+    }
+
+    // 2. Add verification note
+    await verifyMutation.mutateAsync({
+      verified: true,
+      notes: resolutionNotes
+    });
+
+    // 3. Update status to Resolved
+    await updateStatusMutation.mutateAsync({
+      status: 'RESOLVED'
+    });
+    
+    setResolutionNotes('');
+    setAfterPhotoFile(null);
+  };
+
+  const handleFileSelect = (e) => {
+    if (e.target.files && e.target.files[0]) {
+      setAfterPhotoFile(e.target.files[0]);
+    }
+  };
 
   return (
     <div className="flex flex-col h-full">
@@ -163,19 +237,28 @@ const IncidentWorkspace = ({ incident }) => {
             </div>
             <div>
               <p className="text-[10px] text-slate-400 mb-1 font-medium">After Photo (Officer Resolution)</p>
-              {afterPhotoUploaded ? (
+              {hasAfterPhoto ? (
                 <div className="rounded-lg overflow-hidden border border-green-400 dark:border-green-700 aspect-video bg-green-50 dark:bg-green-900/20 flex flex-col items-center justify-center gap-1">
                   <CheckCircle className="w-5 h-5 text-green-600" />
                   <span className="text-[10px] text-green-700 dark:text-green-400 font-medium">Uploaded</span>
                 </div>
               ) : (
-                <button
-                  onClick={() => setAfterPhotoUploaded(true)}
-                  className="w-full aspect-video flex flex-col items-center justify-center gap-1.5 rounded-lg border-2 border-dashed border-slate-300 dark:border-gray-700 hover:border-green-500 dark:hover:border-green-500 bg-slate-50 hover:bg-green-50 dark:bg-gray-800/50 dark:hover:bg-green-900/20 transition-colors text-slate-400 hover:text-green-600 dark:hover:text-green-400"
-                >
-                  <Camera className="w-5 h-5" />
-                  <span className="text-[10px] font-medium">Upload Photo</span>
-                </button>
+                <>
+                  <input 
+                    type="file" 
+                    accept="image/*" 
+                    className="hidden" 
+                    ref={fileInputRef} 
+                    onChange={handleFileSelect} 
+                  />
+                  <button
+                    onClick={() => fileInputRef.current?.click()}
+                    className="w-full aspect-video flex flex-col items-center justify-center gap-1.5 rounded-lg border-2 border-dashed border-slate-300 dark:border-gray-700 hover:border-green-500 dark:hover:border-green-500 bg-slate-50 hover:bg-green-50 dark:bg-gray-800/50 dark:hover:bg-green-900/20 transition-colors text-slate-400 hover:text-green-600 dark:hover:text-green-400"
+                  >
+                    <Camera className="w-5 h-5" />
+                    <span className="text-[10px] font-medium">Upload Photo</span>
+                  </button>
+                </>
               )}
             </div>
           </div>
@@ -205,7 +288,8 @@ const IncidentWorkspace = ({ incident }) => {
         <motion.button
           whileHover={{ scale: canSubmit ? 1.02 : 1 }}
           whileTap={{ scale: canSubmit ? 0.98 : 1 }}
-          disabled={!canSubmit}
+          disabled={!canSubmit || updateStatusMutation.isPending || uploadMediaMutation.isPending || verifyMutation.isPending}
+          onClick={handleSubmitClosure}
           className={`w-full py-4 rounded-xl text-[15px] font-bold flex items-center justify-center gap-2 transition-all ${
             canSubmit
               ? 'bg-green-600 hover:bg-green-500 text-white shadow-lg shadow-green-700/25 ring-2 ring-green-400/30'
@@ -213,12 +297,17 @@ const IncidentWorkspace = ({ incident }) => {
           }`}
         >
           <CheckCircle className="w-5 h-5" />
-          Submit for Closure
+          {updateStatusMutation.isPending ? 'Submitting...' : 'Submit for Closure'}
           {!canSubmit && <span className="text-[10px] font-normal ml-1">(upload photo + add notes)</span>}
         </motion.button>
-        <button className="w-full py-2 px-4 bg-transparent border border-slate-200 dark:border-gray-700 rounded-lg text-xs font-medium text-slate-500 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-gray-800 transition-colors">
-          Save as Draft
-        </button>
+        {activeIncident.status !== 'IN_PROGRESS' && activeIncident.status !== 'RESOLVED' && (
+          <button 
+            onClick={() => updateStatusMutation.mutate({ status: 'IN_PROGRESS' })}
+            className="w-full py-2 px-4 bg-transparent border border-slate-200 dark:border-gray-700 rounded-lg text-xs font-medium text-slate-500 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-gray-800 transition-colors"
+          >
+            Mark as In Progress
+          </button>
+        )}
       </div>
     </div>
   );

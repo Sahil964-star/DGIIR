@@ -2,6 +2,7 @@ import React from 'react';
 import { Navigate, Outlet } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth';
 import Loader from '../shared/components/Loader';
+import { getRoleLandingPage } from '../utils/roleUtils';
 
 const ProtectedRoute = ({ allowedRoles = [] }) => {
   const { user, role, token, isLoading } = useAuth();
@@ -24,9 +25,9 @@ const ProtectedRoute = ({ allowedRoles = [] }) => {
     return <Navigate to="/login" replace />;
   }
 
-  // If roles are specified and user's role is not included, redirect to a default safe route
+  // If roles are specified and user's role is not included, redirect to a default safe route based on their actual role
   if (allowedRoles.length > 0 && !allowedRoles.includes(role)) {
-    return <Navigate to="/" replace />;
+    return <Navigate to={getRoleLandingPage(role)} replace />;
   }
 
   // Render child routes

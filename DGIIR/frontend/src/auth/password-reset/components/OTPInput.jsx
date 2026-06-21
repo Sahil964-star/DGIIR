@@ -3,6 +3,8 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import { ShieldAlert, Clock, RefreshCw } from 'lucide-react';
 import Button from '../../../shared/components/Button';
 import { motion } from 'framer-motion';
+import { useMutation } from '@tanstack/react-query';
+import { authApi } from '../../../api/authApi';
 
 const OTPInput = () => {
   const navigate = useNavigate();
@@ -18,7 +20,41 @@ const OTPInput = () => {
   const [failures, setFailures] = useState(0);
   const [isLocked, setIsLocked] = useState(false);
   const [error, setError] = useState('');
-  const [isLoading, setIsLoading] = useState(false);
+
+  const verifyOtpMutation = useMutation({
+    mutationFn: (data) => authApi.verifyOtp(data),
+    onSuccess: (data, variables) => {
+      navigate('/forgot-password/reset', { state: { role, identifier, otp: variables.otp } });
+    },
+    onError: (err) => {
+      const newFailures = failures + 1;
+      setFailures(newFailures);
+      if (newFailures >= 3) {
+        setIsLocked(true);
+        setError('Maximum verification attempts reached. Security lockout active.');
+      } else {
+        setError(err.response?.data?.message || `Invalid code. ${3 - newFailures} attempts remaining.`);
+        setOtp(['', '', '', '', '', '']);
+        setActiveOTPIndex(0);
+      }
+    }
+  });
+
+  const resendOtpMutation = useMutation({
+    mutationFn: (identifier) => authApi.forgotPassword(identifier),
+    onSuccess: () => {
+      setResendTimer(30);
+      setTimer(300);
+      setFailures(0);
+      setIsLocked(false);
+      setError('');
+      setOtp(['', '', '', '', '', '']);
+      setActiveOTPIndex(0);
+    },
+    onError: (err) => {
+      setError(err.response?.data?.message || 'Failed to resend OTP.');
+    }
+  });
 
   useEffect(() => {
     inputRef.current?.focus();
@@ -96,35 +132,12 @@ const OTPInput = () => {
       return;
     }
 
-    setIsLoading(true);
-    setTimeout(() => {
-      setIsLoading(false);
-      if (code === '123456') {
-        navigate('/forgot-password/reset', { state: { role } });
-      } else {
-        const newFailures = failures + 1;
-        setFailures(newFailures);
-        if (newFailures >= 3) {
-          setIsLocked(true);
-          setError('Maximum verification attempts reached. Security lockout active.');
-        } else {
-          setError(`Invalid code. ${3 - newFailures} attempts remaining.`);
-          setOtp(['', '', '', '', '', '']);
-          setActiveOTPIndex(0);
-        }
-      }
-    }, 1000);
+    verifyOtpMutation.mutate({ phone: identifier, otp: code });
   };
 
   const handleResend = () => {
     if (resendTimer > 0) return;
-    setResendTimer(30);
-    setTimer(300);
-    setFailures(0);
-    setIsLocked(false);
-    setError('');
-    setOtp(['', '', '', '', '', '']);
-    setActiveOTPIndex(0);
+    resendOtpMutation.mutate(identifier);
   };
 
   return (
@@ -174,7 +187,7 @@ const OTPInput = () => {
         </div>
         <button
           onClick={handleResend}
-          disabled={resendTimer > 0 || isLocked}
+          disabled={resendTimer > 0 || isLocked || resendOtpMutation.isPending}
           className="flex items-center font-semibold transition-colors disabled:opacity-50 disabled:cursor-not-allowed text-green-600 hover:text-green-700 dark:text-green-500 dark:hover:text-green-400"
         >
           <RefreshCw className="w-3.5 h-3.5 mr-1" />
@@ -187,7 +200,7 @@ const OTPInput = () => {
           onClick={handleVerify}
           fullWidth 
           variant="primary"
-          isLoading={isLoading}
+          isLoading={verifyOtpMutation.isPending}
           disabled={isLocked || otp.join('').length < 6}
           className="bg-green-700 hover:bg-green-800 dark:bg-green-600 dark:hover:bg-green-700 text-white font-semibold py-4"
         >

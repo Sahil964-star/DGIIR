@@ -1,25 +1,25 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useQuery } from '@tanstack/react-query';
 import { motion } from 'framer-motion';
 import { User, Phone, Mail, MapPin, Briefcase, Building, FileBadge, UploadCloud, Shield } from 'lucide-react';
 import Input from '../../../shared/components/Input';
 import Button from '../../../shared/components/Button';
+import { metaApi } from '../../../api/metaApi';
 
 const roles = [
   "Operations Analyst", "Incident Coordinator", "Escalation Manager", 
   "Supervisor", "Control Room Operator"
 ];
 
-const districts = [
-  "Central Delhi", "East Delhi", "New Delhi", "North Delhi",
-  "North East Delhi", "North West Delhi", "Shahdara",
-  "South Delhi", "South East Delhi", "South West Delhi", "West Delhi",
-  "All Regions (HQ)"
-];
-
 const AccessRequestForm = () => {
   const navigate = useNavigate();
   const [isLoading, setIsLoading] = useState(false);
+
+  const { data: districtsData, isLoading: isLoadingDistricts } = useQuery({
+    queryKey: ['districts'],
+    queryFn: metaApi.getDistricts
+  });
   
   const [formData, setFormData] = useState({
     fullName: '',
@@ -92,10 +92,11 @@ const AccessRequestForm = () => {
             <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
               <MapPin className="h-5 w-5 text-slate-400" />
             </div>
-            <select id="district" value={formData.district} onChange={handleChange} required
+            <select id="district" value={formData.district} onChange={handleChange} required disabled={isLoadingDistricts}
               className="pl-10 w-full bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700 text-slate-900 dark:text-white text-sm rounded-lg focus:ring-green-600 focus:border-green-600 block p-3.5 transition-colors">
-              <option value="" disabled>Assigned Region</option>
-              {districts.map(d => <option key={d} value={d}>{d}</option>)}
+              <option value="" disabled>{isLoadingDistricts ? "Loading..." : "Assigned Region"}</option>
+              {districtsData?.data?.districts?.map(d => <option key={d.id} value={d.id}>{d.name}</option>)}
+              <option value="ALL">All Regions (HQ)</option>
             </select>
           </div>
         </div>

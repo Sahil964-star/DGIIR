@@ -1,8 +1,9 @@
 import React from 'react';
 import { useAuth } from '../../hooks/useAuth';
 import ThemeToggle from '../../auth/components/ThemeToggle';
-import { Menu, LogOut, Bell } from 'lucide-react';
+import { Menu, LogOut } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import NotificationDropdown from './NotificationDropdown';
 
 const TopNav = ({ setMobileOpen }) => {
   const { user, role, logout } = useAuth();
@@ -31,10 +32,7 @@ const TopNav = ({ setMobileOpen }) => {
       <div className="flex items-center space-x-3 sm:space-x-5">
         <ThemeToggle />
         
-        <button className="p-2 text-slate-500 hover:bg-slate-100 dark:hover:bg-gray-800 rounded-full transition-colors relative">
-          <Bell size={20} />
-          <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-red-500 rounded-full border border-white dark:border-gray-900"></span>
-        </button>
+        <NotificationDropdown />
 
         <div className="hidden sm:block h-6 w-px bg-slate-200 dark:bg-gray-700"></div>
 

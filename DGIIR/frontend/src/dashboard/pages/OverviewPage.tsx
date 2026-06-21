@@ -1,11 +1,6 @@
 import { useQuery } from '@tanstack/react-query'
 import {
-  fetchComplaintStats,
-  fetchTopConcerns,
-  fetchPriorityStats,
-  fetchDistrictRisk,
-  fetchResolutionStats,
-} from '@shared/api/dashboardApi'
+import { analyticsApi } from '../../api/analyticsApi'
 
 import Header              from '../components/Header'
 import StatCard            from '../components/StatCard'
@@ -15,7 +10,6 @@ import DistrictRiskMap     from '../components/DistrictRiskMap'
 import TopConcernsTable    from '../components/TopConcernsTable'
 import PriorityGlance      from '../components/PriorityGlance'
 import LastUpdatedBar      from '../components/LastUpdatedBar'
-import CitizenImpactIndicators from '../components/CitizenImpactIndicators'
 
 // ─── Stat card icons (inline SVG) ────────────────────────────────────────────
 const TotalIcon = () => (
@@ -43,51 +37,61 @@ const OverdueIcon = () => (
 const REFETCH_MS = 60_000
 
 export default function OverviewPage() {
-  const { data: stats, isLoading: statsLoading } = useQuery({
+  const { data: overviewResp, isLoading: statsLoading } = useQuery({
     queryKey: ['complaint-stats'],
-    queryFn: fetchComplaintStats,
+    queryFn: () => analyticsApi.getCmOverview(),
     refetchInterval: REFETCH_MS,
   })
 
-  const { data: concerns, isLoading: concernsLoading } = useQuery({
+  const { data: concernsResp, isLoading: concernsLoading } = useQuery({
     queryKey: ['top-concerns'],
-    queryFn: fetchTopConcerns,
+    queryFn: () => analyticsApi.getCmTopConcerns(),
     refetchInterval: REFETCH_MS,
   })
 
-  const { data: priority, isLoading: priorityLoading } = useQuery({
+  const { data: priorityResp, isLoading: priorityLoading } = useQuery({
     queryKey: ['priority-stats'],
-    queryFn: fetchPriorityStats,
+    queryFn: () => analyticsApi.getCmPriority(),
     refetchInterval: REFETCH_MS,
   })
 
-  const { data: districts, isLoading: districtsLoading } = useQuery({
+  const { data: districtsResp, isLoading: districtsLoading } = useQuery({
     queryKey: ['district-risk'],
-    queryFn: fetchDistrictRisk,
+    queryFn: () => analyticsApi.getCmDistrictRisk(),
     refetchInterval: REFETCH_MS,
   })
 
-  const { data: resolution, isLoading: resolutionLoading } = useQuery({
+  const { data: resolutionResp, isLoading: resolutionLoading } = useQuery({
     queryKey: ['resolution-stats'],
-    queryFn: fetchResolutionStats,
+    queryFn: () => analyticsApi.getCmResolutionTime(),
     refetchInterval: REFETCH_MS,
   })
+
+  const stats = overviewResp?.data?.kpis || overviewResp?.kpis || {};
+  const concerns = concernsResp?.data || concernsResp || [];
+  const priority = priorityResp?.data || priorityResp || [];
+  const districts = districtsResp?.data || districtsResp || [];
+  const resolutionData = resolutionResp?.data || resolutionResp || [];
+
+  // Map resolution data to expected format if needed
+  const resolution = {
+    avgHours: resolutionData.length > 0 ? resolutionData[resolutionData.length - 1].avgTimeHours : 0,
+    improvement: 0,
+    trend: resolutionData.map((d: any) => d.avgTimeHours || 0)
+  };
 
   return (
     <div className="page-enter px-7 pb-8">
       {/* ── Header ── */}
       <Header />
 
-      {/* ── Citizen Impact Indicators ── */}
-      <CitizenImpactIndicators />
-
       {/* ── Stat Cards Row ── */}
       <section aria-label="Overview statistics" className="grid grid-cols-2 xl:grid-cols-4 gap-4 mb-5">
         <StatCard
           id="stat-total"
           title="Total Complaints"
-          value={stats?.total ?? 0}
-          contextText="Affecting approximately 4.8 lakh citizens"
+          value={stats?.totalCount ?? 0}
+          contextText=""
           accentColor="blue"
           icon={<TotalIcon />}
           loading={statsLoading}
@@ -95,8 +99,8 @@ export default function OverviewPage() {
         <StatCard
           id="stat-resolved"
           title="Resolved"
-          value={stats?.resolved ?? 0}
-          contextText="68.8% addressed successfully"
+          value={stats?.resolvedCount ?? 0}
+          contextText={`${stats?.resolutionRatePct ?? 0}% addressed successfully`}
           accentColor="green"
           icon={<ResolvedIcon />}
           loading={statsLoading}
@@ -104,7 +108,7 @@ export default function OverviewPage() {
         <StatCard
           id="stat-inprogress"
           title="In Progress"
-          value={stats?.inProgress ?? 0}
+          value={(stats?.totalCount || 0) - (stats?.resolvedCount || 0) - (stats?.overdueCount || 0)}
           contextText="Active interventions underway"
           accentColor="amber"
           icon={<InProgressIcon />}
@@ -113,7 +117,7 @@ export default function OverviewPage() {
         <StatCard
           id="stat-overdue"
           title="Overdue"
-          value={stats?.overdue ?? 0}
+          value={stats?.overdueCount ?? 0}
           contextText="Requires intervention from departments"
           accentColor="red"
           icon={<OverdueIcon />}
@@ -125,7 +129,15 @@ export default function OverviewPage() {
       <section aria-label="Charts and map" className="grid grid-cols-1 lg:grid-cols-3 gap-4 mb-5">
         {/* Status Overview bar chart */}
         <StatusOverviewChart
-          stats={stats ?? { total: 0, resolved: 0, inProgress: 0, overdue: 0, resolvedPct: 0, inProgressPct: 0, overduePct: 0 }}
+          stats={{ 
+            total: stats?.totalCount || 0, 
+            resolved: stats?.resolvedCount || 0, 
+            inProgress: (stats?.totalCount || 0) - (stats?.resolvedCount || 0) - (stats?.overdueCount || 0), 
+            overdue: stats?.overdueCount || 0, 
+            resolvedPct: stats?.resolutionRatePct || 0, 
+            inProgressPct: 0, 
+            overduePct: 0 
+          }}
           loading={statsLoading}
         />
 
@@ -154,7 +166,10 @@ export default function OverviewPage() {
 
         {/* Priority at a glance — takes 1/3 width */}
         <PriorityGlance
-          data={priority ?? { high: 0, medium: 0, low: 0 }}
+          data={priority.reduce((acc: any, curr: any) => {
+             acc[curr.name.toLowerCase()] = curr.value;
+             return acc;
+          }, { high: 0, medium: 0, low: 0 })}
           loading={priorityLoading}
         />
       </section>

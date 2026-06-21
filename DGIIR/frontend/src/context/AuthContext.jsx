@@ -1,4 +1,5 @@
 import React, { createContext, useState, useEffect } from 'react';
+import { authApi } from '../api/authApi';
 
 export const AuthContext = createContext(null);
 
@@ -8,26 +9,63 @@ export const AuthProvider = ({ children }) => {
   const [token, setToken] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
 
-  // Restore session on initial load
   useEffect(() => {
-    const storedToken = localStorage.getItem('token');
-    const storedRole = localStorage.getItem('role');
-    const storedUser = localStorage.getItem('user');
+    let mounted = true;
 
-    if (storedToken && storedRole && storedUser) {
+    const initializeAuth = async () => {
       try {
+        const storedToken = localStorage.getItem('token');
+
+        // No token → no session
+        if (!storedToken) {
+          if (mounted) setIsLoading(false);
+          return;
+        }
+
+        // Verify session with backend
+        const response = await authApi.getCurrentUser();
+
+        const backendUser =
+          response?.data?.user ||
+          response?.user ||
+          null;
+
+        if (!backendUser) {
+          throw new Error('No user data returned');
+        }
+
+        if (!mounted) return;
+
         setToken(storedToken);
-        setRole(storedRole);
-        setUser(JSON.parse(storedUser));
+        setUser(backendUser);
+        setRole(backendUser.role);
+
+        localStorage.setItem('role', backendUser.role);
+        localStorage.setItem('user', JSON.stringify(backendUser));
       } catch (error) {
-        console.error('Failed to restore session:', error);
+        console.error('Auth initialization failed:', error);
+
+        if (!mounted) return;
+
+        setUser(null);
+        setRole(null);
+        setToken(null);
+
         localStorage.removeItem('token');
         localStorage.removeItem('role');
         localStorage.removeItem('user');
+      } finally {
+        if (mounted) {
+          setIsLoading(false);
+        }
       }
-    }
-    
-    setIsLoading(false);
+    };
+
+    initializeAuth();
+
+    return () => {
+      mounted = false;
+    };
   }, []);
 
   const login = (userData, userRole, jwtToken) => {
@@ -40,14 +78,22 @@ export const AuthProvider = ({ children }) => {
     localStorage.setItem('user', JSON.stringify(userData));
   };
 
-  const logout = () => {
-    setUser(null);
-    setRole(null);
-    setToken(null);
+  const logout = async () => {
+    try {
+      await authApi.logout();
+    } catch (error) {
+      console.error('Logout API call failed:', error);
+    } finally {
+      setUser(null);
+      setRole(null);
+      setToken(null);
 
-    localStorage.removeItem('token');
-    localStorage.removeItem('role');
-    localStorage.removeItem('user');
+      localStorage.removeItem('token');
+      localStorage.removeItem('role');
+      localStorage.removeItem('user');
+
+      window.location.href = '/login';
+    }
   };
 
   const value = {

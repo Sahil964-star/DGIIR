@@ -1,6 +1,7 @@
 import { NavLink, useNavigate } from 'react-router-dom'
 import { useEffect, useState } from 'react'
 import { useQueryClient } from '@tanstack/react-query'
+// @ts-ignore
 import { useAuth } from '../../hooks/useAuth'
 
 // ─── Icons (inline SVG to keep zero extra deps) ──────────────────────────────

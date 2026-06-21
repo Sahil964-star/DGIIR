@@ -4,6 +4,8 @@ import { Mail, Phone, ArrowRight } from 'lucide-react';
 import Input from '../../../shared/components/Input';
 import Button from '../../../shared/components/Button';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useMutation } from '@tanstack/react-query';
+import { authApi } from '../../../api/authApi';
 
 const ForgotPasswordForm = () => {
   const navigate = useNavigate();
@@ -12,17 +14,22 @@ const ForgotPasswordForm = () => {
   
   const [channel, setChannel] = useState('mobile'); // 'mobile' | 'email'
   const [inputValue, setInputValue] = useState('');
-  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState('');
+
+  const forgotPasswordMutation = useMutation({
+    mutationFn: (identifier) => authApi.forgotPassword(identifier),
+    onSuccess: () => {
+      navigate('/forgot-password/verify', { state: { role, channel, identifier: inputValue } });
+    },
+    onError: (err) => {
+      setError(err.response?.data?.message || 'Failed to send OTP. Please try again.');
+    }
+  });
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    setIsLoading(true);
-    
-    // Simulate API dispatch
-    setTimeout(() => {
-      setIsLoading(false);
-      navigate('/forgot-password/verify', { state: { role, channel, identifier: inputValue } });
-    }, 1500);
+    setError('');
+    forgotPasswordMutation.mutate(inputValue);
   };
 
   const getSubtitle = () => {
@@ -109,18 +116,21 @@ const ForgotPasswordForm = () => {
             </motion.div>
           </AnimatePresence>
         </div>
+        {error && (
+          <p className="text-sm text-red-600 dark:text-red-400 font-medium mb-4 text-center">{error}</p>
+        )}
 
         <Button 
           type="submit" 
           fullWidth 
           variant="primary"
-          isLoading={isLoading}
+          isLoading={forgotPasswordMutation.isPending}
           disabled={!inputValue || (channel === 'mobile' && inputValue.length < 10)}
           className="bg-green-700 hover:bg-green-800 dark:bg-green-600 dark:hover:bg-green-700 text-white font-semibold py-4"
         >
           <div className="flex items-center justify-center space-x-2">
             <span>Send OTP</span>
-            {!isLoading && <ArrowRight size={18} />}
+            {!forgotPasswordMutation.isPending && <ArrowRight size={18} />}
           </div>
         </Button>
       </form>
