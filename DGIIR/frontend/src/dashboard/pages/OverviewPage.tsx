@@ -67,17 +67,14 @@ export default function OverviewPage() {
     refetchInterval: REFETCH_MS,
   })
 
-  const stats = overviewResp?.data?.kpis || overviewResp?.kpis || {};
-  const concerns = concernsResp?.data || concernsResp || [];
-  const priority = priorityResp?.data || priorityResp || [];
-  const districts = districtsResp?.data || districtsResp || [];
-  const resolutionData = resolutionResp?.data || resolutionResp || [];
+  const stats = overviewResp?.data || {};
+  const concerns = concernsResp?.data || [];
+  const priority = priorityResp?.data || [];
+  const districts = districtsResp?.data || [];
+  const resolutionData = resolutionResp?.data || { averageDays: "0" };
 
-  // Map resolution data to expected format if needed
   const resolution = {
-    avgHours: resolutionData.length > 0 ? resolutionData[resolutionData.length - 1].avgTimeHours : 0,
-    improvement: 0,
-    trend: resolutionData.map((d: any) => d.avgTimeHours || 0)
+    avgDays: resolutionData.averageDays || "0"
   };
 
   return (
@@ -90,7 +87,7 @@ export default function OverviewPage() {
         <StatCard
           id="stat-total"
           title="Total Complaints"
-          value={stats?.totalCount ?? 0}
+          value={stats?.total ?? 0}
           contextText=""
           accentColor="blue"
           icon={<TotalIcon />}
@@ -99,8 +96,8 @@ export default function OverviewPage() {
         <StatCard
           id="stat-resolved"
           title="Resolved"
-          value={stats?.resolvedCount ?? 0}
-          contextText={`${stats?.resolutionRatePct ?? 0}% addressed successfully`}
+          value={stats?.resolved ?? 0}
+          contextText={`${stats?.resolutionRate ?? 0}% addressed successfully`}
           accentColor="green"
           icon={<ResolvedIcon />}
           loading={statsLoading}
@@ -108,7 +105,7 @@ export default function OverviewPage() {
         <StatCard
           id="stat-inprogress"
           title="In Progress"
-          value={(stats?.totalCount || 0) - (stats?.resolvedCount || 0) - (stats?.overdueCount || 0)}
+          value={stats?.inProgress ?? 0}
           contextText="Active interventions underway"
           accentColor="amber"
           icon={<InProgressIcon />}
@@ -117,7 +114,7 @@ export default function OverviewPage() {
         <StatCard
           id="stat-overdue"
           title="Overdue"
-          value={stats?.overdueCount ?? 0}
+          value={stats?.overdue ?? 0}
           contextText="Requires intervention from departments"
           accentColor="red"
           icon={<OverdueIcon />}
@@ -130,20 +127,20 @@ export default function OverviewPage() {
         {/* Status Overview bar chart */}
         <StatusOverviewChart
           stats={{ 
-            total: stats?.totalCount || 0, 
-            resolved: stats?.resolvedCount || 0, 
-            inProgress: (stats?.totalCount || 0) - (stats?.resolvedCount || 0) - (stats?.overdueCount || 0), 
-            overdue: stats?.overdueCount || 0, 
-            resolvedPct: stats?.resolutionRatePct || 0, 
+            total: stats?.total || 0, 
+            resolved: stats?.resolved || 0, 
+            inProgress: stats?.inProgress || 0, 
+            overdue: stats?.overdue || 0, 
+            resolvedPct: stats?.resolutionRate || 0, 
             inProgressPct: 0, 
             overduePct: 0 
           }}
           loading={statsLoading}
         />
 
-        {/* Average resolution time with sparkline */}
+        {/* Average resolution time */}
         <ResolutionTimeCard
-          data={resolution ?? { avgHours: 0, improvement: 0, trend: [] }}
+          data={resolution ?? { avgDays: "0" }}
           loading={resolutionLoading}
         />
 
@@ -167,9 +164,9 @@ export default function OverviewPage() {
         {/* Priority at a glance — takes 1/3 width */}
         <PriorityGlance
           data={priority.reduce((acc: any, curr: any) => {
-             acc[curr.name.toLowerCase()] = curr.value;
+             acc[(curr.priority || '').toLowerCase()] = curr._count?.id || 0;
              return acc;
-          }, { high: 0, medium: 0, low: 0 })}
+          }, { high: 0, medium: 0, low: 0, critical: 0 })}
           loading={priorityLoading}
         />
       </section>

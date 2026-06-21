@@ -53,7 +53,6 @@ export default function TopConcernsTable({ concerns, loading }: TopConcernsTable
               <th className="text-left pb-2 pr-3 w-8">Rank</th>
               <th className="text-left pb-2 pr-3">Concern</th>
               <th className="text-right pb-2 pr-4">Complaints</th>
-              <th className="text-right pb-2">Trend (7d)</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-slate-50 dark:divide-slate-700/50">
@@ -77,23 +76,8 @@ export default function TopConcernsTable({ concerns, loading }: TopConcernsTable
                   {c.name}
                 </td>
 
-                {/* Complaint count */}
                 <td className="py-2 pr-4 text-right font-semibold text-slate-700 dark:text-slate-200">
-                  {c.count.toLocaleString('en-IN')}
-                </td>
-
-                {/* Trend */}
-                <td className="py-2 text-right">
-                  <span
-                    className={`inline-flex items-center gap-0.5 text-xs font-bold ${
-                      c.trendUp
-                        ? 'text-red-500 dark:text-red-400'
-                        : 'text-emerald-600 dark:text-emerald-400'
-                    }`}
-                  >
-                    {c.trendUp ? <UpArrow /> : <DownArrow />}
-                    {c.trend}%
-                  </span>
+                  {c.count?.toLocaleString('en-IN') || 0}
                 </td>
               </tr>
             ))}

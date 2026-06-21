@@ -145,18 +145,18 @@ export default function DistrictRiskMap({ districts, loading }: DistrictRiskMapP
             {/* Tooltip */}
             {hoveredDistrict && (
               <div className="absolute top-0 left-0 z-10 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg px-3 py-2 shadow-lg pointer-events-none flex flex-col gap-0.5 min-w-[140px]">
-                <p className="text-sm font-bold text-slate-800 dark:text-white mb-1">{hoveredDistrict.name}</p>
+                <p className="text-sm font-bold text-slate-800 dark:text-white mb-1">{hoveredDistrict.district || hoveredDistrict.name}</p>
                 <div className="flex items-center gap-1.5 text-xs">
                   <span className="text-slate-500 dark:text-slate-400">Risk:</span>
-                  <span className="font-medium" style={{ color: riskColor[hoveredDistrict.riskLevel] }}>
-                    {riskLabel[hoveredDistrict.riskLevel]}
+                  <span className="font-medium" style={{ color: riskColor[hoveredDistrict.riskLevel] || riskColor.watch }}>
+                    {riskLabel[hoveredDistrict.riskLevel] || 'Unknown'}
                   </span>
                 </div>
                 <p className="text-xs text-slate-500 dark:text-slate-400">
-                  Complaints: <span className="font-medium text-slate-700 dark:text-slate-300">{hoveredDistrict.complaintCount}</span>
+                  Total Complaints: <span className="font-medium text-slate-700 dark:text-slate-300">{hoveredDistrict.total || 0}</span>
                 </p>
                 <p className="text-xs text-slate-500 dark:text-slate-400">
-                  Avg Resolution: <span className="font-medium text-slate-700 dark:text-slate-300">{hoveredDistrict.avgResolutionTime || Math.floor(Math.random() * 40 + 24)} hrs</span>
+                  Overdue: <span className="font-medium text-slate-700 dark:text-slate-300">{hoveredDistrict.overdue || 0}</span>
                 </p>
               </div>
             )}

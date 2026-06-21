@@ -7,7 +7,7 @@ export const getCmOverview = asyncHandler(async (req: Request, res: Response) =>
   const resolved = await prisma.complaint.count({ where: { status: 'CLOSED' } }); // Assuming closed is the final resolved state
   const inProgress = await prisma.complaint.count({ where: { status: { in: ['ASSIGNED', 'IN_PROGRESS'] } } });
   const overdue = await prisma.complaint.count({ where: { isOverdue: true } });
-  
+
   const resolutionRate = total === 0 ? 0 : ((resolved / total) * 100).toFixed(2);
 
   res.status(200).json({
@@ -41,7 +41,7 @@ export const getDistrictRisk = asyncHandler(async (req: Request, res: Response) 
   const districtData = await Promise.all(districts.map(async (d) => {
     const dist = await prisma.district.findUnique({ where: { id: d.districtId } });
     const overdueCount = await prisma.complaint.count({ where: { districtId: d.districtId, isOverdue: true } });
-    
+
     return {
       district: dist?.name || 'Unknown',
       total: d._count.id,

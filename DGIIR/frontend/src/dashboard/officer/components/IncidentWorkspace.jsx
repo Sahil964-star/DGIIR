@@ -1,5 +1,5 @@
 import React, { useState, useRef } from 'react';
-import { Camera, Image as ImageIcon, CheckCircle, Clock, MessageCircle, MapPin, Navigation, Layers, Building2, Users, Hash } from 'lucide-react';
+import { Camera, Image as ImageIcon, CheckCircle, Clock, MessageCircle, MapPin, Navigation, Layers, Building2, Users } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { complaintApi } from '../../../../api/complaintApi';
@@ -28,44 +28,54 @@ const ImageWithFallback = ({ src, alt, className }) => (
 
 const getStatusColor = (status) => {
   switch (status) {
-    case 'In Progress': return 'bg-orange-100 text-orange-800 dark:bg-orange-900/30 dark:text-orange-300';
-    case 'Overdue':     return 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-300';
-    case 'Assigned':    return 'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300';
-    default:            return 'bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-300';
+    case 'IN_PROGRESS':
+      return 'bg-orange-100 text-orange-800 dark:bg-orange-900/30 dark:text-orange-300';
+    case 'OVERDUE':
+      return 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-300';
+    case 'ASSIGNED':
+      return 'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300';
+    case 'CLOSED':
+      return 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300';
+    default:
+      return 'bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-300';
   }
 };
 
 const getSeverityColor = (severity) => {
   switch (severity) {
-    case 'Critical': return 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-300';
-    case 'At Risk':  return 'bg-orange-100 text-orange-800 dark:bg-orange-900/30 dark:text-orange-300';
-    case 'Stable':   return 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300';
-    default:         return 'bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-300';
+    case 'CRITICAL': return 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-300';
+    case 'HIGH': return 'bg-orange-100 text-orange-800 dark:bg-orange-900/30 dark:text-orange-300';
+    case 'MEDIUM': return 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-300';
+    case 'LOW': return 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300';
+    default: return 'bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-300';
   }
 };
 
 // Compact static map preview
-const MapPreview = ({ location }) => (
-  <div className="rounded-lg overflow-hidden border border-slate-200 dark:border-gray-700 bg-slate-100 dark:bg-gray-800 relative h-20">
-    <img
-      src="https://staticmap.openstreetmap.de/staticmap.php?center=28.7041,77.1025&zoom=13&size=600x200&markers=28.7041,77.1025,red-pushpin"
-      alt="Incident map"
-      className="w-full h-full object-cover opacity-80 dark:opacity-60"
-      onError={(e) => {
-        e.target.style.display = 'none';
-        e.target.nextSibling.style.display = 'flex';
-      }}
-    />
-    <div className="w-full h-full flex-col items-center justify-center bg-slate-100 dark:bg-gray-800 text-slate-400 gap-1 absolute inset-0 hidden">
-      <MapPin className="w-5 h-5" />
-      <span className="text-[10px]">Map preview</span>
+const MapPreview = ({ latitude, longitude }) => {
+  if (!latitude || !longitude) return null;
+  return (
+    <div className="rounded-lg overflow-hidden border border-slate-200 dark:border-gray-700 bg-slate-100 dark:bg-gray-800 relative h-20">
+      <img
+        src={`https://staticmap.openstreetmap.de/staticmap.php?center=${latitude},${longitude}&zoom=13&size=600x200&markers=${latitude},${longitude},red-pushpin`}
+        alt="Incident map"
+        className="w-full h-full object-cover opacity-80 dark:opacity-60"
+        onError={(e) => {
+          e.target.style.display = 'none';
+          e.target.nextSibling.style.display = 'flex';
+        }}
+      />
+      <div className="w-full h-full flex-col items-center justify-center bg-slate-100 dark:bg-gray-800 text-slate-400 gap-1 absolute inset-0 hidden">
+        <MapPin className="w-5 h-5" />
+        <span className="text-[10px]">Map preview</span>
+      </div>
+      <div className="absolute bottom-1.5 left-1.5 flex items-center gap-1 bg-white/90 dark:bg-gray-900/90 rounded px-2 py-0.5">
+        <Navigation className="w-2.5 h-2.5 text-green-600" />
+        <span className="text-[10px] font-medium text-slate-700 dark:text-slate-300">Open in Maps</span>
+      </div>
     </div>
-    <div className="absolute bottom-1.5 left-1.5 flex items-center gap-1 bg-white/90 dark:bg-gray-900/90 rounded px-2 py-0.5">
-      <Navigation className="w-2.5 h-2.5 text-green-600" />
-      <span className="text-[10px] font-medium text-slate-700 dark:text-slate-300">Open in Maps</span>
-    </div>
-  </div>
-);
+  );
+};
 
 const IncidentWorkspace = ({ incidentId }) => {
   const queryClient = useQueryClient();
@@ -87,13 +97,6 @@ const IncidentWorkspace = ({ incidentId }) => {
     }
   });
 
-  const verifyMutation = useMutation({
-    mutationFn: (verifyData) => complaintApi.verifyComplaint(incidentId, verifyData),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['complaint', incidentId] });
-    }
-  });
-
   const uploadMediaMutation = useMutation({
     mutationFn: (formData) => complaintApi.uploadMedia(incidentId, formData),
     onSuccess: () => {
@@ -105,7 +108,7 @@ const IncidentWorkspace = ({ incidentId }) => {
     return <div className="h-full flex items-center justify-center"><Loader size={32} /></div>;
   }
 
-  const rawIncident = incidentResp?.data || incidentResp || {};
+  const rawIncident = incidentResp?.data?.complaint || {};
   if (!rawIncident.id) {
     return <div className="h-full flex items-center justify-center text-slate-500">Incident not found.</div>;
   }
@@ -113,42 +116,39 @@ const IncidentWorkspace = ({ incidentId }) => {
   const activeIncident = {
     id: rawIncident.id,
     title: rawIncident.title,
-    location: rawIncident.location || 'Unknown',
+    location: rawIncident.address || 'Unknown',
+    latitude: rawIncident.latitude,
+    longitude: rawIncident.longitude,
     assignedDate: new Date(rawIncident.createdAt).toLocaleDateString(),
     citizenNotes: rawIncident.description || 'No description provided.',
-    category: rawIncident.categoryId || 'General',
-    department: 'Assigned Department',
-    severity: rawIncident.severity || 'Medium',
-    affectedCitizens: 0,
+    category: rawIncident.category?.name || 'General',
+    department: rawIncident.department?.name || 'Unassigned',
+    officerAssigned: rawIncident.officer?.name,
+    severity: rawIncident.priority || 'MEDIUM',
     status: rawIncident.status,
-    beforePhoto: rawIncident.mediaUrls?.[0] || '',
-    afterPhoto: rawIncident.mediaUrls?.[1] || ''
+    beforePhoto: rawIncident.media?.find(m => m.type === 'CITIZEN_EVIDENCE')?.url || '',
+    afterPhoto: rawIncident.media?.find(m => m.type === 'OFFICER_PROOF' || m.type === 'AFTER_PHOTO')?.url || ''
   };
 
   const hasAfterPhoto = !!activeIncident.afterPhoto || !!afterPhotoFile;
-  const canSubmit = resolutionNotes.trim().length > 10 && hasAfterPhoto;
+  const canSubmit = resolutionNotes.trim().length >= 10 && hasAfterPhoto && activeIncident.status === 'IN_PROGRESS';
 
   const handleSubmitClosure = async () => {
     if (!canSubmit) return;
-    
+
     // 1. Upload photo if newly selected
     if (afterPhotoFile) {
       const formData = new FormData();
-      formData.append('media', afterPhotoFile);
+      formData.append('file', afterPhotoFile);
       await uploadMediaMutation.mutateAsync(formData);
     }
 
-    // 2. Add verification note
-    await verifyMutation.mutateAsync({
-      verified: true,
-      notes: resolutionNotes
+    // 2. Update status to Resolved
+    await updateStatusMutation.mutateAsync({
+      status: 'RESOLVED',
+      comments: resolutionNotes
     });
 
-    // 3. Update status to Resolved
-    await updateStatusMutation.mutateAsync({
-      status: 'RESOLVED'
-    });
-    
     setResolutionNotes('');
     setAfterPhotoFile(null);
   };
@@ -178,20 +178,12 @@ const IncidentWorkspace = ({ incidentId }) => {
       <div className="py-4 border-y border-slate-200 dark:border-gray-800/60 shrink-0 my-2">
         <div className="grid grid-cols-2 gap-y-2 gap-x-4">
           <div className="flex items-center gap-1.5 text-xs text-slate-600 dark:text-slate-400">
-            <Clock className="w-3.5 h-3.5 text-slate-400" />
-            <span className="font-semibold text-slate-800 dark:text-slate-200">Incident Age:</span> 3 Days Open
-          </div>
-          <div className="flex items-center gap-1.5 text-xs text-slate-600 dark:text-slate-400">
-            <Users className="w-3.5 h-3.5 text-orange-500" />
-            <span className="font-semibold text-slate-800 dark:text-slate-200">Citizen Impact:</span> {activeIncident.affectedCitizens} Residents Affected
-          </div>
-          <div className="flex items-center gap-1.5 text-xs text-slate-600 dark:text-slate-400">
-            <MessageCircle className="w-3.5 h-3.5 text-slate-400" />
-            <span className="font-semibold text-slate-800 dark:text-slate-200">Last Update:</span> 2 Hours Ago
-          </div>
-          <div className="flex items-center gap-1.5 text-xs text-slate-600 dark:text-slate-400">
             <Building2 className="w-3.5 h-3.5 text-slate-400" />
-            <span className="font-semibold text-slate-800 dark:text-slate-200">Officer Assigned:</span> Rajesh Kumar
+            <span className="font-semibold text-slate-800 dark:text-slate-200">Department:</span> {activeIncident.department}
+          </div>
+          <div className="flex items-center gap-1.5 text-xs text-slate-600 dark:text-slate-400">
+            <Users className="w-3.5 h-3.5 text-slate-400" />
+            <span className="font-semibold text-slate-800 dark:text-slate-200">Officer Assigned:</span> {activeIncident.officerAssigned || 'Pending Assignment'}
           </div>
         </div>
       </div>
@@ -206,7 +198,7 @@ const IncidentWorkspace = ({ incidentId }) => {
             <span className="text-[11px] font-semibold text-slate-600 dark:text-slate-400 uppercase tracking-wide">Location</span>
             <span className="text-[11px] text-slate-400 ml-auto">{activeIncident.location}</span>
           </div>
-          <MapPreview location={activeIncident.location} />
+          <MapPreview latitude={activeIncident.latitude} longitude={activeIncident.longitude} />
         </div>
 
         {/* Citizen Report */}
@@ -244,12 +236,12 @@ const IncidentWorkspace = ({ incidentId }) => {
                 </div>
               ) : (
                 <>
-                  <input 
-                    type="file" 
-                    accept="image/*" 
-                    className="hidden" 
-                    ref={fileInputRef} 
-                    onChange={handleFileSelect} 
+                  <input
+                    type="file"
+                    accept="image/*"
+                    className="hidden"
+                    ref={fileInputRef}
+                    onChange={handleFileSelect}
                   />
                   <button
                     onClick={() => fileInputRef.current?.click()}
@@ -274,9 +266,10 @@ const IncidentWorkspace = ({ incidentId }) => {
             value={resolutionNotes}
             onChange={(e) => setResolutionNotes(e.target.value)}
             placeholder="Describe the corrective actions taken..."
-            className="w-full h-16 p-3 bg-slate-50 dark:bg-gray-800 border border-slate-200 dark:border-gray-700 rounded-lg text-sm text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-green-500 resize-none"
+            disabled={activeIncident.status !== 'IN_PROGRESS'}
+            className="w-full h-16 p-3 bg-slate-50 dark:bg-gray-800 border border-slate-200 dark:border-gray-700 rounded-lg text-sm text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-green-500 resize-none disabled:opacity-50"
           />
-          {resolutionNotes.trim().length > 0 && resolutionNotes.trim().length <= 10 && (
+          {resolutionNotes.trim().length > 0 && resolutionNotes.trim().length < 10 && activeIncident.status === 'IN_PROGRESS' && (
             <p className="text-[10px] text-orange-500 mt-0.5">Add more detail (min. 10 characters).</p>
           )}
         </div>
@@ -288,21 +281,25 @@ const IncidentWorkspace = ({ incidentId }) => {
         <motion.button
           whileHover={{ scale: canSubmit ? 1.02 : 1 }}
           whileTap={{ scale: canSubmit ? 0.98 : 1 }}
-          disabled={!canSubmit || updateStatusMutation.isPending || uploadMediaMutation.isPending || verifyMutation.isPending}
+          disabled={!canSubmit || updateStatusMutation.isPending || uploadMediaMutation.isPending}
           onClick={handleSubmitClosure}
-          className={`w-full py-4 rounded-xl text-[15px] font-bold flex items-center justify-center gap-2 transition-all ${
-            canSubmit
-              ? 'bg-green-600 hover:bg-green-500 text-white shadow-lg shadow-green-700/25 ring-2 ring-green-400/30'
-              : 'bg-slate-100 dark:bg-gray-800 text-slate-400 dark:text-slate-500 cursor-not-allowed border border-slate-200 dark:border-gray-700'
-          }`}
+          className={`w-full py-4 rounded-xl text-[15px] font-bold flex items-center justify-center gap-2 transition-all ${canSubmit
+            ? 'bg-green-600 hover:bg-green-500 text-white shadow-lg shadow-green-700/25 ring-2 ring-green-400/30'
+            : 'bg-slate-100 dark:bg-gray-800 text-slate-400 dark:text-slate-500 cursor-not-allowed border border-slate-200 dark:border-gray-700'
+            }`}
         >
           <CheckCircle className="w-5 h-5" />
           {updateStatusMutation.isPending ? 'Submitting...' : 'Submit for Closure'}
-          {!canSubmit && <span className="text-[10px] font-normal ml-1">(upload photo + add notes)</span>}
+          {!canSubmit && activeIncident.status === 'IN_PROGRESS' && <span className="text-[10px] font-normal ml-1">(upload photo + add notes)</span>}
         </motion.button>
-        {activeIncident.status !== 'IN_PROGRESS' && activeIncident.status !== 'RESOLVED' && (
-          <button 
-            onClick={() => updateStatusMutation.mutate({ status: 'IN_PROGRESS' })}
+        {activeIncident.status === 'ASSIGNED' && (
+          <button
+            onClick={() =>
+              updateStatusMutation.mutate({
+                status: 'IN_PROGRESS',
+                comments: 'Officer started investigation'
+              })
+            }
             className="w-full py-2 px-4 bg-transparent border border-slate-200 dark:border-gray-700 rounded-lg text-xs font-medium text-slate-500 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-gray-800 transition-colors"
           >
             Mark as In Progress

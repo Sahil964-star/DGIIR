@@ -11,7 +11,7 @@ const ForgotPasswordForm = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const role = location.state?.role || 'citizen';
-  
+
   const [channel, setChannel] = useState('mobile'); // 'mobile' | 'email'
   const [inputValue, setInputValue] = useState('');
   const [error, setError] = useState('');
@@ -33,7 +33,7 @@ const ForgotPasswordForm = () => {
   };
 
   const getSubtitle = () => {
-    switch(role) {
+    switch (role) {
       case 'officer': return "Recover access to your field operations account.";
       case 'operations': return "Recover access to your operations control center account.";
       case 'citizen':
@@ -58,11 +58,10 @@ const ForgotPasswordForm = () => {
           <button
             type="button"
             onClick={() => { setChannel('mobile'); setInputValue(''); }}
-            className={`flex-1 py-2.5 text-sm font-semibold rounded-lg flex items-center justify-center space-x-2 transition-all ${
-              channel === 'mobile' 
-                ? 'bg-white dark:bg-slate-800 text-green-700 dark:text-green-500 shadow-sm border border-slate-200 dark:border-slate-700' 
+            className={`flex-1 py-2.5 text-sm font-semibold rounded-lg flex items-center justify-center space-x-2 transition-all ${channel === 'mobile'
+                ? 'bg-white dark:bg-slate-800 text-green-700 dark:text-green-500 shadow-sm border border-slate-200 dark:border-slate-700'
                 : 'text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-300'
-            }`}
+              }`}
           >
             <Phone className="w-4 h-4" />
             <span>Mobile Number</span>
@@ -70,11 +69,10 @@ const ForgotPasswordForm = () => {
           <button
             type="button"
             onClick={() => { setChannel('email'); setInputValue(''); }}
-            className={`flex-1 py-2.5 text-sm font-semibold rounded-lg flex items-center justify-center space-x-2 transition-all ${
-              channel === 'email' 
-                ? 'bg-white dark:bg-slate-800 text-green-700 dark:text-green-500 shadow-sm border border-slate-200 dark:border-slate-700' 
+            className={`flex-1 py-2.5 text-sm font-semibold rounded-lg flex items-center justify-center space-x-2 transition-all ${channel === 'email'
+                ? 'bg-white dark:bg-slate-800 text-green-700 dark:text-green-500 shadow-sm border border-slate-200 dark:border-slate-700'
                 : 'text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-300'
-            }`}
+              }`}
           >
             <Mail className="w-4 h-4" />
             <span>Registered Email</span>
@@ -92,25 +90,25 @@ const ForgotPasswordForm = () => {
               transition={{ duration: 0.2 }}
             >
               {channel === 'mobile' ? (
-                <Input 
-                  id="mobile" 
-                  type="tel" 
-                  placeholder="Registered Mobile Number" 
-                  value={inputValue} 
+                <Input
+                  id="mobile"
+                  type="tel"
+                  placeholder="Registered Mobile Number"
+                  value={inputValue}
                   onChange={(e) => setInputValue(e.target.value.replace(/\D/g, ''))}
-                  icon={Phone} 
+                  icon={Phone}
                   maxLength="10"
-                  required 
+                  required
                 />
               ) : (
-                <Input 
-                  id="email" 
-                  type="email" 
-                  placeholder="Registered Email ID" 
-                  value={inputValue} 
+                <Input
+                  id="email"
+                  type="email"
+                  placeholder="Registered Email ID"
+                  value={inputValue}
                   onChange={(e) => setInputValue(e.target.value)}
-                  icon={Mail} 
-                  required 
+                  icon={Mail}
+                  required
                 />
               )}
             </motion.div>
@@ -120,9 +118,9 @@ const ForgotPasswordForm = () => {
           <p className="text-sm text-red-600 dark:text-red-400 font-medium mb-4 text-center">{error}</p>
         )}
 
-        <Button 
-          type="submit" 
-          fullWidth 
+        <Button
+          type="submit"
+          fullWidth
           variant="primary"
           isLoading={forgotPasswordMutation.isPending}
           disabled={!inputValue || (channel === 'mobile' && inputValue.length < 10)}

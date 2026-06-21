@@ -11,18 +11,10 @@ import RecentActivity from '../components/RecentActivity';
 import IncidentWorkspace from '../components/IncidentWorkspace';
 import { officerApi } from '../../../api/officerApi';
 import Loader from '../../../shared/components/Loader';
-
-// Fallback profile if me API doesn't provide it
-const officerProfile = {
-  name: "Rajesh Kumar",
-  role: "Field Supervisor",
-  id: "OFF-2026-984",
-  zone: "North West Delhi",
-  avatar: "https://i.pravatar.cc/150?u=rajesh",
-  contact: "+91 98765 43210"
-};
+import { useAuth } from '../../../context/AuthContext';
 
 const OfficerDashboard = () => {
+  const { user } = useAuth();
   const [selectedIncidentId, setSelectedIncidentId] = useState(null);
 
   const { data: myComplaintsResp, isLoading: isLoadingComplaints } = useQuery({
@@ -49,25 +41,36 @@ const OfficerDashboard = () => {
   const performance = performanceResp?.data || performanceResp?.performance || {};
 
   const summaryStats = {
-    activeTasks: workload.activeTasks || 0,
-    criticalAlerts: workload.criticalAlerts || 0,
-    resolvedToday: performance.resolvedToday || 0,
-    distanceCovered: '0 km', // Not tracked by backend
-    verification: performance.verificationRate || 95
+    assigned: workload.assigned || 0,
+    inProgress: workload.inProgress || 0,
+    overdue: workload.overdue || 0,
+    resolved: performance.resolved || 0,
+    verification: performance.verificationPending || 0
   };
 
   const incidents = complaints.map(c => ({
     id: c.id,
     title: c.title,
-    location: c.location || 'Unknown',
+    location: c.address || 'Unknown',
     time: new Date(c.createdAt).toLocaleTimeString(),
     status: c.status,
-    severity: c.severity || 'Medium',
-    priority: c.severity === 'Critical' ? 'High' : 'Normal',
+    severity: c.priority || 'MEDIUM',
+    priority: c.priority,
   }));
 
   // Auto-select first incident if none selected
   const activeIncidentId = selectedIncidentId || (incidents.length > 0 ? incidents[0].id : null);
+
+  const officerProfile = {
+    name: user?.name,
+    role: user?.role,
+    id: user?.id,
+    zone: user?.department?.name || user?.departmentId,
+    avatar: user?.avatar,
+    contact: user?.phone
+  };
+
+  return (
     <div className="min-h-screen bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-50 flex">
       <Sidebar officerProfile={officerProfile} />
 

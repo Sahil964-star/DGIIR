@@ -1,12 +1,12 @@
 import React from 'react';
 import { useQuery } from '@tanstack/react-query';
 import Card from '../../shared/components/Card';
-import { BarChart3, TrendingUp, AlertTriangle } from 'lucide-react';
+import { BarChart3, TrendingUp, AlertTriangle, Clock } from 'lucide-react';
 import { analyticsApi } from '../../api/analyticsApi';
 import Loader from '../../shared/components/Loader';
 import { 
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, ResponsiveContainer,
-  LineChart, Line, PieChart, Pie, Cell, Legend
+  PieChart, Pie, Cell, Legend
 } from 'recharts';
 
 const COLORS = ['#3b82f6', '#22c55e', '#ef4444', '#f97316', '#eab308', '#a855f7'];
@@ -41,13 +41,15 @@ const CMDashboard = () => {
     return <div className="min-h-screen flex items-center justify-center"><Loader size={48} /></div>;
   }
 
-  const kpis = overviewResp?.data?.kpis || overviewResp?.kpis || {};
-  const topConcerns = concernsResp?.data || concernsResp || [];
-  const districtRisk = riskResp?.data || riskResp || [];
-  const resolutionTime = resolutionResp?.data || resolutionResp || [];
-  const priorityAnalytics = priorityResp?.data || priorityResp || [];
-
-  const kpis = overviewResp?.data?.kpis || overviewResp?.kpis || {};
+  const kpis = overviewResp?.data || {};
+  const topConcerns = concernsResp?.data || [];
+  const districtRisk = riskResp?.data || [];
+  const resolutionTime = resolutionResp?.data || { averageDays: "0" };
+  const rawPriority = priorityResp?.data || [];
+  const priorityAnalytics = rawPriority.map(p => ({
+    name: p.priority,
+    value: p._count?.id || 0
+  }));
   return (
     <div className="space-y-6">
       <div className="mb-8">
@@ -62,8 +64,8 @@ const CMDashboard = () => {
               <AlertTriangle size={24} />
             </div>
             <div>
-              <p className="text-sm font-medium text-slate-500 dark:text-slate-400">Critical Incidents</p>
-              <h3 className="text-2xl font-bold text-slate-900 dark:text-white">{kpis.criticalCount || 0}</h3>
+              <p className="text-sm font-medium text-slate-500 dark:text-slate-400">Critical Incidents (Overdue)</p>
+              <h3 className="text-2xl font-bold text-slate-900 dark:text-white">{kpis.overdue || 0}</h3>
             </div>
           </div>
         </Card>
@@ -75,7 +77,7 @@ const CMDashboard = () => {
             </div>
             <div>
               <p className="text-sm font-medium text-slate-500 dark:text-slate-400">Resolution Rate</p>
-              <h3 className="text-2xl font-bold text-slate-900 dark:text-white">{kpis.resolutionRatePct ? `${kpis.resolutionRatePct}%` : '0%'}</h3>
+              <h3 className="text-2xl font-bold text-slate-900 dark:text-white">{kpis.resolutionRate ? `${kpis.resolutionRate}%` : '0%'}</h3>
             </div>
           </div>
         </Card>
@@ -87,7 +89,7 @@ const CMDashboard = () => {
             </div>
             <div>
               <p className="text-sm font-medium text-slate-500 dark:text-slate-400">Total Reported</p>
-              <h3 className="text-2xl font-bold text-slate-900 dark:text-white">{kpis.totalCount || 0}</h3>
+              <h3 className="text-2xl font-bold text-slate-900 dark:text-white">{kpis.total || 0}</h3>
             </div>
           </div>
         </Card>
@@ -105,7 +107,7 @@ const CMDashboard = () => {
                   <XAxis type="number" />
                   <YAxis dataKey="name" type="category" width={100} tick={{ fontSize: 12 }} />
                   <RechartsTooltip contentStyle={{ borderRadius: '8px', border: 'none', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }} />
-                  <Bar dataKey="value" fill="#3b82f6" radius={[0, 4, 4, 0]} />
+                  <Bar dataKey="count" fill="#3b82f6" radius={[0, 4, 4, 0]} />
                 </BarChart>
               </ResponsiveContainer>
             ) : (
@@ -125,9 +127,8 @@ const CMDashboard = () => {
                   <XAxis dataKey="district" angle={-45} textAnchor="end" height={60} tick={{ fontSize: 12 }} />
                   <YAxis />
                   <RechartsTooltip contentStyle={{ borderRadius: '8px', border: 'none', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }} />
-                  <Bar dataKey="critical" stackId="a" fill="#ef4444" name="Critical" />
-                  <Bar dataKey="high" stackId="a" fill="#f97316" name="High" />
-                  <Bar dataKey="normal" stackId="a" fill="#22c55e" name="Normal" />
+                  <Bar dataKey="total" fill="#3b82f6" name="Total" />
+                  <Bar dataKey="overdue" fill="#ef4444" name="Overdue" />
                   <Legend wrapperStyle={{ paddingTop: '20px' }} />
                 </BarChart>
               </ResponsiveContainer>
@@ -137,23 +138,15 @@ const CMDashboard = () => {
           </div>
         </Card>
 
-        {/* Resolution Time Trends */}
-        <Card className="p-6 h-80 flex flex-col">
-          <h2 className="text-lg font-semibold text-slate-900 dark:text-white mb-4">Resolution Time Trends</h2>
-          <div className="flex-1 bg-white dark:bg-[#0b1120] rounded-lg">
-            {resolutionTime.length > 0 ? (
-              <ResponsiveContainer width="100%" height="100%">
-                <LineChart data={resolutionTime} margin={{ top: 5, right: 30, left: 0, bottom: 5 }}>
-                  <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="var(--border-color, #e2e8f0)" />
-                  <XAxis dataKey="date" tick={{ fontSize: 12 }} />
-                  <YAxis />
-                  <RechartsTooltip contentStyle={{ borderRadius: '8px', border: 'none', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }} />
-                  <Line type="monotone" dataKey="avgTimeHours" stroke="#8b5cf6" strokeWidth={3} dot={{ r: 4 }} activeDot={{ r: 8 }} name="Avg Hours" />
-                </LineChart>
-              </ResponsiveContainer>
-            ) : (
-              <div className="flex items-center justify-center h-full text-slate-500">No data available</div>
-            )}
+        {/* Resolution Time Average */}
+        <Card className="p-6 h-80 flex flex-col justify-center">
+          <h2 className="text-lg font-semibold text-slate-900 dark:text-white mb-4">Average Resolution Time</h2>
+          <div className="flex-1 bg-white dark:bg-[#0b1120] rounded-lg flex flex-col items-center justify-center p-8 text-center border border-slate-100 dark:border-white/5 shadow-inner">
+            <Clock size={48} className="text-blue-500 mb-6" />
+            <span className="text-5xl font-extrabold text-slate-900 dark:text-white tracking-tighter">
+              {resolutionTime.averageDays || 0}
+            </span>
+            <span className="text-sm font-medium text-slate-500 uppercase tracking-widest mt-2">Days</span>
           </div>
         </Card>
 
