@@ -30,10 +30,13 @@ export type RiskLevel = 'healthy' | 'watch' | 'concern' | 'critical';
 
 export interface DistrictRisk {
   id: string;
-  name: string;
+  name?: string;
+  district?: string;
   riskLevel: RiskLevel;
-  complaintCount: number;
+  complaintCount?: number;
   avgResolutionTime?: number;
+  total?: number;
+  overdue?: number;
 }
 
 // ─── Resolution Time ─────────────────────────────────────────────────────────

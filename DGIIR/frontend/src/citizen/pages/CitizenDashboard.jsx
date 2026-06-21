@@ -27,9 +27,7 @@ const CitizenDashboard = () => {
         <div className="flex-1 min-w-0 flex flex-col gap-6">
           <HeroBanner />
           {/* Mobile Only Recent Updates */}
-          <div className="block xl:hidden">
-            <RecentUpdates />
-          </div>
+          {/* Removed as no endpoint exists */}
           <CitizenSummary />
           <QuickActions />
           <ComplaintList />
@@ -38,9 +36,7 @@ const CitizenDashboard = () => {
         {/* Right Information Panel */}
         <div className="w-full xl:w-[320px] shrink-0 flex flex-col gap-6">
           {/* Desktop Only Recent Updates */}
-          <div className="hidden xl:block">
-            <RecentUpdates />
-          </div>
+          {/* Removed as no endpoint exists */}
           <SupportCard />
           <HowItWorks />
         </div>

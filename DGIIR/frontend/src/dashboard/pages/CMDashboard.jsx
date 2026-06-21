@@ -12,33 +12,37 @@ import {
 const COLORS = ['#3b82f6', '#22c55e', '#ef4444', '#f97316', '#eab308', '#a855f7'];
 
 const CMDashboard = () => {
-  const { data: overviewResp, isLoading: isLoadingOverview } = useQuery({
+  const { data: overviewResp, isLoading: isLoadingOverview, isError: errOverview } = useQuery({
     queryKey: ['cmOverview'],
     queryFn: () => analyticsApi.getCmOverview()
   });
 
-  const { data: concernsResp, isLoading: isLoadingConcerns } = useQuery({
+  const { data: concernsResp, isLoading: isLoadingConcerns, isError: errConcerns } = useQuery({
     queryKey: ['cmTopConcerns'],
     queryFn: () => analyticsApi.getCmTopConcerns()
   });
 
-  const { data: riskResp, isLoading: isLoadingRisk } = useQuery({
+  const { data: riskResp, isLoading: isLoadingRisk, isError: errRisk } = useQuery({
     queryKey: ['cmDistrictRisk'],
     queryFn: () => analyticsApi.getCmDistrictRisk()
   });
 
-  const { data: resolutionResp, isLoading: isLoadingResolution } = useQuery({
+  const { data: resolutionResp, isLoading: isLoadingResolution, isError: errResolution } = useQuery({
     queryKey: ['cmResolutionTime'],
     queryFn: () => analyticsApi.getCmResolutionTime()
   });
 
-  const { data: priorityResp, isLoading: isLoadingPriority } = useQuery({
+  const { data: priorityResp, isLoading: isLoadingPriority, isError: errPriority } = useQuery({
     queryKey: ['cmPriority'],
     queryFn: () => analyticsApi.getCmPriority()
   });
 
   if (isLoadingOverview || isLoadingConcerns || isLoadingRisk || isLoadingResolution || isLoadingPriority) {
     return <div className="min-h-screen flex items-center justify-center"><Loader size={48} /></div>;
+  }
+
+  if (errOverview || errConcerns || errRisk || errResolution || errPriority) {
+    return <div className="min-h-screen flex items-center justify-center text-red-500">Failed to load Chief Minister data.</div>;
   }
 
   const kpis = overviewResp?.data || {};

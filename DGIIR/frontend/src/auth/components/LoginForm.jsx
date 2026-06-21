@@ -35,26 +35,15 @@ const LoginForm = () => {
   const loginMutation = useMutation({
     mutationFn: authApi.login,
     onSuccess: (data) => {
-      const token = data.data?.accessToken || data.accessToken || 'mock-jwt-token';
-      const user = data.data?.user || data.user || { email, name: 'John Doe', role: 'CITIZEN' };
+      const token = data.data?.accessToken || data.accessToken;
+      const user = data.data?.user || data.user;
       
       const actualRole = user.role;
       login(user, actualRole, token);
       navigate(getRoleLandingPage(actualRole));
     },
     onError: (error) => {
-      console.error('Login failed, using mock flow:', error);
-      // Fallback for mock flow without backend
-      const token = 'mock-jwt-token-123';
-      
-      let mockRole = 'CITIZEN';
-      if (selectedRole === 'operations') mockRole = 'OPERATIONS';
-      if (selectedRole === 'officer') mockRole = 'FIELD_OFFICER';
-      if (selectedRole === 'cm') mockRole = 'CHIEF_MINISTER';
-
-      const user = { email, name: 'Mock User', role: mockRole };
-      login(user, mockRole, token);
-      navigate(getRoleLandingPage(mockRole));
+      setErrorMsg(error?.response?.data?.message || 'Login failed. Please check your credentials.');
     }
   });
 
@@ -74,9 +63,7 @@ const LoginForm = () => {
       await authApi.requestOtp(mobile);
       setOtpSent(true);
     } catch (error) {
-      console.error('Request OTP failed, using mock bypass:', error);
-      // Fallback for development/testing bypass
-      setOtpSent(true);
+      setErrorMsg(error?.response?.data?.message || 'Failed to request OTP. Please try again.');
     } finally {
       setIsLoading(false);
     }
@@ -87,19 +74,14 @@ const LoginForm = () => {
     setErrorMsg('');
     try {
       const data = await authApi.verifyOtp({ phone: mobile, otp: otpCode });
-      const token = data.data?.accessToken || data.accessToken || 'mock-jwt-token';
-      const user = data.data?.user || data.user || { phone: mobile, name: `Citizen ${mobile.slice(-4)}`, role: 'CITIZEN' };
+      const token = data.data?.accessToken || data.accessToken;
+      const user = data.data?.user || data.user;
       
       const actualRole = user.role;
       login(user, actualRole, token);
       navigate(getRoleLandingPage(actualRole));
     } catch (error) {
-      console.error('Verify OTP failed, using mock bypass:', error);
-      // Fallback for demo/dev bypass
-      const token = 'mock-jwt-token';
-      const user = { phone: mobile, name: `Citizen ${mobile.slice(-4)}`, role: 'CITIZEN' };
-      login(user, 'CITIZEN', token);
-      navigate(getRoleLandingPage('CITIZEN'));
+      setErrorMsg(error?.response?.data?.message || 'Invalid OTP. Please try again.');
     } finally {
       setIsLoading(false);
     }

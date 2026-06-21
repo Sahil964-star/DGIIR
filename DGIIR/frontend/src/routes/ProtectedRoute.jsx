@@ -7,8 +7,8 @@ import { getRoleLandingPage } from '../utils/roleUtils';
 const ProtectedRoute = ({ allowedRoles = [] }) => {
   const { user, role, token, isLoading } = useAuth();
 
-  // DEV BYPASS: Temporarily allow all access during frontend development
-  if (import.meta.env.VITE_DEV_BYPASS_AUTH === 'true') {
+  // DEV BYPASS: Temporarily allow all access during frontend development, strictly blocked in prod
+  if (!import.meta.env.PROD && import.meta.env.VITE_DEV_BYPASS_AUTH === 'true') {
     return <Outlet />;
   }
 

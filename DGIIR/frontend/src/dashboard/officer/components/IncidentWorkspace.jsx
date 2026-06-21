@@ -2,8 +2,8 @@ import React, { useState, useRef } from 'react';
 import { Camera, Image as ImageIcon, CheckCircle, Clock, MessageCircle, MapPin, Navigation, Layers, Building2, Users } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { complaintApi } from '../../../../api/complaintApi';
-import Loader from '../../../../shared/components/Loader';
+import { complaintApi } from '../../../api/complaintApi';
+import Loader from '../../../shared/components/Loader';
 
 // Fallback placeholder for images
 const ImageWithFallback = ({ src, alt, className }) => (

@@ -27,18 +27,22 @@ const SectionHeader = ({ title }) => (
 );
 
 const OperationsDashboard = () => {
-  const { data: overviewResp, isLoading: isLoadingOverview } = useQuery({
+  const { data: overviewResp, isLoading: isLoadingOverview, isError: isErrorOverview } = useQuery({
     queryKey: ['operationsOverview'],
     queryFn: analyticsApi.getOperationsOverview
   });
 
-  const { data: slaResp, isLoading: isLoadingSla } = useQuery({
+  const { data: slaResp, isLoading: isLoadingSla, isError: isErrorSla } = useQuery({
     queryKey: ['operationsSla'],
     queryFn: analyticsApi.getOperationsSla
   });
 
   if (isLoadingOverview || isLoadingSla) {
     return <div className="min-h-screen flex justify-center items-center"><Loader size={48} /></div>;
+  }
+
+  if (isErrorOverview || isErrorSla) {
+    return <div className="min-h-screen flex justify-center items-center text-red-500">Failed to load operations data.</div>;
   }
 
   const kpis = overviewResp?.data || {};

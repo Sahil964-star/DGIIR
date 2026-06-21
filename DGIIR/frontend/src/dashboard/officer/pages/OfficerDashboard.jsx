@@ -11,29 +11,33 @@ import RecentActivity from '../components/RecentActivity';
 import IncidentWorkspace from '../components/IncidentWorkspace';
 import { officerApi } from '../../../api/officerApi';
 import Loader from '../../../shared/components/Loader';
-import { useAuth } from '../../../context/AuthContext';
+import { useAuth } from '../../../hooks/useAuth';
 
 const OfficerDashboard = () => {
   const { user } = useAuth();
   const [selectedIncidentId, setSelectedIncidentId] = useState(null);
 
-  const { data: myComplaintsResp, isLoading: isLoadingComplaints } = useQuery({
+  const { data: myComplaintsResp, isLoading: isLoadingComplaints, isError: errComplaints } = useQuery({
     queryKey: ['officerComplaints'],
     queryFn: () => officerApi.getMyComplaints()
   });
 
-  const { data: workloadResp } = useQuery({
+  const { data: workloadResp, isError: errWorkload } = useQuery({
     queryKey: ['officerWorkload'],
     queryFn: () => officerApi.getWorkload()
   });
 
-  const { data: performanceResp } = useQuery({
+  const { data: performanceResp, isError: errPerformance } = useQuery({
     queryKey: ['officerPerformance'],
     queryFn: () => officerApi.getPerformance()
   });
 
   if (isLoadingComplaints) {
     return <div className="min-h-screen flex items-center justify-center"><Loader size={48} /></div>;
+  }
+
+  if (errComplaints || errWorkload || errPerformance) {
+    return <div className="min-h-screen flex items-center justify-center text-red-500">Failed to load officer data.</div>;
   }
 
   const complaints = myComplaintsResp?.data || myComplaintsResp?.complaints || [];

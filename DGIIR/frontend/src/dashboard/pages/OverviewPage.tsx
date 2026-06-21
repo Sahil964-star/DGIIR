@@ -1,7 +1,6 @@
 import { useQuery } from '@tanstack/react-query'
-import {
+// @ts-ignore
 import { analyticsApi } from '../../api/analyticsApi'
-
 import Header              from '../components/Header'
 import StatCard            from '../components/StatCard'
 import StatusOverviewChart from '../components/StatusOverviewChart'
@@ -37,7 +36,7 @@ const OverdueIcon = () => (
 const REFETCH_MS = 60_000
 
 export default function OverviewPage() {
-  const { data: overviewResp, isLoading: statsLoading } = useQuery({
+  const { data: overviewResp, isLoading: statsLoading, isError: statsError } = useQuery({
     queryKey: ['complaint-stats'],
     queryFn: () => analyticsApi.getCmOverview(),
     refetchInterval: REFETCH_MS,
@@ -76,6 +75,17 @@ export default function OverviewPage() {
   const resolution = {
     avgDays: resolutionData.averageDays || "0"
   };
+
+  if (statsError) {
+    return (
+      <div className="page-enter px-7 pb-8 flex items-center justify-center min-h-[50vh]">
+        <div className="text-center">
+          <h2 className="text-xl font-bold text-slate-900 dark:text-white mb-2">Failed to load overview data</h2>
+          <p className="text-slate-500 dark:text-slate-400">Please check your connection and try again.</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="page-enter px-7 pb-8">
