@@ -15,4 +15,14 @@ export const authApi = {
     const response = await axiosClient.get('/auth/me');
     return response.data;
   },
+
+  requestOtp: async (phone) => {
+    const response = await axiosClient.post('/auth/request-otp', { phone });
+    return response.data;
+  },
+
+  verifyOtp: async ({ phone, otp }) => {
+    const response = await axiosClient.post('/auth/verify-otp', { phone, otp });
+    return response.data;
+  },
 };
