@@ -1,7 +1,5 @@
-// prisma/schema.prisma
-
 generator client {
-  provider = "prisma-client-js"
+  provider        = "prisma-client-js"
   previewFeatures = ["fullTextSearchPostgres"]
 }
 
@@ -9,7 +7,226 @@ datasource db {
   provider = "postgresql"
 }
 
-// ─── ENUMS ────────────────────────────────────────────────────────
+model User {
+  id                   String            @id @default(uuid())
+  email                String?           @unique
+  phone                String?           @unique
+  passwordHash         String?
+  twoFactorSec         String?
+  name                 String
+  role                 Role              @default(CITIZEN)
+  isActive             Boolean           @default(true)
+  deviceToken          String?
+  departmentId         String?
+  districtId           String?
+  createdAt            DateTime          @default(now())
+  updatedAt            DateTime          @updatedAt
+  deletedAt            DateTime?
+  auditLogs            AuditLog[]
+  complaintsFiled      Complaint[]       @relation("CitizenComplaints")
+  complaintsAssigned   Complaint[]       @relation("OfficerComplaints")
+  events               ComplaintEvent[]
+  escalationsTriggered Escalation[]      @relation("EscalatedFrom")
+  escalationsReceived  Escalation[]      @relation("EscalatedTo")
+  media                Media[]
+  notifications        Notification[]
+  otps                 OtpVerification[]
+  department           Department?       @relation(fields: [departmentId], references: [id])
+  district             District?         @relation(fields: [districtId], references: [id])
+
+  @@index([role, districtId])
+}
+
+model District {
+  id         String      @id @default(uuid())
+  name       String      @unique
+  code       String      @unique
+  complaints Complaint[]
+  users      User[]
+}
+
+model Department {
+  id         String      @id @default(uuid())
+  name       String      @unique
+  code       String      @unique
+  deletedAt  DateTime?
+  categories Category[]
+  complaints Complaint[]
+  users      User[]
+}
+
+model Category {
+  id           String            @id @default(uuid())
+  name         String            @unique
+  departmentId String
+  department   Department        @relation(fields: [departmentId], references: [id])
+  complaints   Complaint[]
+  slaConfig    SlaConfiguration?
+
+  @@index([departmentId])
+}
+
+model SlaConfiguration {
+  id               String   @id @default(uuid())
+  categoryId       String   @unique
+  resolveHours     Int
+  escalationTarget Role
+  priorityRules    Json
+  updatedAt        DateTime @updatedAt
+  category         Category @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+}
+
+model Complaint {
+  id           String                 @id @default(uuid())
+  complaintNo  String                 @unique
+  title        String
+  description  String
+  status       ComplaintStatus        @default(PENDING)
+  priority     Priority               @default(MEDIUM)
+  isOverdue    Boolean                @default(false)
+  address      String
+  latitude     Float?
+  longitude    Float?
+  ward         String?
+  zone         String?
+  createdAt    DateTime               @default(now())
+  updatedAt    DateTime               @updatedAt
+  assignedAt   DateTime?
+  resolvedAt   DateTime?
+  closedAt     DateTime?
+  slaBreachAt  DateTime?
+  deletedAt    DateTime?
+  citizenId    String
+  officerId    String?
+  districtId   String
+  departmentId String?
+  categoryId   String
+  category     Category               @relation(fields: [categoryId], references: [id])
+  citizen      User                   @relation("CitizenComplaints", fields: [citizenId], references: [id])
+  department   Department?            @relation(fields: [departmentId], references: [id])
+  district     District               @relation(fields: [districtId], references: [id])
+  officer      User?                  @relation("OfficerComplaints", fields: [officerId], references: [id])
+  events       ComplaintEvent[]
+  verification ComplaintVerification?
+  escalations  Escalation[]
+  media        Media[]
+
+  @@index([status, createdAt])
+  @@index([districtId, status])
+  @@index([departmentId, isOverdue])
+  @@index([slaBreachAt])
+  @@index([priority])
+}
+
+model ComplaintVerification {
+  id          String             @id @default(uuid())
+  complaintId String             @unique
+  status      VerificationStatus @default(PENDING)
+  feedback    String?
+  rating      Int?
+  verifiedAt  DateTime?
+  createdAt   DateTime           @default(now())
+  complaint   Complaint          @relation(fields: [complaintId], references: [id], onDelete: Cascade)
+}
+
+model Escalation {
+  id              String    @id @default(uuid())
+  complaintId     String
+  escalatedFromId String
+  escalatedToId   String
+  reason          String
+  createdAt       DateTime  @default(now())
+  complaint       Complaint @relation(fields: [complaintId], references: [id], onDelete: Cascade)
+  escalatedFrom   User      @relation("EscalatedFrom", fields: [escalatedFromId], references: [id])
+  escalatedTo     User      @relation("EscalatedTo", fields: [escalatedToId], references: [id])
+
+  @@index([complaintId])
+}
+
+model ComplaintEvent {
+  id          String           @id @default(uuid())
+  action      String
+  oldStatus   ComplaintStatus?
+  newStatus   ComplaintStatus?
+  comments    String?
+  complaintId String
+  actorId     String
+  createdAt   DateTime         @default(now())
+  actor       User             @relation(fields: [actorId], references: [id])
+  complaint   Complaint        @relation(fields: [complaintId], references: [id], onDelete: Cascade)
+}
+
+model Media {
+  id           String    @id @default(uuid())
+  url          String
+  publicId     String
+  type         MediaType
+  complaintId  String
+  uploadedById String
+  createdAt    DateTime  @default(now())
+  complaint    Complaint @relation(fields: [complaintId], references: [id], onDelete: Cascade)
+  uploadedBy   User      @relation(fields: [uploadedById], references: [id])
+}
+
+model AuditLog {
+  id         String   @id @default(uuid())
+  actorId    String
+  action     String
+  entityType String
+  entityId   String
+  details    Json
+  ipAddress  String?
+  timestamp  DateTime @default(now())
+  actor      User     @relation(fields: [actorId], references: [id])
+
+  @@index([entityType, entityId])
+  @@index([timestamp])
+}
+
+model Notification {
+  id         String           @id @default(uuid())
+  userId     String
+  type       NotificationType
+  title      String
+  message    String
+  isRead     Boolean          @default(false)
+  linkTarget String?
+  createdAt  DateTime         @default(now())
+  user       User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, isRead])
+}
+
+model OtpVerification {
+  id        String   @id @default(uuid())
+  userId    String
+  otpHash   String
+  expiresAt DateTime
+  isUsed    Boolean  @default(false)
+  createdAt DateTime @default(now())
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, isUsed])
+}
+
+model AnalyticsSnapshot {
+  id                       String   @id @default(uuid())
+  timestamp                DateTime @default(now())
+  totalComplaints          Int
+  resolved                 Int
+  inProgress               Int
+  overdue                  Int
+  districtMetrics          Json
+  departmentMetrics        Json
+  categoryMetrics          Json
+  resolutionTrends         Json
+  averageRating            Float?
+  citizenSatisfactionScore Float?
+  verificationApprovalRate Float?
+  officerMetrics           Json?
+
+  @@index([timestamp])
+}
 
 enum Role {
   CITIZEN
@@ -59,281 +276,4 @@ enum MediaType {
   OFFICER_PROOF
   BEFORE_PHOTO
   AFTER_PHOTO
-}
-
-// ─── CORE ENTITIES ────────────────────────────────────────────────
-
-model User {
-  id            String   @id @default(uuid())
-  email         String?  @unique
-  phone         String?  @unique
-  passwordHash  String?  // Optional for Citizens using OTP
-  twoFactorSec  String?  // 2FA Secret for CM/Admin
-  name          String
-  role          Role     @default(CITIZEN)
-  isActive      Boolean  @default(true)
-  deviceToken   String?  // Firebase Cloud Messaging (Push Notifications)
-  
-  departmentId  String?
-  department    Department? @relation(fields: [departmentId], references: [id])
-  
-  districtId    String?
-  district      District?   @relation(fields: [districtId], references: [id])
-
-  complaintsFiled   Complaint[] @relation("CitizenComplaints")
-  complaintsAssigned Complaint[] @relation("OfficerComplaints")
-  
-  escalationsTriggered Escalation[] @relation("EscalatedFrom")
-  escalationsReceived  Escalation[] @relation("EscalatedTo")
-
-  events            ComplaintEvent[]
-  media             Media[]
-  notifications     Notification[]
-  otps              OtpVerification[]
-  auditLogs         AuditLog[]
-
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
-  deletedAt     DateTime? // Soft Delete
-
-  @@index([role, districtId])
-}
-
-model District {
-  id          String   @id @default(uuid())
-  name        String   @unique 
-  code        String   @unique 
-  
-  users       User[]
-  complaints  Complaint[]
-}
-
-model Department {
-  id          String   @id @default(uuid())
-  name        String   @unique 
-  code        String   @unique 
-  
-  users       User[]
-  complaints  Complaint[]
-  categories  Category[]
-  
-  deletedAt   DateTime? // Soft Delete
-}
-
-model Category {
-  id           String   @id @default(uuid())
-  name         String   @unique 
-  
-  departmentId String
-  department   Department @relation(fields: [departmentId], references: [id])
-  
-  slaConfig    SlaConfiguration?
-  complaints   Complaint[]
-
-  @@index([departmentId])
-}
-
-model SlaConfiguration {
-  id            String   @id @default(uuid())
-  categoryId    String   @unique
-  category      Category @relation(fields: [categoryId], references: [id], onDelete: Cascade)
-  
-  resolveHours  Int      
-  escalationTarget Role  
-  priorityRules Json     
-  
-  updatedAt     DateTime @updatedAt
-}
-
-model Complaint {
-  id          String          @id @default(uuid())
-  complaintNo String          @unique 
-  title       String
-  description String
-  status      ComplaintStatus @default(PENDING)
-  priority    Priority        @default(MEDIUM)
-  isOverdue   Boolean         @default(false)
-  
-  // Location Intelligence
-  address     String
-  latitude    Float?
-  longitude   Float?
-  ward        String?         // Future-proof: Local ward name/number
-  zone        String?         // Future-proof: Local municipal zone
-
-  // Timestamps
-  createdAt   DateTime  @default(now())
-  updatedAt   DateTime  @updatedAt
-  assignedAt  DateTime?
-  resolvedAt  DateTime?
-  closedAt    DateTime?
-  slaBreachAt DateTime? 
-  deletedAt   DateTime? // Soft Delete
-  
-  // Foreign Keys
-  citizenId   String
-  citizen     User      @relation("CitizenComplaints", fields: [citizenId], references: [id])
-  
-  officerId   String?
-  officer     User?     @relation("OfficerComplaints", fields: [officerId], references: [id])
-  
-  districtId  String
-  district    District  @relation(fields: [districtId], references: [id])
-  
-  departmentId String?
-  department   Department? @relation(fields: [departmentId], references: [id])
-  
-  categoryId  String
-  category    Category  @relation(fields: [categoryId], references: [id])
-  
-  // Relations
-  events       ComplaintEvent[]
-  media        Media[]
-  escalations  Escalation[]
-  verification ComplaintVerification?
-
-  // Required Indexes for Analytics & Operations
-  @@index([status, createdAt])
-  @@index([districtId, status])
-  @@index([departmentId, isOverdue])
-  @@index([slaBreachAt])
-  @@index([priority])
-}
-
-// ─── WORKFLOW & AUDIT ENTITIES ────────────────────────────────────
-
-model ComplaintVerification {
-  id          String   @id @default(uuid())
-  complaintId String   @unique
-  complaint   Complaint @relation(fields: [complaintId], references: [id], onDelete: Cascade)
-  
-  status      VerificationStatus @default(PENDING)
-  feedback    String?
-  rating      Int?     // 1-5 scale
-  
-  verifiedAt  DateTime?
-  createdAt   DateTime @default(now())
-}
-
-model Escalation {
-  id             String   @id @default(uuid())
-  complaintId    String
-  complaint      Complaint @relation(fields: [complaintId], references: [id], onDelete: Cascade)
-  
-  escalatedFromId String
-  escalatedFrom   User    @relation("EscalatedFrom", fields: [escalatedFromId], references: [id])
-  
-  escalatedToId   String
-  escalatedTo     User    @relation("EscalatedTo", fields: [escalatedToId], references: [id])
-  
-  reason         String
-  createdAt      DateTime @default(now())
-
-  @@index([complaintId])
-}
-
-model ComplaintEvent {
-  id          String   @id @default(uuid())
-  action      String   
-  oldStatus   ComplaintStatus?
-  newStatus   ComplaintStatus?
-  comments    String?
-  
-  complaintId String
-  complaint   Complaint @relation(fields: [complaintId], references: [id], onDelete: Cascade)
-  
-  actorId     String
-  actor       User      @relation(fields: [actorId], references: [id])
-  
-  createdAt   DateTime  @default(now())
-}
-
-model Media {
-  id          String   @id @default(uuid())
-  url         String   
-  publicId    String   
-  type        MediaType
-  
-  complaintId String
-  complaint   Complaint @relation(fields: [complaintId], references: [id], onDelete: Cascade)
-  
-  uploadedById String
-  uploadedBy   User     @relation(fields: [uploadedById], references: [id])
-  
-  createdAt   DateTime @default(now())
-}
-
-model AuditLog {
-  id          String   @id @default(uuid())
-  actorId     String
-  actor       User     @relation(fields: [actorId], references: [id])
-  
-  action      String   
-  entityType  String
-  entityId    String
-  details     Json
-  ipAddress   String?
-  
-  timestamp   DateTime @default(now())
-
-  @@index([entityType, entityId])
-  @@index([timestamp])
-}
-
-// ─── SYSTEM ENTITIES ──────────────────────────────────────────────
-
-model Notification {
-  id          String   @id @default(uuid())
-  userId      String
-  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  
-  type        NotificationType
-  title       String
-  message     String
-  isRead      Boolean  @default(false)
-  linkTarget  String?  
-  
-  createdAt   DateTime @default(now())
-
-  @@index([userId, isRead])
-}
-
-model OtpVerification {
-  id          String   @id @default(uuid())
-  userId      String
-  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  
-  otpHash     String
-  expiresAt   DateTime
-  isUsed      Boolean  @default(false)
-  
-  createdAt   DateTime @default(now())
-
-  @@index([userId, isUsed])
-}
-
-model AnalyticsSnapshot {
-  id                String   @id @default(uuid())
-  timestamp         DateTime @default(now())
-  
-  totalComplaints   Int
-  resolved          Int
-  inProgress        Int
-  overdue           Int
-  
-  // Advanced Analytics Payloads
-  districtMetrics   Json     
-  departmentMetrics Json     
-  categoryMetrics   Json     
-  resolutionTrends  Json     
-  
-  // Satisfaction Analytics
-  averageRating           Float?
-  citizenSatisfactionScore Float?
-  verificationApprovalRate Float?
-
-  // Officer Performance Analytics
-  officerMetrics          Json?    
-  
-  @@index([timestamp])
 }
