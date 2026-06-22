@@ -5,13 +5,17 @@ import { asyncHandler } from '../utils/asyncHandler.js';
 import { CloudinaryService } from '../services/cloudinary.service.js';
 import { AuditService } from '../services/audit.service.js';
 import { NotificationService } from '../services/notification.service.js';
-import { ComplaintStatus, MediaType } from '@prisma/client';
+import { AIService } from '../services/ai.service.js';
+import { ComplaintStatus, MediaType, Priority } from '@prisma/client';
+import fs from 'fs';
 
 export const createComplaint = asyncHandler(async (req: Request, res: Response) => {
-  const { title, description, districtId, categoryId, address, latitude, longitude, citizenId: providedCitizenId } = req.body;
-  
-  if (!title || !description || !districtId || !categoryId || !address) {
-    throw new AppError('Please provide all required fields', 400);
+  const { title, description, districtId, address, latitude, longitude, citizenId: providedCitizenId } = req.body;
+  // Note: categoryId is now optional — AI will determine it
+  const categoryIdOverride: string | undefined = req.body.categoryId;
+
+  if (!title || !description || !districtId || !address) {
+    throw new AppError('Please provide title, description, districtId, and address', 400);
   }
 
   let lat: number | null = null;
@@ -21,14 +25,13 @@ export const createComplaint = asyncHandler(async (req: Request, res: Response) 
     lat = Number(latitude);
     if (isNaN(lat)) throw new AppError('Invalid latitude value', 400);
   }
-
   if (longitude !== undefined && longitude !== null) {
     lng = Number(longitude);
     if (isNaN(lng)) throw new AppError('Invalid longitude value', 400);
   }
 
+  // ── Resolve citizen ─────────────────────────────────────────────────────────
   let targetCitizenId: string;
-
   if (req.user!.role === 'OPERATIONS') {
     if (!providedCitizenId) {
       throw new AppError('citizenId is required when creating a complaint on behalf of a citizen.', 400);
@@ -42,48 +45,214 @@ export const createComplaint = asyncHandler(async (req: Request, res: Response) 
     targetCitizenId = req.user!.id;
   }
 
-  // Generate Complaint No e.g. CMP-20231012-XXXX
+  // ── Resolve district name for AI ────────────────────────────────────────────
+  const selectedDistrict = await prisma.district.findUnique({ where: { id: districtId } });
+  if (!selectedDistrict) throw new AppError('Invalid districtId', 400);
+
+  // ── AI Classification ────────────────────────────────────────────────────────
+  // Runs async; if it fails, buildFallbackResult is returned (confidence 40)
+  const imagePath = (req.file as Express.Multer.File | undefined)?.path;
+  const aiResult = await AIService.analyzeComplaint({
+    title,
+    description,
+    address,
+    district: selectedDistrict.name,
+    ...(imagePath && { imagePath }),
+  });
+
+  // ── Map AI category suggestion → DB category ─────────────────────────────────
+  let resolvedCategoryId: string;
+  let resolvedDepartmentId: string | null = null;
+
+  if (categoryIdOverride) {
+    // Manual override (e.g., Operations creating on behalf of citizen)
+    const cat = await prisma.category.findUnique({ where: { id: categoryIdOverride } });
+    if (!cat) throw new AppError('Invalid categoryId override', 400);
+    resolvedCategoryId = cat.id;
+    resolvedDepartmentId = cat.departmentId;
+  } else if (aiResult.confidence >= 60) {
+    // AI is confident enough — use its suggestion
+    const aiCategory = await prisma.category.findFirst({
+      where: { name: { equals: aiResult.predictedCategory, mode: 'insensitive' } },
+    });
+    if (aiCategory) {
+      resolvedCategoryId = aiCategory.id;
+      resolvedDepartmentId = aiCategory.departmentId;
+    } else {
+      // AI suggested a category that doesn't exist — fall back to "Other"
+      const fallback = await prisma.category.findFirst({ where: { name: 'Other' } });
+      if (!fallback) throw new AppError('Default category "Other" not found in database', 500);
+      resolvedCategoryId = fallback.id;
+      resolvedDepartmentId = fallback.departmentId;
+    }
+  } else {
+    // Low confidence — use "Other" and route to Operations Review
+    const fallback = await prisma.category.findFirst({ where: { name: 'Other' } });
+    if (!fallback) throw new AppError('Default category "Other" not found in database', 500);
+    resolvedCategoryId = fallback.id;
+    resolvedDepartmentId = null; // will be assigned manually
+  }
+
+  // ── District verification ──────────────────────────────────────────────────
+  // Check if AI district suggestion differs from citizen's selection
+  let aiDistrictMismatch = false;
+  if (aiResult.districtSuggestion) {
+    const aiDistrict = await prisma.district.findFirst({
+      where: { name: { equals: aiResult.districtSuggestion, mode: 'insensitive' } },
+    });
+    if (aiDistrict && aiDistrict.id !== districtId) {
+      aiDistrictMismatch = true;
+    }
+  }
+
+  // ── Routing decision ─────────────────────────────────────────────────────────
+  // confidence > 90 AND no district mismatch → PENDING (auto-routed to department)
+  // confidence 60-90 → UNDER_REVIEW (operations review)
+  // confidence < 60 OR district mismatch → UNDER_REVIEW (AI Review Queue, flagged)
+  
+  const shouldFlagForReview = aiResult.confidence < 60 || aiDistrictMismatch;
+  
+  let initialStatus: ComplaintStatus;
+  if (aiResult.confidence > 90 && !aiDistrictMismatch) {
+    initialStatus = ComplaintStatus.PENDING;
+  } else {
+    initialStatus = ComplaintStatus.UNDER_REVIEW;
+  }
+
+  // If confidence is < 60, don't guess the department (leave null for manual review)
+  if (aiResult.confidence < 60) {
+    resolvedDepartmentId = null;
+  }
+
+  // ── Generate complaint number ──────────────────────────────────────────────
   const complaintNo = `CMP-${new Date().toISOString().slice(0, 10).replace(/-/g, '')}-${Math.floor(1000 + Math.random() * 9000)}`;
 
-  const category = await prisma.category.findUnique({ where: { id: categoryId } });
-  if (!category) throw new AppError('Invalid category', 400);
-
+  // ── Create complaint in DB ─────────────────────────────────────────────────
   const complaint = await prisma.complaint.create({
     data: {
       complaintNo,
       title,
       description,
       districtId,
-      categoryId,
-      departmentId: category.departmentId,
+      categoryId: resolvedCategoryId,
+      departmentId: resolvedDepartmentId,
       citizenId: targetCitizenId,
       address,
       latitude: lat,
       longitude: lng,
+      status: initialStatus,
+      priority: aiResult.priority as Priority,
+      // ── AI Fields ──
+      aiCategory: aiResult.predictedCategory,
+      aiConfidence: aiResult.confidence,
+      aiPriority: aiResult.priority as Priority,
+      aiSeverityScore: aiResult.severityScore,
+      aiSummary: aiResult.aiSummary,
+      aiKeywords: aiResult.keywords,
+      aiDepartmentSuggestion: aiResult.departmentSuggestion,
+      aiDistrictSuggestion: aiResult.districtSuggestion,
+      aiIsFlagged: shouldFlagForReview,
+      aiDetectedObjects: aiResult.detectedObjects,
+      aiImageConfidence: aiResult.imageConfidence,
     },
   });
+
+  // ── Audit + Event ──────────────────────────────────────────────────────────
+  const eventComment = shouldFlagForReview
+    ? `AI routed to Operations Review (confidence: ${aiResult.confidence}%, district mismatch: ${aiDistrictMismatch})`
+    : `AI auto-classified as "${aiResult.predictedCategory}" with ${aiResult.confidence}% confidence`;
 
   await prisma.complaintEvent.create({
     data: {
       complaintId: complaint.id,
       action: 'CREATED',
-      newStatus: 'PENDING',
+      newStatus: initialStatus,
       actorId: req.user!.id,
-      comments: req.user!.role === 'OPERATIONS' ? 'Complaint registered by Operations staff on behalf of citizen' : 'Complaint registered by citizen',
+      comments: eventComment,
     },
   });
 
-  await AuditService.log(req.user!.id, 'CREATE_COMPLAINT', 'Complaint', complaint.id);
+  await AuditService.log(req.user!.id, 'CREATE_COMPLAINT', 'Complaint', complaint.id, {
+    aiCategory: aiResult.predictedCategory,
+    aiConfidence: aiResult.confidence,
+    aiPriority: aiResult.priority,
+    aiIsFlagged: shouldFlagForReview,
+  });
+
+  // ── Upload image to Cloudinary if provided ─────────────────────────────────
+  if (imagePath && fs.existsSync(imagePath)) {
+    try {
+      const cloudResult = await CloudinaryService.uploadImage(imagePath);
+      await prisma.media.create({
+        data: {
+          complaintId: complaint.id,
+          url: cloudResult.secure_url,
+          publicId: cloudResult.public_id,
+          type: MediaType.CITIZEN_EVIDENCE,
+          uploadedById: req.user!.id,
+        },
+      });
+    } catch {
+      // Non-fatal: image upload failure should not block complaint creation
+      console.error('[createComplaint] Cloudinary upload failed for', imagePath);
+      if (fs.existsSync(imagePath)) fs.unlinkSync(imagePath);
+    }
+  }
+
+  // ── Notify citizen ─────────────────────────────────────────────────────────
+  const notifMsg = initialStatus === ComplaintStatus.UNDER_REVIEW
+    ? `Your complaint ${complaint.complaintNo} is under review by our team.`
+    : `Your complaint ${complaint.complaintNo} has been successfully registered and routed to ${aiResult.departmentSuggestion || 'the relevant department'}.`;
+
   await NotificationService.notify(
     targetCitizenId,
     'SYSTEM_ALERT',
     'Complaint Registered',
-    `Your complaint ${complaint.complaintNo} has been successfully registered.`,
+    notifMsg,
     `/citizen/complaints/${complaint.id}`
   );
 
-  res.status(201).json({ status: 'success', data: { complaint } });
+  // ── Notify operations if flagged or CRITICAL ───────────────────────────────
+  if (shouldFlagForReview || aiResult.priority === 'CRITICAL') {
+    const opsUsers = await prisma.user.findMany({ where: { role: 'OPERATIONS' }, take: 5 });
+    for (const ops of opsUsers) {
+      const opsTitle = shouldFlagForReview ? 'AI Review Required' : 'Critical Incident Detected';
+      const opsMsg = shouldFlagForReview
+        ? `Complaint ${complaint.complaintNo} flagged for manual review (AI confidence: ${aiResult.confidence}%).`
+        : `CRITICAL priority complaint ${complaint.complaintNo} automatically routed and needs immediate attention.`;
+
+      await NotificationService.notify(
+        ops.id,
+        'SYSTEM_ALERT',
+        opsTitle,
+        opsMsg,
+        `/dashboard/operations?tab=complaints`
+      );
+    }
+  }
+
+  res.status(201).json({
+    status: 'success',
+    data: {
+      complaint,
+      aiInsights: {
+        category: aiResult.predictedCategory,
+        confidence: aiResult.confidence,
+        priority: aiResult.priority,
+        severityScore: aiResult.severityScore,
+        keywords: aiResult.keywords,
+        summary: aiResult.aiSummary,
+        department: aiResult.departmentSuggestion,
+        district: aiResult.districtSuggestion,
+        detectedObjects: aiResult.detectedObjects,
+        isFlagged: shouldFlagForReview,
+        requiresEscalation: aiResult.requiresEscalation,
+      },
+    },
+  });
 });
+
+
 
 export const getComplaints = asyncHandler(async (req: Request, res: Response) => {
   const { status, priority, districtId } = req.query;
@@ -451,3 +620,62 @@ export const escalateComplaint = asyncHandler(async (req: Request, res: Response
 
   res.status(200).json({ status: 'success', data: { escalation } });
 });
+
+export const overrideClassification = asyncHandler(async (req: Request, res: Response) => {
+  const id = req.params.id as string;
+  const { categoryId, departmentId, comments } = req.body;
+
+  if (!categoryId || !departmentId) {
+    throw new AppError('Please provide categoryId and departmentId for override', 400);
+  }
+
+  const complaint = await prisma.complaint.findUnique({ where: { id } });
+  if (!complaint) throw new AppError('Complaint not found', 404);
+
+  // Allow Super Admin or Operations
+  if (req.user!.role !== 'OPERATIONS' && req.user!.role !== 'SUPER_ADMIN') {
+    throw new AppError('Only Operations can override AI classification', 403);
+  }
+
+  const updatedComplaint = await prisma.complaint.update({
+    where: { id },
+    data: {
+      categoryId,
+      departmentId,
+      status: 'PENDING', // moves out of UNDER_REVIEW
+      aiIsFlagged: false, // resolved
+    },
+    include: { category: true, department: true },
+  });
+
+  await prisma.complaintEvent.create({
+    data: {
+      complaintId: id,
+      action: 'AI_OVERRIDE',
+      oldStatus: complaint.status,
+      newStatus: 'PENDING',
+      comments: comments || `Operations overrode AI classification. New Category: ${updatedComplaint.category.name}`,
+      actorId: req.user!.id,
+    },
+  });
+
+  await AuditService.log(req.user!.id, 'AI_OVERRIDE', 'Complaint', id, {
+    oldCategory: complaint.categoryId,
+    newCategory: categoryId,
+    oldDepartment: complaint.departmentId,
+    newDepartment: departmentId,
+    comments
+  });
+
+  // Notify citizen that complaint is now routed
+  await NotificationService.notify(
+    complaint.citizenId,
+    'STATUS_UPDATE',
+    'Complaint Routed',
+    `Your complaint ${complaint.complaintNo} has been routed to the ${updatedComplaint.department?.name || 'appropriate department'}.`,
+    `/citizen/complaints/${complaint.id}`
+  );
+
+  res.status(200).json({ status: 'success', data: { complaint: updatedComplaint } });
+});
+

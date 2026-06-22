@@ -100,7 +100,19 @@ model Complaint {
   officerId    String?
   districtId   String
   departmentId String?
-  categoryId   String
+  categoryId             String
+  // AI Classification Fields
+  aiCategory             String?
+  aiConfidence           Float?
+  aiPriority             Priority?
+  aiSeverityScore        Int?
+  aiSummary              String?
+  aiKeywords             String[]
+  aiDepartmentSuggestion String?
+  aiDistrictSuggestion   String?
+  aiIsFlagged            Boolean                @default(false)
+  aiDetectedObjects      String[]
+  aiImageConfidence      Float?
   category     Category               @relation(fields: [categoryId], references: [id])
   citizen      User                   @relation("CitizenComplaints", fields: [citizenId], references: [id])
   department   Department?            @relation(fields: [departmentId], references: [id])

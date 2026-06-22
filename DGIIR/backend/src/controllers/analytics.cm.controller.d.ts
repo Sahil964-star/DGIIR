@@ -4,4 +4,5 @@ export declare const getTopConcerns: (req: Request, res: Response, next: import(
 export declare const getDistrictRisk: (req: Request, res: Response, next: import("express").NextFunction) => void;
 export declare const getResolutionTime: (req: Request, res: Response, next: import("express").NextFunction) => void;
 export declare const getPriorityDistribution: (req: Request, res: Response, next: import("express").NextFunction) => void;
+export declare const getAiAnalytics: (req: Request, res: Response, next: import("express").NextFunction) => void;
 //# sourceMappingURL=analytics.cm.controller.d.ts.map

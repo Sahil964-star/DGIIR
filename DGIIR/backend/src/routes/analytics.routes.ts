@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import { getCmOverview, getTopConcerns, getDistrictRisk, getResolutionTime, getPriorityDistribution } from '../controllers/analytics.cm.controller.js';
+import { getCmOverview, getTopConcerns, getDistrictRisk, getResolutionTime, getPriorityDistribution, getAiAnalytics } from '../controllers/analytics.cm.controller.js';
 import { getOperationsOverview, getSlaPerformance, getOfficerWorkload } from '../controllers/analytics.operations.controller.js';
 import { protect } from '../middlewares/auth.js';
 import { restrictTo } from '../middlewares/rbac.js';

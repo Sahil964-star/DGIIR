@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import { createComplaint, getComplaints, getComplaintById, updateStatus, assignComplaint, uploadMedia, verifyComplaint, acceptComplaint, rejectComplaint, escalateComplaint, } from '../controllers/complaint.controller.js';
+import { createComplaint, getComplaints, getComplaintById, updateStatus, assignComplaint, uploadMedia, verifyComplaint, acceptComplaint, rejectComplaint, escalateComplaint, overrideClassification, } from '../controllers/complaint.controller.js';
 import { protect } from '../middlewares/auth.js';
 import { restrictTo } from '../middlewares/rbac.js';
 import { upload } from '../middlewares/upload.js';
@@ -32,7 +32,7 @@ router.use(protect);
  *         description: List of complaints
  */
 router.route('/')
-    .post(restrictTo('CITIZEN', 'OPERATIONS'), createComplaint)
+    .post(restrictTo('CITIZEN', 'OPERATIONS'), upload.single('image'), createComplaint)
     .get(getComplaints);
 /**
  * @swagger
@@ -133,5 +133,6 @@ router.post('/:id/verify', restrictTo('CITIZEN'), verifyComplaint);
 router.post('/:id/accept', restrictTo('FIELD_OFFICER'), acceptComplaint);
 router.post('/:id/reject', restrictTo('FIELD_OFFICER'), rejectComplaint);
 router.post('/:id/escalate', restrictTo('FIELD_OFFICER'), escalateComplaint);
+router.patch('/:id/ai-override', restrictTo('OPERATIONS', 'SUPER_ADMIN'), overrideClassification);
 export default router;
 //# sourceMappingURL=complaint.routes.js.map

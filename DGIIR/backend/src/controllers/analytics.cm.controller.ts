@@ -21,7 +21,7 @@ export const getTopConcerns = asyncHandler(async (req: Request, res: Response) =
     by: ['categoryId'],
     _count: { id: true },
     orderBy: { _count: { id: 'desc' } },
-    take: 5,
+    take: 10,
   });
 
   const categoryData = await Promise.all(categories.map(async (c) => {
@@ -42,11 +42,20 @@ export const getDistrictRisk = asyncHandler(async (req: Request, res: Response) 
     const dist = await prisma.district.findUnique({ where: { id: d.districtId } });
     const overdueCount = await prisma.complaint.count({ where: { districtId: d.districtId, isOverdue: true } });
 
+    const name = dist?.name || 'Unknown';
+    const id = name.toLowerCase().replace(/\s+/g, '-');
+    
+    let riskLevel = 'healthy';
+    if (overdueCount > 50) riskLevel = 'critical';
+    else if (overdueCount > 20) riskLevel = 'concern';
+    else if (overdueCount > 5) riskLevel = 'watch';
+
     return {
-      district: dist?.name || 'Unknown',
+      id,
+      district: name,
       total: d._count.id,
       overdue: overdueCount,
-      riskLevel: overdueCount > 50 ? 'HIGH' : overdueCount > 20 ? 'MEDIUM' : 'LOW',
+      riskLevel,
     };
   }));
 
@@ -79,4 +88,64 @@ export const getPriorityDistribution = asyncHandler(async (req: Request, res: Re
   });
 
   res.status(200).json({ status: 'success', data: distribution });
+});
+
+export const getAiAnalytics = asyncHandler(async (req: Request, res: Response) => {
+  const totalWithAi = await prisma.complaint.count({ where: { aiConfidence: { not: null } } });
+  
+  // Auto-routed (>90 confidence and not flagged)
+  const autoRouted = await prisma.complaint.count({ 
+    where: { aiConfidence: { gt: 90 }, aiIsFlagged: false } 
+  });
+  
+  // Manual Review (flagged or <=90)
+  const manualReview = totalWithAi - autoRouted;
+
+  // AI Category Distribution
+  const categoryDist = await prisma.complaint.groupBy({
+    by: ['aiCategory'],
+    _count: { id: true },
+    where: { aiCategory: { not: null } },
+  });
+
+  // Calculate Accuracy (if categoryId matches AI predicted category name)
+  // Since we don't have a direct boolean, we can do a rough count by querying those where it was overridden
+  const overriddenEvents = await prisma.complaintEvent.count({
+    where: { action: 'AI_OVERRIDE' }
+  });
+
+  const accuracyRate = totalWithAi === 0 ? 100 : (((totalWithAi - overriddenEvents) / totalWithAi) * 100).toFixed(1);
+
+  // Emerging Issues (count by keyword, very rough estimation in code, but we'll return recent keywords)
+  // For simplicity, we just return basic stats since Prisma doesn't group by string arrays easily.
+  const recentComplaints = await prisma.complaint.findMany({
+    where: { aiKeywords: { isEmpty: false } },
+    take: 50,
+    orderBy: { createdAt: 'desc' },
+    select: { aiKeywords: true }
+  });
+
+  const keywordCounts: Record<string, number> = {};
+  recentComplaints.forEach(c => {
+    c.aiKeywords.forEach(kw => {
+      keywordCounts[kw] = (keywordCounts[kw] || 0) + 1;
+    });
+  });
+
+  const topKeywords = Object.entries(keywordCounts)
+    .sort((a, b) => b[1] - a[1])
+    .slice(0, 10)
+    .map(([keyword, count]) => ({ keyword, count }));
+
+  res.status(200).json({ 
+    status: 'success', 
+    data: {
+      totalWithAi,
+      autoRouted,
+      manualReview,
+      accuracyRate: Number(accuracyRate),
+      aiCategoryDistribution: categoryDist.map(d => ({ name: d.aiCategory, count: d._count.id })),
+      emergingKeywords: topKeywords
+    } 
+  });
 });
