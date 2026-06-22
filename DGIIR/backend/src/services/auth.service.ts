@@ -46,7 +46,11 @@ export class AuthService {
     await otpProvider.sendOtp(phone, otp);
   }
 
-  static async verifyOtp(phone: string, otp: string) {
+  static async verifyOtp(
+    phone: string, 
+    otp: string, 
+    registrationData?: { name?: string; email?: string; districtId?: string }
+  ) {
     let user = await prisma.user.findUnique({ where: { phone } });
 
     if (user && user.role !== 'CITIZEN') {
@@ -77,10 +81,28 @@ export class AuthService {
     });
 
     if (!user) {
+      if (!registrationData?.name) {
+        throw new AppError('Name is required for new citizen registration', 400);
+      }
+      
+      // Validate email uniqueness if provided
+      if (registrationData.email) {
+        const existingEmail = await prisma.user.findUnique({ where: { email: registrationData.email } });
+        if (existingEmail) throw new AppError('Email is already registered', 400);
+      }
+
+      // Validate district existence if provided
+      if (registrationData.districtId) {
+        const district = await prisma.district.findUnique({ where: { id: registrationData.districtId } });
+        if (!district) throw new AppError('Invalid district selected', 400);
+      }
+
       user = await prisma.user.create({
         data: {
           phone,
-          name: 'Citizen',
+          name: registrationData.name,
+          email: registrationData.email || null,
+          districtId: registrationData.districtId || null,
           role: 'CITIZEN'
         }
       });

@@ -165,7 +165,7 @@ export const updateStatus = asyncHandler(async (req, res) => {
 export const assignComplaint = asyncHandler(async (req, res) => {
     const id = req.params.id;
     const { officerId } = req.body;
-    const officer = await prisma.user.findUnique({ where: { id: officerId, role: 'FIELD_OFFICER' } });
+    const officer = await prisma.user.findFirst({ where: { id: officerId, role: 'FIELD_OFFICER' } });
     if (!officer)
         throw new AppError('Invalid officer ID', 400);
     const complaint = await prisma.complaint.update({

@@ -2,7 +2,11 @@ export declare class AuthService {
     static generateAccessToken(userId: string, role: string): string;
     static generateRefreshToken(userId: string, role: string): string;
     static requestOtp(phone: string, purpose?: 'LOGIN' | 'RESET'): Promise<void>;
-    static verifyOtp(phone: string, otp: string): Promise<{
+    static verifyOtp(phone: string, otp: string, registrationData?: {
+        name?: string;
+        email?: string;
+        districtId?: string;
+    }): Promise<{
         accessToken: string;
         refreshToken: string;
         user: {

@@ -2,20 +2,22 @@ import React, { useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { motion, AnimatePresence } from 'framer-motion';
-import { User, Phone, Mail, Lock, MapPin, CheckCircle2 } from 'lucide-react';
+import { User, Phone, Mail, MapPin, CheckCircle2 } from 'lucide-react';
 import Input from '../../shared/components/Input';
 import Button from '../../shared/components/Button';
-import PasswordStrength from './PasswordStrength';
 import OTPVerification from './OTPVerification';
 import { metaApi } from '../../api/metaApi';
+import { authApi } from '../../api/authApi';
+import { useAuth } from '../../hooks/useAuth';
 
 const RegisterForm = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  const role = location.state?.role || 'citizen';
+  const { login } = useAuth();
   
   const [step, setStep] = useState('form'); // 'form' | 'otp' | 'success'
   const [isLoading, setIsLoading] = useState(false);
+  const [errorMsg, setErrorMsg] = useState('');
   
   const { data: districtsData, isLoading: isLoadingDistricts } = useQuery({
     queryKey: ['districts'],
@@ -27,10 +29,7 @@ const RegisterForm = () => {
     fullName: '',
     mobile: '',
     email: '',
-    password: '',
-    confirmPassword: '',
     district: '',
-    address: '',
     agreed: false
   });
 
@@ -42,31 +41,41 @@ const RegisterForm = () => {
     }));
   };
 
-  const handleRegisterSubmit = (e) => {
+  const handleRegisterSubmit = async (e) => {
     e.preventDefault();
-    if (formData.password !== formData.confirmPassword) {
-      alert("Passwords do not match");
-      return;
-    }
+    setErrorMsg('');
+    setIsLoading(true);
     
-    setIsLoading(true);
-    // Simulate API call for registration
-    setTimeout(() => {
-      setIsLoading(false);
+    try {
+      await authApi.requestOtp(formData.mobile);
       setStep('otp');
-    }, 1500);
-  };
-
-  const handleVerifyOTP = (otp) => {
-    setIsLoading(true);
-    // Simulate API call for OTP verification
-    setTimeout(() => {
+    } catch (error) {
+      setErrorMsg(error.response?.data?.message || 'Failed to request OTP');
+    } finally {
       setIsLoading(false);
-      setStep('success');
-    }, 1500);
+    }
   };
 
+  const handleVerifyOTP = async (otp) => {
+    setErrorMsg('');
+    setIsLoading(true);
+    try {
+      const response = await authApi.verifyOtp({
+        phone: formData.mobile,
+        otp,
+        name: formData.fullName,
+        email: formData.email || undefined,
+        districtId: formData.district || undefined,
+      });
 
+      login(response.data.user, response.data.user.role, response.data.accessToken);
+      setStep('success');
+    } catch (error) {
+      setErrorMsg(error.response?.data?.message || 'Invalid OTP');
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   return (
     <div className="w-full max-w-md mx-auto">
@@ -83,12 +92,18 @@ const RegisterForm = () => {
           >
             <div className="mb-8 text-center">
               <h2 className="text-3xl font-bold tracking-tight text-slate-900 dark:text-white mb-2">
-                Create Citizen Account
+                Verify Your Identity
               </h2>
               <p className="text-slate-600 dark:text-slate-400">
                 Register to report and track civic issues.
               </p>
             </div>
+
+            {errorMsg && (
+              <div className="mb-4 p-3 bg-red-50 dark:bg-red-900/30 text-red-600 dark:text-red-400 text-sm rounded-lg border border-red-200 dark:border-red-800">
+                {errorMsg}
+              </div>
+            )}
 
             <form onSubmit={handleRegisterSubmit} className="space-y-4">
               <Input
@@ -124,30 +139,6 @@ const RegisterForm = () => {
                 </div>
               </div>
 
-              <div>
-                <Input
-                  id="password"
-                  placeholder="Password"
-                  type="password"
-                  value={formData.password}
-                  onChange={handleChange}
-                  icon={Lock}
-                  required
-                  minLength={8}
-                />
-                <PasswordStrength password={formData.password} />
-              </div>
-
-              <Input
-                id="confirmPassword"
-                placeholder="Confirm Password"
-                type="password"
-                value={formData.confirmPassword}
-                onChange={handleChange}
-                icon={Lock}
-                required
-              />
-
               <div className="relative">
                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                   <MapPin className="h-5 w-5 text-slate-400" />
@@ -168,13 +159,6 @@ const RegisterForm = () => {
                   ))}
                 </select>
               </div>
-
-              <Input
-                id="address"
-                placeholder="Full Address (Optional)"
-                value={formData.address}
-                onChange={handleChange}
-              />
 
               <div className="flex items-center py-2">
                 <label className="flex items-center space-x-2 cursor-pointer">
@@ -200,7 +184,7 @@ const RegisterForm = () => {
                 disabled={!formData.agreed}
                 className="bg-green-700 hover:bg-green-800 dark:bg-green-600 dark:hover:bg-green-700 text-white font-semibold py-3.5 mt-2"
               >
-                Create Account
+                Send OTP
               </Button>
 
               <div className="text-center mt-6">
@@ -218,7 +202,14 @@ const RegisterForm = () => {
 
         {/* STEP 2: OTP VERIFICATION */}
         {step === 'otp' && (
-          <OTPVerification key="otp" onVerify={handleVerifyOTP} />
+          <div className="w-full">
+            {errorMsg && (
+              <div className="mb-4 p-3 bg-red-50 dark:bg-red-900/30 text-red-600 dark:text-red-400 text-sm rounded-lg border border-red-200 dark:border-red-800 text-center">
+                {errorMsg}
+              </div>
+            )}
+            <OTPVerification key="otp" onVerify={handleVerifyOTP} />
+          </div>
         )}
 
         {/* STEP 3: SUCCESS VALIDATION */}

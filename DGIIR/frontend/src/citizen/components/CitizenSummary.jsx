@@ -4,10 +4,14 @@ import { useQuery } from '@tanstack/react-query';
 import { complaintApi } from '../../api/complaintApi';
 
 const CitizenSummary = () => {
-  const { data, isLoading } = useQuery({
+  const { data, isLoading, isError } = useQuery({
     queryKey: ['my-complaints'],
     queryFn: () => complaintApi.getComplaints()
   });
+
+  if (isError) {
+    return <div className="mt-6 text-red-500">Failed to load activity summary.</div>;
+  }
 
   const complaints = data?.data?.complaints || data?.complaints || [];
 

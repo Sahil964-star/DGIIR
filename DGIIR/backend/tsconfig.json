@@ -40,5 +40,11 @@
     "noUncheckedSideEffectImports": true,
     "moduleDetection": "force",
     "skipLibCheck": true,
-  }
+  },
+  "exclude": [
+    "verify_auth.ts",
+    "verify_security.ts",
+    "verify_lifecycle.ts"
+  ]
 }
+

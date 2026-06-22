@@ -99,7 +99,7 @@ router.post('/request-otp', authRateLimiter, requestOtp);
  *       403:
  *         description: Forbidden for staff members
  */
-router.post('/verify-otp', authRateLimiter, verifyOtp);
+router.post('/verify-otp', verifyOtp);
 
 /**
  * @swagger

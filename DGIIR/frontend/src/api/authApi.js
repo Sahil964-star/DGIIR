@@ -19,10 +19,13 @@ export const authApi = {
   },
 
   // Citizen OTP Verification
-  verifyOtp: async ({ phone, otp }) => {
+  verifyOtp: async ({ phone, otp, name, email, districtId }) => {
     const response = await axiosClient.post('/auth/verify-otp', {
       phone,
       otp,
+      name,
+      email,
+      districtId
     });
     return response.data;
   },

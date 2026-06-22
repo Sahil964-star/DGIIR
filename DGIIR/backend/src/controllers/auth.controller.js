@@ -13,10 +13,10 @@ export const requestOtp = asyncHandler(async (req, res) => {
     res.status(200).json({ status: 'success', message: 'OTP sent successfully' });
 });
 export const verifyOtp = asyncHandler(async (req, res) => {
-    const { phone, otp } = req.body;
+    const { phone, otp, name, email, districtId } = req.body;
     if (!phone || !otp)
         throw new AppError('Please provide phone and OTP', 400);
-    const result = await AuthService.verifyOtp(phone, otp);
+    const result = await AuthService.verifyOtp(phone, otp, { name, email, districtId });
     res.cookie('refreshToken', result.refreshToken, {
         httpOnly: true,
         secure: process.env.NODE_ENV === 'production',
@@ -62,11 +62,17 @@ export const loginAdmin = asyncHandler(async (req, res) => {
 export const refreshToken = asyncHandler(async (req, res) => {
     const { refreshToken } = req.cookies;
     if (!refreshToken)
-        throw new AppError('Please provide a refresh token', 400);
-    const decoded = jwt.verify(refreshToken, process.env.JWT_REFRESH_SECRET);
+        throw new AppError('Please provide a refresh token', 401);
+    let decoded;
+    try {
+        decoded = jwt.verify(refreshToken, process.env.JWT_REFRESH_SECRET);
+    }
+    catch (error) {
+        throw new AppError('Invalid refresh token', 401);
+    }
     const user = await prisma.user.findUnique({ where: { id: decoded.id } });
     if (!user)
-        throw new AppError('User not found', 404);
+        throw new AppError('User not found', 401);
     const newAccessToken = AuthService.generateAccessToken(user.id, user.role);
     res.status(200).json({ status: 'success', data: { accessToken: newAccessToken } });
 });
