@@ -23,6 +23,11 @@ const RegisterForm = () => {
     queryKey: ['districts'],
     queryFn: metaApi.getDistricts
   });
+  // ---- DEBUG LOGS ----
+  console.log('isLoadingDistricts', isLoadingDistricts);
+  console.log('districtsData', districtsData);
+  console.log('districtsData?.data', districtsData?.data);
+  console.log('districtsData?.data?.districts', districtsData?.data?.districts);
   
   // Form State
   const [formData, setFormData] = useState({
@@ -154,9 +159,10 @@ const RegisterForm = () => {
                   <option value="" disabled>
                     {isLoadingDistricts ? "Loading districts..." : "Select District"}
                   </option>
-                  {districtsData?.data?.districts?.map(d => (
-                    <option key={d.id} value={d.id}>{d.name}</option>
-                  ))}
+                  {districtsData?.data?.districts?.map(d => {
+                    console.log('rendering district', d);
+                    return (<option key={d.id} value={d.id}>{d.name}</option>);
+                  })}
                 </select>
               </div>
 

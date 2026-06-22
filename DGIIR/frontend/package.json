@@ -16,6 +16,7 @@
     "framer-motion": "^12.40.0",
     "leaflet": "^1.9.4",
     "lucide-react": "^0.400.0",
+    "puppeteer": "^20.9.0",
     "react": "^19.2.7",
     "react-dom": "^19.2.7",
     "react-router-dom": "^7.18.0",
