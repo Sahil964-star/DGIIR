@@ -44,7 +44,8 @@
   "exclude": [
     "verify_auth.ts",
     "verify_security.ts",
-    "verify_lifecycle.ts"
+    "verify_lifecycle.ts",
+    "verification_script.ts"
   ]
 }
 

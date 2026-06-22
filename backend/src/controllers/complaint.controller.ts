@@ -64,6 +64,36 @@ export const createComplaint = asyncHandler(async (req: Request, res: Response) 
   let resolvedCategoryId: string;
   let resolvedDepartmentId: string | null = null;
 
+  const getOtherCategory = async () => {
+    let fallback = await prisma.category.findFirst({ where: { name: 'Other' } });
+    if (!fallback) {
+      let otherDept = await prisma.department.findFirst({ where: { name: 'Other' } });
+      if (!otherDept) {
+        otherDept = await prisma.department.create({ data: { name: 'Other', code: 'OTH' } });
+      }
+      fallback = await prisma.category.create({
+        data: {
+          name: 'Other',
+          departmentId: otherDept.id,
+        }
+      });
+      // Optionally create SLA Configuration for the newly created "Other" category
+      try {
+        await prisma.slaConfiguration.create({
+          data: {
+            categoryId: fallback.id,
+            resolveHours: 48,
+            escalationTarget: 'OPERATIONS',
+            priorityRules: { HIGH: 24, MEDIUM: 48, LOW: 72 },
+          }
+        });
+      } catch (slaErr) {
+        // Suppress if already exists
+      }
+    }
+    return fallback;
+  };
+
   if (categoryIdOverride) {
     // Manual override (e.g., Operations creating on behalf of citizen)
     const cat = await prisma.category.findUnique({ where: { id: categoryIdOverride } });
@@ -80,15 +110,13 @@ export const createComplaint = asyncHandler(async (req: Request, res: Response) 
       resolvedDepartmentId = aiCategory.departmentId;
     } else {
       // AI suggested a category that doesn't exist — fall back to "Other"
-      const fallback = await prisma.category.findFirst({ where: { name: 'Other' } });
-      if (!fallback) throw new AppError('Default category "Other" not found in database', 500);
+      const fallback = await getOtherCategory();
       resolvedCategoryId = fallback.id;
       resolvedDepartmentId = fallback.departmentId;
     }
   } else {
     // Low confidence — use "Other" and route to Operations Review
-    const fallback = await prisma.category.findFirst({ where: { name: 'Other' } });
-    if (!fallback) throw new AppError('Default category "Other" not found in database', 500);
+    const fallback = await getOtherCategory();
     resolvedCategoryId = fallback.id;
     resolvedDepartmentId = null; // will be assigned manually
   }
@@ -106,14 +134,13 @@ export const createComplaint = asyncHandler(async (req: Request, res: Response) 
   }
 
   // ── Routing decision ─────────────────────────────────────────────────────────
-  // confidence > 90 AND no district mismatch → PENDING (auto-routed to department)
-  // confidence 60-90 → UNDER_REVIEW (operations review)
-  // confidence < 60 OR district mismatch → UNDER_REVIEW (AI Review Queue, flagged)
+  // confidence >= 80 AND no district mismatch → PENDING (auto-routed to department)
+  // confidence < 80 OR district mismatch → UNDER_REVIEW (Admin Queue, flagged)
   
-  const shouldFlagForReview = aiResult.confidence < 60 || aiDistrictMismatch;
+  const shouldFlagForReview = aiResult.confidence < 80 || aiDistrictMismatch;
   
   let initialStatus: ComplaintStatus;
-  if (aiResult.confidence > 90 && !aiDistrictMismatch) {
+  if (aiResult.confidence >= 80 && !aiDistrictMismatch) {
     initialStatus = ComplaintStatus.PENDING;
   } else {
     initialStatus = ComplaintStatus.UNDER_REVIEW;

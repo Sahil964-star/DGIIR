@@ -3,10 +3,59 @@ import fs from 'fs';
 import path from 'path';
 import { prisma } from '../db/prisma.js';
 const genAI = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY || '' });
+const KEYWORD_RULES = [
+    {
+        keywords: ['no water', 'water supply', 'dry tap', 'no drinking water', 'taps are dry', 'water shortage'],
+        categoryName: 'No Water Supply',
+        departmentName: 'Delhi Jal Board',
+        priority: 'HIGH',
+        severityScore: 75,
+        confidence: 91,
+    },
+    {
+        keywords: ['water leakage', 'water leak', 'pipe burst', 'broken pipe', 'flooded road', 'sewage overflow', 'drain overflowing'],
+        categoryName: 'Water Leakage',
+        departmentName: 'Delhi Jal Board',
+        priority: 'HIGH',
+        severityScore: 80,
+        confidence: 93,
+    },
+    {
+        keywords: ['pothole', 'potholes', 'road broken', 'cracked road', 'road damage', 'crater'],
+        categoryName: 'Potholes on Main Roads',
+        departmentName: 'Public Works Department',
+        priority: 'MEDIUM',
+        severityScore: 50,
+        confidence: 95,
+    },
+    {
+        keywords: ['streetlight', 'street light', 'dark street', 'lights not working', 'bulb broken', 'street lamp'],
+        categoryName: 'Streetlight Malfunction',
+        departmentName: 'Public Works Department',
+        priority: 'LOW',
+        severityScore: 30,
+        confidence: 92,
+    },
+    {
+        keywords: ['garbage', 'trash', 'dump', 'overflowing bin', 'waste accumulation', 'rubbish'],
+        categoryName: 'Garbage Dump Clearance',
+        departmentName: 'Municipal Corporation of Delhi',
+        priority: 'HIGH',
+        severityScore: 70,
+        confidence: 94,
+    },
+    {
+        keywords: ['stray animal', 'stray dog', 'monkey menace', 'cattle', 'cow attack', 'stray cow', 'animal attack'],
+        categoryName: 'Stray Animal Menace',
+        departmentName: 'Municipal Corporation of Delhi',
+        priority: 'HIGH',
+        severityScore: 68,
+        confidence: 90,
+    }
+];
 export class AIService {
     /**
-     * Main entry point: classifies a complaint using Gemini (text + optional image).
-     * Fetches categories and departments dynamically from the DB — no hardcoding.
+     * Main entry point: classifies a complaint using rule-based keywords or LLM fallback.
      */
     static async analyzeComplaint(input) {
         const [categories, departments, districts] = await Promise.all([
@@ -14,6 +63,44 @@ export class AIService {
             prisma.department.findMany(),
             prisma.district.findMany(),
         ]);
+        // 1. Try Rule-based keyword matching first
+        const normalizedTitle = input.title.toLowerCase();
+        const normalizedDesc = input.description.toLowerCase();
+        let matchedRule = null;
+        let matchedKeyword = '';
+        for (const rule of KEYWORD_RULES) {
+            for (const kw of rule.keywords) {
+                if (normalizedTitle.includes(kw) || normalizedDesc.includes(kw)) {
+                    matchedRule = rule;
+                    matchedKeyword = kw;
+                    break;
+                }
+            }
+            if (matchedRule)
+                break;
+        }
+        if (matchedRule) {
+            const matchedCat = categories.find((c) => c.name.toLowerCase() === matchedRule.categoryName.toLowerCase());
+            const matchedDept = departments.find((d) => d.name.toLowerCase() === matchedRule.departmentName.toLowerCase());
+            if (matchedCat && matchedDept) {
+                console.log(`[AIService] Keyword matched: "${matchedKeyword}" -> ${matchedCat.name}`);
+                return {
+                    predictedCategory: matchedCat.name,
+                    confidence: matchedRule.confidence,
+                    keywords: [matchedKeyword],
+                    reasoning: `Rule-based keyword match for "${matchedKeyword}"`,
+                    priority: matchedRule.priority,
+                    severityScore: matchedRule.severityScore,
+                    departmentSuggestion: matchedDept.name,
+                    districtSuggestion: input.district,
+                    aiSummary: input.title,
+                    detectedObjects: [],
+                    imageConfidence: null,
+                    requiresEscalation: matchedRule.priority === 'CRITICAL',
+                };
+            }
+        }
+        // 2. Fall back to LLMs (Groq, OpenAI, or Gemini)
         const categoryList = categories.map((c) => `  - "${c.name}" (Department: "${c.department.name}")`).join('\n');
         const districtList = districts.map((d) => `  - "${d.name}"`).join('\n');
         const textPrompt = `
@@ -81,23 +168,77 @@ Citizen-Selected District: "${input.district}"
   "imageConfidence": null,
   "requiresEscalation": true|false
 }`;
-        let result;
         try {
-            if (input.imagePath && fs.existsSync(input.imagePath)) {
-                // Multimodal: text + image
-                result = await AIService.analyzeWithImage(textPrompt, input.imagePath);
+            let responseText = '';
+            // A. Try Groq if configured
+            if (process.env.GROQ_API_KEY) {
+                try {
+                    console.log('[AIService] Attempting Groq fallback...');
+                    const response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Authorization': `Bearer ${process.env.GROQ_API_KEY}`
+                        },
+                        body: JSON.stringify({
+                            model: 'llama3-8b-8192',
+                            messages: [{ role: 'user', content: textPrompt }],
+                            temperature: 0.1,
+                            response_format: { type: 'json_object' }
+                        })
+                    });
+                    if (response.ok) {
+                        const data = await response.json();
+                        responseText = data.choices?.[0]?.message?.content || '';
+                    }
+                }
+                catch (err) {
+                    console.error('[AIService] Groq API call failed:', err);
+                }
             }
-            else {
-                // Text-only
-                result = await AIService.analyzeTextOnly(textPrompt);
+            // B. Try OpenAI if configured and Groq didn't succeed
+            if (!responseText && process.env.OPENAI_API_KEY) {
+                try {
+                    console.log('[AIService] Attempting OpenAI fallback...');
+                    const response = await fetch('https://api.openai.com/v1/chat/completions', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Authorization': `Bearer ${process.env.OPENAI_API_KEY}`
+                        },
+                        body: JSON.stringify({
+                            model: 'gpt-4o-mini',
+                            messages: [{ role: 'user', content: textPrompt }],
+                            temperature: 0.1,
+                            response_format: { type: 'json_object' }
+                        })
+                    });
+                    if (response.ok) {
+                        const data = await response.json();
+                        responseText = data.choices?.[0]?.message?.content || '';
+                    }
+                }
+                catch (err) {
+                    console.error('[AIService] OpenAI API call failed:', err);
+                }
+            }
+            // C. Try Gemini as final option or standard flow
+            if (!responseText) {
+                if (input.imagePath && fs.existsSync(input.imagePath)) {
+                    return await AIService.analyzeWithImage(textPrompt, input.imagePath);
+                }
+                else {
+                    return await AIService.analyzeTextOnly(textPrompt);
+                }
+            }
+            if (responseText) {
+                return AIService.parseGeminiResponse(responseText);
             }
         }
         catch (err) {
-            console.error('[AIService] Gemini API error:', err);
-            // Fallback: return a low-confidence result so it goes to Operations Review
-            return AIService.buildFallbackResult(input);
+            console.error('[AIService] Fallback LLM error:', err);
         }
-        return result;
+        return AIService.buildFallbackResult(input);
     }
     static async analyzeTextOnly(prompt) {
         const response = await genAI.models.generateContent({
@@ -147,7 +288,6 @@ Citizen-Selected District: "${input.district}"
         return AIService.parseGeminiResponse(text);
     }
     static parseGeminiResponse(text) {
-        // Strip markdown code fences if model returned them despite JSON mode
         const cleaned = text.replace(/^```json\s*/i, '').replace(/```\s*$/i, '').trim();
         const parsed = JSON.parse(cleaned);
         return {
@@ -168,7 +308,7 @@ Citizen-Selected District: "${input.district}"
     static buildFallbackResult(input) {
         return {
             predictedCategory: 'Other',
-            confidence: 40, // below 60 — will route to Operations Review
+            confidence: 40, // below 80 — will route to Operations Review
             keywords: [],
             reasoning: 'AI classification unavailable. Routed to Operations Review.',
             priority: 'MEDIUM',

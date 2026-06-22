@@ -284,7 +284,7 @@ export default function ComplaintsPage() {
                             {c.aiSummary && (
                               <div className="col-span-full p-3 rounded-lg bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700">
                                 <p className="text-xs font-semibold text-slate-500 dark:text-slate-400 mb-1 flex items-center gap-1.5">
-                                  <AIBadge /> AI Summary
+                                  <AIBadge /> Reason / Summary
                                 </p>
                                 <p className="text-sm text-slate-700 dark:text-slate-300 italic">"{c.aiSummary}"</p>
                               </div>

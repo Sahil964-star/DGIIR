@@ -1286,6 +1286,24 @@ const OperationsDashboard = () => {
                 <Building size={14} className="text-slate-400 shrink-0" />
                 <span>{incident.category?.name} • {incident.district?.name}</span>
               </div>
+              {incident.aiConfidence !== undefined && incident.aiConfidence !== null && (
+                <div className="mt-2.5 p-3 rounded-xl bg-indigo-50/40 dark:bg-indigo-950/20 border border-indigo-100/50 dark:border-indigo-900/30 text-xs flex flex-col gap-1">
+                  <div className="flex justify-between items-center font-bold text-indigo-700 dark:text-indigo-400">
+                    <span>🤖 AI Prediction</span>
+                    <span>{Math.round(incident.aiConfidence)}% Conf.</span>
+                  </div>
+                  {incident.aiCategory && (
+                    <div className="text-[11px] mt-0.5 text-slate-700 dark:text-slate-300">
+                      Suggested Category: <span className="font-semibold">{incident.aiCategory}</span>
+                    </div>
+                  )}
+                  {incident.aiSummary && (
+                    <div className="text-[11px] text-slate-600 dark:text-slate-400 italic">
+                      Reason: "{incident.aiSummary}"
+                    </div>
+                  )}
+                </div>
+              )}
             </div>
           </div>
 
@@ -1329,6 +1347,24 @@ const OperationsDashboard = () => {
                   <span>Location: <span className="text-slate-700 dark:text-slate-300 font-semibold">{incident.address}</span></span>
                   <span>Category: <span className="text-slate-700 dark:text-slate-300 font-semibold">{incident.category?.name}</span></span>
                 </div>
+                {incident.aiConfidence !== undefined && incident.aiConfidence !== null && (
+                  <div className="mt-3 p-3 rounded-xl bg-indigo-50/40 dark:bg-indigo-950/20 border border-indigo-100/50 dark:border-indigo-900/30 text-xs flex flex-col gap-1 max-w-xl">
+                    <div className="flex justify-between items-center font-bold text-indigo-700 dark:text-indigo-400">
+                      <span>🤖 AI prediction insights</span>
+                      <span>{Math.round(incident.aiConfidence)}% Confidence</span>
+                    </div>
+                    {incident.aiCategory && (
+                      <div className="text-[11px] text-slate-700 dark:text-slate-300">
+                        Suggested Category: <span className="font-semibold">{incident.aiCategory}</span>
+                      </div>
+                    )}
+                    {incident.aiSummary && (
+                      <div className="text-[11px] text-slate-600 dark:text-slate-400 italic font-medium">
+                        Reason: "{incident.aiSummary}"
+                      </div>
+                    )}
+                  </div>
+                )}
               </div>
 
               <div className="flex items-center gap-3 shrink-0 flex-wrap sm:flex-nowrap">

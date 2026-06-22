@@ -21,8 +21,7 @@ export interface AIClassificationResult {
 }
 export declare class AIService {
     /**
-     * Main entry point: classifies a complaint using Gemini (text + optional image).
-     * Fetches categories and departments dynamically from the DB — no hardcoding.
+     * Main entry point: classifies a complaint using rule-based keywords or LLM fallback.
      */
     static analyzeComplaint(input: AIClassificationInput): Promise<AIClassificationResult>;
     private static analyzeTextOnly;
