@@ -13,12 +13,12 @@ const getStatusStyles = (status) => {
 
 const TaskTimeline = ({ tasks }) => {
   return (
-    <div className="h-full flex flex-col pt-2">
+    <div className="h-full flex flex-col pt-2 font-sans">
       <div className="flex items-center justify-between mb-8">
-        <h3 className="text-xl font-bold text-slate-900 dark:text-white">Today's Tasks</h3>
-        <div className="flex items-center gap-2 text-sm text-slate-500 dark:text-slate-400">
+        <h3 className="text-base font-bold text-slate-900 dark:text-white">Today's Tasks</h3>
+        <div className="flex items-center gap-2 text-xs font-semibold text-slate-500 dark:text-slate-400">
           <Calendar className="w-4 h-4" />
-          <span>21 May 2026</span>
+          <span>{new Date().toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })}</span>
         </div>
       </div>
       

@@ -1,33 +1,31 @@
 import React from 'react';
-import { Camera, FileUp, MessageSquare, AlertTriangle, ArrowRight } from 'lucide-react';
-import { motion } from 'framer-motion';
+import { RefreshCw, Camera, MessageCircle, MapPin } from 'lucide-react';
 
-const QuickActions = () => {
+const QuickActions = ({ onActionClick }) => {
   const actions = [
-    { name: 'Update Status', icon: ArrowRight, color: 'text-blue-600 dark:text-blue-400', bg: 'bg-blue-50 dark:bg-blue-900/20', hover: 'hover:bg-blue-100 dark:hover:bg-blue-900/40' },
-    { name: 'Upload Photo', icon: Camera, color: 'text-green-600 dark:text-green-400', bg: 'bg-green-50 dark:bg-green-900/20', hover: 'hover:bg-green-100 dark:hover:bg-green-900/40' },
-    { name: 'Submit Closure', icon: FileUp, color: 'text-indigo-600 dark:text-indigo-400', bg: 'bg-indigo-50 dark:bg-indigo-900/20', hover: 'hover:bg-indigo-100 dark:hover:bg-indigo-900/40' },
-    { name: 'Add Comment', icon: MessageSquare, color: 'text-purple-600 dark:text-purple-400', bg: 'bg-purple-50 dark:bg-purple-900/20', hover: 'hover:bg-purple-100 dark:hover:bg-purple-900/40' },
-    { name: 'Escalate', icon: AlertTriangle, color: 'text-red-600 dark:text-red-400', bg: 'bg-red-50 dark:bg-red-900/20', hover: 'hover:bg-red-100 dark:hover:bg-red-900/40' },
+    { id: 'status', name: 'Update Status', icon: RefreshCw, color: 'text-blue-600 dark:text-blue-400', bg: 'bg-blue-50 dark:bg-blue-950/40 hover:bg-blue-100/80 dark:hover:bg-blue-900/50' },
+    { id: 'closure', name: 'Submit Closure', icon: Camera, color: 'text-emerald-600 dark:text-emerald-400', bg: 'bg-emerald-50 dark:bg-emerald-950/40 hover:bg-emerald-100/80 dark:hover:bg-emerald-900/50' },
+    { id: 'comment', name: 'Add Comment', icon: MessageCircle, color: 'text-purple-600 dark:text-purple-400', bg: 'bg-purple-50 dark:bg-purple-950/40 hover:bg-purple-100/80 dark:hover:bg-purple-900/50' },
+    { id: 'visit', name: 'Log Visit', icon: MapPin, color: 'text-amber-600 dark:text-amber-400', bg: 'bg-amber-50 dark:bg-amber-950/40 hover:bg-amber-100/80 dark:hover:bg-amber-900/50' },
   ];
 
   return (
-    <div className="bg-white dark:bg-gray-900 rounded-xl p-4 border border-slate-200 dark:border-gray-800 shadow-sm">
-      <h3 className="text-xs font-bold text-slate-900 dark:text-white uppercase tracking-wide mb-3">Quick Actions</h3>
-      <div className="grid grid-cols-5 gap-2">
-        {actions.map((action, index) => (
-          <motion.button
-            key={action.name}
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.2, delay: 0.05 * index }}
-            className={`flex flex-col items-center justify-center py-2.5 px-2 rounded-lg transition-all ${action.bg} ${action.hover} border border-transparent hover:border-slate-200 dark:hover:border-slate-700`}
+    <div className="font-sans">
+      <h3 className="text-base font-bold text-slate-900 dark:text-white mb-4">Quick Actions</h3>
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+        {actions.map((action) => (
+          <button
+            key={action.id}
+            onClick={() => onActionClick(action.id)}
+            className={`flex flex-col items-center justify-center p-4 rounded-2xl transition-all cursor-pointer ${action.bg} border border-slate-100 dark:border-slate-800/80 shadow-sm flex-1`}
           >
-            <action.icon className={`w-5 h-5 mb-1.5 ${action.color}`} />
-            <span className="text-[10px] font-medium text-slate-700 dark:text-slate-300 text-center leading-tight">
+            <div className={`p-2.5 rounded-full ${action.bg.split(' ')[0]} mb-2`}>
+              <action.icon className={`w-5 h-5 ${action.color}`} />
+            </div>
+            <span className="text-xs font-bold text-slate-800 dark:text-slate-200 text-center leading-tight">
               {action.name}
             </span>
-          </motion.button>
+          </button>
         ))}
       </div>
     </div>

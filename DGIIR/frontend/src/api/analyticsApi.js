@@ -11,6 +11,11 @@ export const analyticsApi = {
     return response.data;
   },
 
+  getOfficerWorkload: async () => {
+    const response = await axiosClient.get('/analytics/operations/officer-workload');
+    return response.data;
+  },
+
   getCmOverview: async (params) => {
     const response = await axiosClient.get('/analytics/cm/overview', { params });
     return response.data;

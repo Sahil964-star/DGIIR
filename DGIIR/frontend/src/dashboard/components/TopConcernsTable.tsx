@@ -50,37 +50,53 @@ export default function TopConcernsTable({ concerns, loading }: TopConcernsTable
         <table className="w-full text-sm">
           <thead>
             <tr className="text-xs text-slate-400 dark:text-slate-500 uppercase tracking-wider">
-              <th className="text-left pb-2 pr-3 w-8">Rank</th>
+              <th className="text-left pb-2 pr-3 w-12">Rank</th>
               <th className="text-left pb-2 pr-3">Concern</th>
               <th className="text-right pb-2 pr-4">Complaints</th>
+              <th className="text-right pb-2 w-32">Trend (vs last 7 days)</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-slate-50 dark:divide-slate-700/50">
-            {visible.map((c) => (
-              <tr
-                key={c.rank}
-                className="hover:bg-slate-50 dark:hover:bg-slate-700/30 transition-colors duration-150"
-              >
-                {/* Rank badge */}
-                <td className="py-2 pr-3">
-                  <span
-                    className="inline-flex w-5 h-5 items-center justify-center rounded text-white text-[10px] font-bold"
-                    style={{ backgroundColor: RANK_COLORS[c.rank - 1] ?? '#94a3b8' }}
-                  >
-                    {c.rank}
-                  </span>
-                </td>
+            {visible.map((c) => {
+              const trendUp = c.trendUp ?? (c.trend >= 0)
+              const trendVal = Math.abs(c.trend || 0)
+              return (
+                <tr
+                  key={c.rank}
+                  className="hover:bg-slate-50 dark:hover:bg-slate-700/30 transition-colors duration-150"
+                >
+                  {/* Rank badge */}
+                  <td className="py-2.5 pr-3">
+                    <span
+                      className="inline-flex w-6 h-6 items-center justify-center rounded-md text-white text-[10px] font-bold"
+                      style={{ backgroundColor: RANK_COLORS[c.rank - 1] ?? '#94a3b8' }}
+                    >
+                      {c.rank}
+                    </span>
+                  </td>
 
-                {/* Concern name */}
-                <td className="py-2 pr-3 text-slate-700 dark:text-slate-200 font-medium whitespace-nowrap">
-                  {c.name}
-                </td>
+                  {/* Concern name */}
+                  <td className="py-2.5 pr-3 text-slate-700 dark:text-slate-200 font-medium whitespace-nowrap">
+                    {c.name}
+                  </td>
 
-                <td className="py-2 pr-4 text-right font-semibold text-slate-700 dark:text-slate-200">
-                  {c.count?.toLocaleString('en-IN') || 0}
-                </td>
-              </tr>
-            ))}
+                  {/* Count */}
+                  <td className="py-2.5 pr-4 text-right font-semibold text-slate-700 dark:text-slate-200">
+                    {c.count?.toLocaleString('en-IN') || 0}
+                  </td>
+
+                  {/* Trend */}
+                  <td className="py-2.5 text-right">
+                    <span className={`inline-flex items-center gap-1 text-xs font-semibold ${
+                      trendUp ? 'text-red-500' : 'text-emerald-500'
+                    }`}>
+                      {trendUp ? <UpArrow /> : <DownArrow />}
+                      {trendVal}%
+                    </span>
+                  </td>
+                </tr>
+              )
+            })}
           </tbody>
         </table>
       </div>

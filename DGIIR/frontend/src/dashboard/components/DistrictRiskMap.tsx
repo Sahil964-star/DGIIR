@@ -15,8 +15,9 @@ const riskLabel: Record<RiskLevel, string> = {
   critical: 'Critical',
 }
 
-// ─── Delhi districts SVG paths (approximate schematic polygons) ───────────────
-// Coordinate space: 0-380 x 0-390 (viewBox)
+// ─── Realistic Delhi districts SVG paths ──────────────────────────────────────
+// More detailed polygons matching actual Delhi district geography
+// ViewBox: 0 0 400 420
 const DISTRICTS: {
   id: string
   label: string
@@ -26,69 +27,69 @@ const DISTRICTS: {
   {
     id: 'north-west',
     label: 'North West',
-    labelPos: [100, 80],
-    path: 'M 80.0,40.0 L 97.2,35.2 L 114.7,33.2 L 133.0,36.0 L 150.0,30.0 L 153.0,46.7 L 158.5,63.0 L 160.6,79.9 L 159.9,97.4 L 173.4,112.0 L 170.0,130.0 L 164.7,144.3 L 154.8,156.6 L 154.9,173.3 L 144.2,185.2 L 140.0,200.0 L 122.5,202.5 L 108.6,194.2 L 92.2,193.4 L 78.3,185.1 L 62.7,181.8 L 47.9,176.2 L 32.5,172.4 L 20.0,160.0 L 23.0,142.6 L 29.7,125.7 L 27.6,107.5 L 30.0,90.0 L 42.2,77.2 L 52.4,62.4 L 67.4,52.4 Z'
+    labelPos: [105, 85],
+    path: 'M 85,25 C 90,22 98,20 110,22 L 128,18 C 135,17 142,18 150,20 L 158,22 C 162,25 165,30 165,38 L 168,55 C 170,65 170,75 168,85 L 165,100 C 163,110 160,118 155,125 L 148,138 C 143,148 140,155 138,165 L 132,178 C 128,185 122,190 115,193 L 100,198 C 92,198 85,196 78,190 L 65,182 C 55,178 45,175 36,172 L 22,165 C 18,158 16,150 18,140 L 22,125 C 25,115 25,105 23,95 L 22,82 C 23,70 28,60 38,52 L 55,40 C 65,33 75,28 85,25 Z'
   },
   {
     id: 'north',
     label: 'North',
-    labelPos: [200, 60],
-    path: 'M 150.0,30.0 L 164.6,24.6 L 180.5,31.6 L 195.7,30.9 L 210.7,29.9 L 224.9,21.1 L 240.0,20.0 L 246.4,34.4 L 246.7,49.7 L 250.1,64.6 L 250.0,80.0 L 253.0,89.8 L 253.6,100.0 L 255.0,110.0 L 238.0,114.2 L 221.1,118.4 L 204.3,123.3 L 188.5,132.3 L 170.0,130.0 L 173.4,112.0 L 159.9,97.4 L 160.6,79.9 L 158.5,63.0 L 153.0,46.7 Z'
-  },
-  {
-    id: 'central',
-    label: 'Central',
-    labelPos: [210, 145],
-    path: 'M 170.0,130.0 L 188.5,132.3 L 204.3,123.3 L 221.1,118.4 L 238.0,114.2 L 255.0,110.0 L 260.2,122.9 L 263.7,136.2 L 265.0,150.0 L 268.3,159.7 L 267.8,170.1 L 270.0,180.0 L 253.6,181.6 L 237.3,183.7 L 220.6,183.4 L 204.2,184.6 L 189.5,197.3 L 172.6,195.7 L 154.8,188.2 L 140.0,200.0 L 144.2,185.2 L 154.9,173.3 L 154.8,156.6 L 164.7,144.3 Z'
-  },
-  {
-    id: 'new-delhi',
-    label: 'New Delhi',
-    labelPos: [210, 200],
-    path: 'M 140.0,200.0 L 154.8,188.2 L 172.6,195.7 L 189.5,197.3 L 204.2,184.6 L 220.6,183.4 L 237.3,183.7 L 253.6,181.6 L 270.0,180.0 L 276.0,192.7 L 276.3,206.8 L 280.0,220.0 L 263.4,228.0 L 244.0,226.5 L 226.7,232.3 L 210.0,240.0 L 194.0,246.9 L 176.3,244.8 L 160.0,250.0 L 152.8,233.6 L 143.2,218.1 Z'
-  },
-  {
-    id: 'west',
-    label: 'West',
-    labelPos: [80, 190],
-    path: 'M 20.0,160.0 L 32.5,172.4 L 47.9,176.2 L 62.7,181.8 L 78.3,185.1 L 92.2,193.4 L 108.6,194.2 L 122.5,202.5 L 140.0,200.0 L 143.2,218.1 L 152.8,233.6 L 160.0,250.0 L 144.5,251.2 L 128.9,252.8 L 114.5,246.6 L 99.0,247.9 L 86.3,230.1 L 68.7,245.3 L 56.2,226.5 L 40.4,229.7 L 25.0,230.0 L 19.5,212.8 L 21.1,195.1 L 16.6,177.8 Z'
-  },
-  {
-    id: 'south-west',
-    label: 'South West',
-    labelPos: [80, 300],
-    path: 'M 25.0,230.0 L 40.4,229.7 L 56.2,226.5 L 68.7,245.3 L 86.3,230.1 L 99.0,247.9 L 114.5,246.6 L 128.9,252.8 L 144.5,251.2 L 160.0,250.0 L 176.3,244.8 L 194.0,246.9 L 210.0,240.0 L 199.6,251.8 L 189.1,263.6 L 193.6,284.1 L 171.5,289.0 L 167.2,304.4 L 158.5,317.2 L 148.8,329.4 L 145.2,345.2 L 140.0,360.0 L 123.1,357.7 L 105.9,357.0 L 90.0,350.0 L 79.6,337.8 L 70.7,324.4 L 59.4,313.0 L 50.0,300.0 L 41.1,283.5 L 41.9,263.4 L 28.6,248.5 Z'
-  },
-  {
-    id: 'south',
-    label: 'South',
-    labelPos: [180, 310],
-    path: 'M 140.0,360.0 L 145.2,345.2 L 148.8,329.4 L 158.5,317.2 L 167.2,304.4 L 171.5,289.0 L 193.6,284.1 L 189.1,263.6 L 199.6,251.8 L 210.0,240.0 L 226.7,232.3 L 244.0,226.5 L 263.4,228.0 L 280.0,220.0 L 286.8,234.3 L 287.8,249.5 L 283.4,265.7 L 290.0,280.0 L 282.5,293.9 L 278.6,310.0 L 260.8,317.4 L 252.8,330.9 L 245.2,344.7 L 240.0,360.0 L 223.3,363.4 L 207.2,369.4 L 190.0,370.0 L 172.8,369.4 L 157.2,360.5 Z'
-  },
-  {
-    id: 'south-east',
-    label: 'South East',
-    labelPos: [260, 270],
-    path: 'M 240.0,360.0 L 245.2,344.7 L 252.8,330.9 L 260.8,317.4 L 278.6,310.0 L 282.5,293.9 L 290.0,280.0 L 284.3,292.7 L 281.5,306.2 L 280.0,320.0 L 268.2,334.9 L 255.0,348.3 Z'
+    labelPos: [210, 55],
+    path: 'M 158,22 L 175,18 C 185,18 195,20 205,22 L 218,20 C 228,18 238,18 248,20 L 260,25 C 265,30 268,38 265,48 L 262,62 C 260,72 260,80 262,90 L 265,102 C 262,108 256,112 248,115 L 232,120 C 222,122 212,126 205,132 L 190,138 C 180,138 172,135 165,130 L 155,125 C 158,118 162,110 165,100 L 168,85 C 170,75 170,65 168,55 L 165,38 C 165,30 162,25 158,22 Z'
   },
   {
     id: 'north-east',
     label: 'North East',
-    labelPos: [290, 60],
-    path: 'M 240.0,20.0 L 255.7,18.6 L 269.5,27.9 L 285.3,25.7 L 300.0,30.0 L 311.5,43.0 L 314.2,60.4 L 324.0,74.2 L 330.0,90.0 L 313.4,92.8 L 297.6,89.3 L 282.3,81.8 L 266.3,79.3 L 250.0,80.0 L 251.4,64.3 L 240.7,50.7 L 239.2,35.6 Z'
+    labelPos: [305, 58],
+    path: 'M 260,25 L 278,22 C 288,22 298,25 308,30 L 318,38 C 322,45 325,55 325,65 L 328,80 C 330,88 332,95 338,100 L 345,108 C 342,115 335,118 325,118 L 310,115 C 300,112 290,108 282,102 L 270,96 C 265,92 262,88 262,82 L 262,72 C 260,72 260,80 262,90 L 265,102 C 262,108 256,112 248,115 L 242,108 C 248,98 252,88 255,78 L 258,65 C 260,55 260,45 258,38 L 260,25 Z'
   },
   {
     id: 'shahdara',
     label: 'Shahdara',
-    labelPos: [310, 120],
-    path: 'M 250.0,80.0 L 266.3,79.3 L 282.3,81.8 L 297.6,89.3 L 313.4,92.8 L 330.0,90.0 L 336.5,107.1 L 343.9,123.9 L 347.1,141.9 L 350.0,160.0 L 332.6,161.3 L 315.6,159.3 L 299.6,148.8 L 282.2,150.2 L 265.0,150.0 L 260.5,132.7 L 261.6,114.1 L 253.0,97.7 Z'
+    labelPos: [325, 135],
+    path: 'M 265,102 L 270,96 C 282,102 290,108 300,112 L 310,115 C 320,118 330,118 338,118 L 345,108 C 348,118 352,128 355,140 L 358,155 C 360,168 360,178 358,188 L 355,195 C 348,198 340,198 330,195 L 315,190 C 305,185 298,178 290,172 L 278,162 C 272,155 268,148 268,140 L 268,128 C 268,118 266,110 265,102 Z'
+  },
+  {
+    id: 'central',
+    label: 'Central',
+    labelPos: [215, 150],
+    path: 'M 165,130 L 190,138 C 200,132 210,126 222,122 L 248,115 C 256,112 262,108 265,102 L 268,118 C 270,128 272,138 275,148 L 278,162 C 275,168 270,172 265,175 L 252,180 C 242,182 232,184 222,184 L 210,185 C 200,188 192,195 185,200 L 175,198 C 165,195 155,190 148,185 L 140,205 C 142,195 146,185 148,178 L 148,165 C 143,155 140,148 138,140 L 138,130 C 145,128 155,128 165,130 Z'
   },
   {
     id: 'east',
     label: 'East',
-    labelPos: [305, 190],
-    path: 'M 265.0,150.0 L 282.2,150.2 L 299.6,148.8 L 315.6,159.3 L 332.6,161.3 L 350.0,160.0 L 347.7,175.2 L 340.9,189.5 L 336.8,204.3 L 339.4,220.6 L 335.4,235.5 L 330.0,250.0 L 316.7,249.6 L 303.3,247.7 L 290.0,250.0 L 286.4,240.1 L 283.1,230.1 L 280.0,220.0 L 277.7,202.2 L 270.5,185.4 L 268.8,167.5 Z'
-  }
+    labelPos: [318, 205],
+    path: 'M 268,140 C 268,148 272,155 278,162 L 290,172 C 298,178 305,185 315,190 L 330,195 C 340,198 348,198 355,195 L 358,188 C 358,198 355,210 350,222 L 345,235 C 340,245 335,252 328,258 L 315,265 C 305,268 295,268 288,265 L 280,258 C 278,248 276,238 275,228 L 275,218 C 275,208 272,198 268,190 L 268,175 C 272,168 275,162 278,155 L 268,140 Z'
+  },
+  {
+    id: 'new-delhi',
+    label: 'New Delhi',
+    labelPos: [215, 210],
+    path: 'M 140,205 L 148,185 C 155,190 165,195 175,198 L 185,200 C 192,195 200,188 210,185 L 222,184 C 232,184 242,182 252,180 L 265,175 C 270,172 275,168 278,162 L 278,175 C 275,182 272,190 270,198 L 268,210 C 268,220 268,228 270,238 L 275,248 C 270,255 262,258 252,258 L 238,255 C 228,252 218,248 210,245 L 198,252 C 188,255 178,255 168,252 L 155,248 C 150,242 145,235 142,225 L 140,215 Z'
+  },
+  {
+    id: 'west',
+    label: 'West',
+    labelPos: [82, 210],
+    path: 'M 22,165 L 36,172 C 45,175 55,178 65,182 L 78,190 C 85,196 92,198 100,198 L 115,193 C 122,190 128,185 132,178 L 138,165 C 138,175 140,185 142,195 L 140,205 C 140,215 142,225 145,235 L 155,248 C 148,252 140,255 130,258 L 118,260 C 108,258 100,252 92,245 L 80,235 C 72,228 65,225 55,228 L 42,232 C 32,232 24,228 18,222 L 15,210 C 14,200 15,190 18,180 L 22,165 Z'
+  },
+  {
+    id: 'south-west',
+    label: 'South West',
+    labelPos: [105, 310],
+    path: 'M 18,222 L 42,232 C 55,228 65,225 72,228 L 80,235 C 92,245 100,252 108,258 L 118,260 C 130,258 140,255 148,252 L 155,248 C 162,252 170,255 178,255 L 198,252 C 210,248 218,245 210,250 L 205,260 C 200,270 198,280 200,290 L 195,300 C 188,308 180,315 172,320 L 160,328 C 152,335 148,342 145,352 L 142,365 C 135,368 125,368 115,365 L 100,360 C 90,355 82,348 75,340 L 65,328 C 58,318 52,310 45,302 L 38,290 C 32,278 30,265 32,252 L 28,240 C 22,232 18,225 18,222 Z'
+  },
+  {
+    id: 'south',
+    label: 'South',
+    labelPos: [195, 325],
+    path: 'M 142,365 L 145,352 C 148,342 152,335 160,328 L 172,320 C 180,315 188,308 195,300 L 200,290 C 198,280 200,270 205,260 L 210,250 C 218,245 228,240 238,238 L 252,238 C 262,238 270,240 278,245 L 288,255 C 292,262 295,272 295,282 L 298,295 C 298,308 295,318 290,328 L 282,340 C 275,348 268,355 260,360 L 248,368 C 238,372 228,375 218,378 L 205,380 C 192,380 180,378 168,372 L 155,365 C 148,368 145,368 142,365 Z'
+  },
+  {
+    id: 'south-east',
+    label: 'South East',
+    labelPos: [305, 275],
+    path: 'M 275,248 C 278,248 280,250 282,252 L 288,255 C 292,262 295,272 295,282 L 298,295 C 298,308 295,318 290,328 L 282,340 C 280,335 278,328 278,320 L 280,308 C 282,298 282,288 280,278 L 278,268 C 276,258 275,252 275,248 Z'
+  },
 ]
 
 // ─── Legend ──────────────────────────────────────────────────────────────────
@@ -123,23 +124,12 @@ export default function DistrictRiskMap({ districts, loading }: DistrictRiskMapP
   return (
     <div className="card animate-fade-in flex flex-col justify-between h-full">
       <div className="flex items-start justify-between mb-1">
-        <div>
-          <h2 className="text-sm font-semibold text-slate-700 dark:text-slate-200">
-            District Risk Map — Delhi
-          </h2>
-          <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
-            Areas needing administrative attention
-          </p>
-        </div>
-        <button className="text-xs text-brand-600 dark:text-brand-400 font-medium hover:underline flex items-center gap-1">
-          View Full Map
-          <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-            <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
-          </svg>
-        </button>
+        <h2 className="text-sm font-semibold text-slate-700 dark:text-slate-200">
+          District Risk Map
+        </h2>
       </div>
 
-      <div className="relative w-full flex justify-center items-center mt-2 h-[260px]">
+      <div className="relative w-full flex justify-center items-center mt-1 flex-1 min-h-[240px]">
         {/* SVG Map */}
         <div className="w-full h-full flex justify-center">
             {/* Tooltip */}
@@ -153,7 +143,7 @@ export default function DistrictRiskMap({ districts, loading }: DistrictRiskMapP
                   </span>
                 </div>
                 <p className="text-xs text-slate-500 dark:text-slate-400">
-                  Total Complaints: <span className="font-medium text-slate-700 dark:text-slate-300">{hoveredDistrict.total || 0}</span>
+                  Total: <span className="font-medium text-slate-700 dark:text-slate-300">{hoveredDistrict.total || 0}</span>
                 </p>
                 <p className="text-xs text-slate-500 dark:text-slate-400">
                   Overdue: <span className="font-medium text-slate-700 dark:text-slate-300">{hoveredDistrict.overdue || 0}</span>
@@ -162,10 +152,17 @@ export default function DistrictRiskMap({ districts, loading }: DistrictRiskMapP
             )}
 
           <svg
-            viewBox="0 0 380 390"
+            viewBox="0 0 400 420"
             className="w-full h-full"
             aria-label="Delhi District Risk Map"
+            style={{ maxHeight: '260px' }}
           >
+            <defs>
+              {/* Drop shadow for hovered districts */}
+              <filter id="district-shadow" x="-5%" y="-5%" width="110%" height="110%">
+                <feDropShadow dx="0" dy="2" stdDeviation="3" floodColor="#000" floodOpacity="0.25" />
+              </filter>
+            </defs>
             {DISTRICTS.map((d) => {
               const info = riskMap[d.id]
               const color = info ? riskColor[info.riskLevel] : '#94a3b8'
@@ -176,25 +173,25 @@ export default function DistrictRiskMap({ districts, loading }: DistrictRiskMapP
                   <path
                     d={d.path}
                     fill={color}
-                    fillOpacity={isHovered ? 1 : 0.8}
+                    fillOpacity={isHovered ? 1 : 0.82}
                     stroke="#ffffff"
-                    strokeWidth={isHovered ? 2 : 1}
+                    strokeWidth={isHovered ? 2.5 : 1.2}
                     strokeLinejoin="round"
                     className="cursor-pointer transition-all duration-150"
                     onMouseEnter={() => setHovered(d.id)}
                     onMouseLeave={() => setHovered(null)}
-                    style={{ filter: isHovered ? 'brightness(1.1) drop-shadow(0 2px 4px rgba(0,0,0,0.25))' : 'none' }}
+                    style={{ filter: isHovered ? 'url(#district-shadow) brightness(1.08)' : 'none' }}
                   />
                   <text
                     x={d.labelPos[0]}
                     y={d.labelPos[1]}
                     textAnchor="middle"
-                    fontSize={10}
+                    fontSize={9}
                     fontWeight={600}
                     fill="#fff"
                     fillOpacity={0.95}
                     pointerEvents="none"
-                    style={{ textShadow: '0 1px 2px rgba(0,0,0,0.6)' }}
+                    style={{ textShadow: '0 1px 3px rgba(0,0,0,0.7)' }}
                   >
                     {d.label}
                   </text>
@@ -205,20 +202,28 @@ export default function DistrictRiskMap({ districts, loading }: DistrictRiskMapP
         </div>
 
         {/* Legend */}
-        <div className="absolute bottom-0 right-0 bg-white/90 dark:bg-slate-800/90 backdrop-blur-sm border border-slate-200 dark:border-slate-700 rounded-lg p-2.5 flex flex-col gap-1.5 shadow-sm">
+        <div className="absolute top-2 right-2 bg-white/90 dark:bg-slate-800/90 backdrop-blur-sm border border-slate-200 dark:border-slate-700 rounded-lg p-2 flex flex-col gap-1.5 shadow-sm">
           {LEGEND.map(({ level }) => (
             <div key={level} className="flex items-center gap-2">
               <span
                 className="w-2.5 h-2.5 rounded-full flex-shrink-0"
                 style={{ backgroundColor: riskColor[level] }}
               />
-              <span className="text-[11px] text-slate-600 dark:text-slate-300 font-medium leading-none">
+              <span className="text-[10px] text-slate-600 dark:text-slate-300 font-medium leading-none">
                 {riskLabel[level]}
               </span>
             </div>
           ))}
         </div>
       </div>
+
+      {/* View Full Map button */}
+      <button className="mt-2 self-end text-xs text-brand-600 dark:text-brand-400 font-medium hover:underline flex items-center gap-1 border border-brand-200 dark:border-brand-800/40 rounded-lg px-3 py-1.5 hover:bg-brand-50 dark:hover:bg-brand-900/20 transition-colors">
+        View Full Map
+        <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+          <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
+        </svg>
+      </button>
     </div>
   )
 }

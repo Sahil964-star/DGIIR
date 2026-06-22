@@ -1,6 +1,7 @@
 import React from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { Droplet, Trash2, MapPin, Calendar, Hash, ArrowRight, AlertCircle } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 import Card from '../../shared/components/Card';
 import StatusBadge from '../../shared/components/StatusBadge';
 import { complaintApi } from '../../api/complaintApi';
@@ -45,6 +46,7 @@ const ProgressNodes = ({ currentStage }) => {
 };
 
 const ComplaintList = () => {
+  const navigate = useNavigate();
   const { data, isLoading, isError } = useQuery({
     queryKey: ['my-complaints'],
     queryFn: () => complaintApi.getComplaints()
@@ -56,7 +58,10 @@ const ComplaintList = () => {
     <div className="mt-8">
       <div className="flex items-center justify-between mb-5">
         <h3 className="text-lg font-bold text-slate-900 dark:text-white">Recent Complaints</h3>
-        <button className="text-sm font-medium text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 transition-colors">
+        <button 
+          onClick={() => navigate('/citizen/my-reports')}
+          className="text-sm font-medium text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 transition-colors cursor-pointer"
+        >
           View All
         </button>
       </div>
@@ -76,7 +81,7 @@ const ComplaintList = () => {
             return (
               <Card 
                 key={complaint.id} 
-                className="cursor-pointer hover:border-slate-300 dark:hover:border-slate-600 hover:scale-[1.01] transition-all duration-300 bg-white dark:bg-slate-800"
+                className="bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 shadow-sm"
               >
                 <div className="flex items-start md:items-center gap-4 flex-col md:flex-row relative">
                   {/* Icon */}
@@ -114,16 +119,6 @@ const ComplaintList = () => {
                     
                     <ProgressNodes currentStage={getStageFromStatus(complaint.status)} />
                   </div>
-                  
-                  {/* View Details CTA */}
-                  <div className="hidden md:flex items-center gap-1 text-sm font-medium text-dgiir-green-700 dark:text-dgiir-green-500 opacity-0 group-hover:opacity-100 transition-opacity absolute right-4 top-1/2 -translate-y-1/2">
-                    View Details <ArrowRight className="w-4 h-4" />
-                  </div>
-                </div>
-                
-                {/* Mobile View Details CTA */}
-                <div className="mt-4 md:hidden flex justify-end items-center gap-1 text-sm font-medium text-dgiir-green-700 dark:text-dgiir-green-500">
-                  View Details <ArrowRight className="w-4 h-4" />
                 </div>
               </Card>
             );

@@ -2,7 +2,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import Button from '../../shared/components/Button';
 import { motion } from 'framer-motion';
 
-const OTPVerification = ({ onVerify }) => {
+const OTPVerification = ({ onVerify, isLoading }) => {
   const [otp, setOtp] = useState(['', '', '', '', '', '']);
   const [countdown, setCountdown] = useState(30);
   const inputRefs = useRef([]);
@@ -15,22 +15,51 @@ const OTPVerification = ({ onVerify }) => {
   }, [countdown]);
 
   const handleChange = (index, value) => {
-    if (isNaN(value)) return;
-    
+    if (value === '') {
+      const newOtp = [...otp];
+      newOtp[index] = '';
+      setOtp(newOtp);
+      return;
+    }
+
+    const digit = value.slice(-1);
+    if (!/^\d$/.test(digit)) return;
+
     const newOtp = [...otp];
-    newOtp[index] = value;
+    newOtp[index] = digit;
     setOtp(newOtp);
 
     // Auto focus next input
-    if (value !== '' && index < 5) {
+    if (index < 5) {
       inputRefs.current[index + 1].focus();
     }
   };
 
   const handleKeyDown = (index, e) => {
-    if (e.key === 'Backspace' && !otp[index] && index > 0) {
-      inputRefs.current[index - 1].focus();
+    if (e.key === 'Backspace') {
+      if (otp[index] === '') {
+        if (index > 0) {
+          const newOtp = [...otp];
+          newOtp[index - 1] = '';
+          setOtp(newOtp);
+          inputRefs.current[index - 1].focus();
+        }
+      } else {
+        const newOtp = [...otp];
+        newOtp[index] = '';
+        setOtp(newOtp);
+      }
     }
+  };
+
+  const handlePaste = (e) => {
+    e.preventDefault();
+    const pastedData = e.clipboardData.getData('text').trim();
+    if (!/^\d{6}$/.test(pastedData)) return;
+
+    const newOtp = pastedData.split('');
+    setOtp(newOtp);
+    inputRefs.current[5].focus();
   };
 
   const handleSubmit = (e) => {
@@ -68,6 +97,7 @@ const OTPVerification = ({ onVerify }) => {
               value={digit}
               onChange={(e) => handleChange(index, e.target.value)}
               onKeyDown={(e) => handleKeyDown(index, e)}
+              onPaste={handlePaste}
               className="w-12 h-14 text-center text-2xl font-bold rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white focus:ring-2 focus:ring-green-600 focus:border-transparent transition-all"
             />
           ))}
@@ -78,6 +108,7 @@ const OTPVerification = ({ onVerify }) => {
           fullWidth 
           variant="primary"
           disabled={otp.join('').length !== 6}
+          isLoading={isLoading}
           className="bg-green-700 hover:bg-green-800 dark:bg-green-600 dark:hover:bg-green-700 text-white font-semibold py-3.5"
         >
           Verify OTP

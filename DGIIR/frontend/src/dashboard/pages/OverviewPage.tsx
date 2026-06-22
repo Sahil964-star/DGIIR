@@ -76,6 +76,15 @@ export default function OverviewPage() {
     avgDays: resolutionData.averageDays || "0"
   };
 
+  // Compute percentages for display
+  const total = stats?.total || 0
+  const resolved = stats?.resolved || 0
+  const inProgress = stats?.inProgress || 0
+  const overdue = stats?.overdue || 0
+  const resolvedPct = total > 0 ? ((resolved / total) * 100).toFixed(1) : '0'
+  const inProgressPct = total > 0 ? ((inProgress / total) * 100).toFixed(1) : '0'
+  const overduePct = total > 0 ? ((overdue / total) * 100).toFixed(1) : '0'
+
   if (statsError) {
     return (
       <div className="page-enter px-7 pb-8 flex items-center justify-center min-h-[50vh]">
@@ -97,8 +106,8 @@ export default function OverviewPage() {
         <StatCard
           id="stat-total"
           title="Total Complaints"
-          value={stats?.total ?? 0}
-          contextText=""
+          value={total}
+          contextText="All time"
           accentColor="blue"
           icon={<TotalIcon />}
           loading={statsLoading}
@@ -106,8 +115,8 @@ export default function OverviewPage() {
         <StatCard
           id="stat-resolved"
           title="Resolved"
-          value={stats?.resolved ?? 0}
-          contextText={`${stats?.resolutionRate ?? 0}% addressed successfully`}
+          value={resolved}
+          contextText={`${resolvedPct}%`}
           accentColor="green"
           icon={<ResolvedIcon />}
           loading={statsLoading}
@@ -115,8 +124,8 @@ export default function OverviewPage() {
         <StatCard
           id="stat-inprogress"
           title="In Progress"
-          value={stats?.inProgress ?? 0}
-          contextText="Active interventions underway"
+          value={inProgress}
+          contextText={`${inProgressPct}%`}
           accentColor="amber"
           icon={<InProgressIcon />}
           loading={statsLoading}
@@ -124,8 +133,8 @@ export default function OverviewPage() {
         <StatCard
           id="stat-overdue"
           title="Overdue"
-          value={stats?.overdue ?? 0}
-          contextText="Requires intervention from departments"
+          value={overdue}
+          contextText={`${overduePct}%`}
           accentColor="red"
           icon={<OverdueIcon />}
           loading={statsLoading}
@@ -137,13 +146,13 @@ export default function OverviewPage() {
         {/* Status Overview bar chart */}
         <StatusOverviewChart
           stats={{ 
-            total: stats?.total || 0, 
-            resolved: stats?.resolved || 0, 
-            inProgress: stats?.inProgress || 0, 
-            overdue: stats?.overdue || 0, 
-            resolvedPct: stats?.resolutionRate || 0, 
-            inProgressPct: 0, 
-            overduePct: 0 
+            total: total, 
+            resolved: resolved, 
+            inProgress: inProgress, 
+            overdue: overdue, 
+            resolvedPct: parseFloat(resolvedPct), 
+            inProgressPct: parseFloat(inProgressPct), 
+            overduePct: parseFloat(overduePct) 
           }}
           loading={statsLoading}
         />

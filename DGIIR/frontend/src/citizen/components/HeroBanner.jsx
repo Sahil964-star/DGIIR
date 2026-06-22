@@ -1,8 +1,11 @@
 import React from 'react';
 import { Plus, Search } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 import Button from '../../shared/components/Button';
 
 const HeroBanner = () => {
+  const navigate = useNavigate();
+
   return (
     <div className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl p-8 lg:p-10 flex flex-col md:flex-row items-center justify-between relative transition-colors shadow-sm">
       <div className="z-10 relative md:max-w-xl">
@@ -11,10 +14,21 @@ const HeroBanner = () => {
           Submit complaints about water supply, garbage collection, roads, streetlights and public services. Track progress in real time.
         </p>
         <div className="flex flex-col sm:flex-row gap-4 mt-2">
-          <Button variant="primary" size="lg" icon={Plus}>
+          <Button 
+            variant="primary" 
+            size="lg" 
+            icon={Plus}
+            onClick={() => navigate('/citizen/report')}
+          >
             File New Complaint
           </Button>
-          <Button variant="outline" size="lg" icon={Search} className="bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-700">
+          <Button 
+            variant="outline" 
+            size="lg" 
+            icon={Search} 
+            className="bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-700"
+            onClick={() => navigate('/citizen/my-reports')}
+          >
             Track Existing Complaint
           </Button>
         </div>

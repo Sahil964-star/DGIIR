@@ -1,36 +1,56 @@
-import React from 'react';
-import { MessageCircle, UserCog, RefreshCw, XCircle } from 'lucide-react';
+import { MessageCircle, UserCheck, RefreshCw, AlertTriangle, FileText, MapPin } from 'lucide-react';
 import { motion } from 'framer-motion';
+
+const iconMap = {
+  MessageCircle: MessageCircle,
+  UserCheck: UserCheck,
+  RefreshCw: RefreshCw,
+  AlertTriangle: AlertTriangle,
+  FileText: FileText,
+  MapPin: MapPin
+};
 
 const RecentActivity = ({ activities = [] }) => {
   return (
-    <div className="h-full flex flex-col pt-2">
+    <div className="h-full flex flex-col pt-2 font-sans">
       <div className="flex items-center justify-between mb-4">
-        <h3 className="text-xl font-bold text-slate-900 dark:text-white">Recent Activity</h3>
+        <h3 className="text-base font-bold text-slate-900 dark:text-white">Incident Updates</h3>
       </div>
-      <div className="flex-1">
-        {activities.length === 0 ? (
-          <div className="text-slate-500 text-sm">No recent activity.</div>
-        ) : (
-          activities.map((activity, index) => (
+      
+      <div className="space-y-4">
+        {activities.map((activity, index) => {
+          const IconComponent = iconMap[activity.iconName] || FileText;
+          return (
             <motion.div
               key={activity.id}
-              initial={{ opacity: 0, x: -10 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ duration: 0.2, delay: 0.04 * index }}
-              className="flex items-start gap-4 py-4 px-2 border-b border-slate-200 dark:border-gray-800/60 last:border-0 hover:bg-slate-50 dark:hover:bg-slate-800/30 transition-colors rounded-xl -mx-2"
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.3, delay: 0.05 * index }}
+              className="flex items-start gap-4 p-3 rounded-2xl hover:bg-slate-50 dark:hover:bg-slate-800/35 transition-colors border border-slate-100/50 dark:border-slate-800/40 bg-white dark:bg-slate-900/50"
             >
               <div className={`p-2.5 rounded-full shrink-0 ${activity.iconBg}`}>
-                <activity.icon className={`w-5 h-5 ${activity.iconColor}`} />
+                <IconComponent className="w-5 h-5" />
               </div>
-              <div className="min-w-0 flex-1 pt-0.5">
-                <p className="text-sm font-semibold text-slate-900 dark:text-white leading-tight">{activity.title}</p>
-                <p className="text-xs font-medium text-slate-500 dark:text-slate-400 mt-1.5">{activity.description}</p>
+              <div className="min-w-0 flex-1">
+                <p className="text-sm font-bold text-slate-800 dark:text-white leading-tight">
+                  {activity.title}
+                </p>
+                <p className="text-xs text-slate-500 dark:text-slate-400 mt-1 font-medium leading-relaxed">
+                  {activity.description}
+                </p>
+                <span className="text-[10px] font-bold text-slate-400 dark:text-slate-500 block mt-1.5">
+                  {activity.time}
+                </span>
               </div>
-              <span className="text-[11px] font-semibold text-slate-400 dark:text-slate-500 whitespace-nowrap shrink-0 pt-0.5">{activity.time}</span>
             </motion.div>
-          ))
-        )}
+          );
+        })}
+      </div>
+
+      <div className="mt-4 pt-4 border-t border-slate-100 dark:border-slate-800 text-center">
+        <button className="text-xs font-bold text-green-700 dark:text-green-500 hover:text-green-800 transition-colors">
+          View All Updates
+        </button>
       </div>
     </div>
   );

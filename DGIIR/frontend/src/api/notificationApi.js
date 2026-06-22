@@ -10,4 +10,9 @@ export const notificationApi = {
     const response = await axiosClient.patch(`/notifications/${id}/read`);
     return response.data;
   },
+
+  markAllRead: async () => {
+    const response = await axiosClient.patch('/notifications/read-all');
+    return response.data;
+  },
 };

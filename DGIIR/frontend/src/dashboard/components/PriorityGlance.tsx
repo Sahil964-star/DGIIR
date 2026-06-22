@@ -28,7 +28,7 @@ const priorities = (data: PriorityStats) => [
     value: data.high,
     subtitle: 'Needs immediate attention',
     icon: <UpArrowIcon className="text-red-500" />,
-    iconBg: 'bg-red-50 dark:bg-red-900/20 border-red-100 dark:border-red-800/30',
+    iconBg: 'bg-red-50 dark:bg-red-900/20',
     valueColor: 'text-red-600 dark:text-red-400',
   },
   {
@@ -36,7 +36,7 @@ const priorities = (data: PriorityStats) => [
     value: data.medium,
     subtitle: 'Being addressed',
     icon: <RightArrowIcon className="text-amber-500" />,
-    iconBg: 'bg-amber-50 dark:bg-amber-900/20 border-amber-100 dark:border-amber-800/30',
+    iconBg: 'bg-amber-50 dark:bg-amber-900/20',
     valueColor: 'text-amber-600 dark:text-amber-400',
   },
   {
@@ -44,7 +44,7 @@ const priorities = (data: PriorityStats) => [
     value: data.low,
     subtitle: 'Under control',
     icon: <DownArrowIcon className="text-emerald-500" />,
-    iconBg: 'bg-emerald-50 dark:bg-emerald-900/20 border-emerald-100 dark:border-emerald-800/30',
+    iconBg: 'bg-emerald-50 dark:bg-emerald-900/20',
     valueColor: 'text-emerald-600 dark:text-emerald-400',
   },
 ]
@@ -54,49 +54,46 @@ export default function PriorityGlance({ data, loading }: PriorityGlanceProps) {
     return (
       <div className="card">
         <div className="skeleton h-4 w-32 rounded mb-4" />
-        <div className="skeleton h-24 w-full rounded mb-4" />
-        <div className="skeleton h-16 w-full rounded" />
+        <div className="space-y-3">
+          {[1,2,3].map(i => (
+            <div key={i} className="skeleton h-20 w-full rounded-lg" />
+          ))}
+        </div>
       </div>
     )
   }
 
   return (
-    <div className="card animate-fade-in flex flex-col justify-between h-full">
+    <div className="card animate-fade-in flex flex-col h-full">
       <h2 className="text-sm font-semibold text-slate-700 dark:text-slate-200 mb-4">
-        Priority Overview
+        Priority at a Glance
       </h2>
 
-      <div className="mb-6">
-        <div className="flex items-center gap-3 mb-2">
-          <div className="w-10 h-10 rounded-lg bg-red-50 dark:bg-red-900/20 flex items-center justify-center">
-            <UpArrowIcon className="text-red-500 w-6 h-6" />
-          </div>
-          <div>
-            <p className="text-xs text-slate-500 dark:text-slate-400 font-medium">High Priority</p>
-            <p className="text-2xl font-bold text-red-600 dark:text-red-400">
-              {formatNumber(data.high)} <span className="text-sm font-normal text-slate-500">complaints</span>
-            </p>
-          </div>
-        </div>
-      </div>
+      <div className="space-y-3 flex-1">
+        {priorities(data).map((p) => (
+          <div
+            key={p.label}
+            className="flex items-center gap-4 p-3.5 rounded-xl bg-slate-50 dark:bg-slate-800/60 border border-slate-100 dark:border-slate-700/40 hover:shadow-sm transition-shadow duration-200"
+          >
+            {/* Icon */}
+            <div className={`w-12 h-12 rounded-xl ${p.iconBg} flex items-center justify-center flex-shrink-0`}>
+              {p.icon}
+            </div>
 
-      <div className="space-y-4">
-        <div className="flex justify-between items-center border-b border-slate-100 dark:border-slate-800 pb-2">
-          <span className="text-sm text-slate-500 dark:text-slate-400">Affected Citizens</span>
-          <span className="text-sm font-bold text-slate-800 dark:text-slate-100">1.2 lakh</span>
-        </div>
-        <div className="flex justify-between items-center border-b border-slate-100 dark:border-slate-800 pb-2">
-          <span className="text-sm text-slate-500 dark:text-slate-400">Top District</span>
-          <span className="text-sm font-bold text-red-600 dark:text-red-400">North East Delhi</span>
-        </div>
-        <div className="flex justify-between items-center border-b border-slate-100 dark:border-slate-800 pb-2">
-          <span className="text-sm text-slate-500 dark:text-slate-400">Lead Department</span>
-          <span className="text-sm font-bold text-amber-600 dark:text-amber-400">Delhi Jal Board</span>
-        </div>
-        <div className="flex justify-between items-center pb-2">
-          <span className="text-sm text-slate-500 dark:text-slate-400">SLA Breach Count</span>
-          <span className="text-sm font-bold text-red-600 dark:text-red-400">84 (Critical)</span>
-        </div>
+            {/* Text */}
+            <div className="flex-1 min-w-0">
+              <p className="text-xs font-semibold text-slate-500 dark:text-slate-400 mb-0.5">
+                {p.label}
+              </p>
+              <p className={`text-2xl font-bold ${p.valueColor} leading-tight`}>
+                {formatNumber(p.value)}
+              </p>
+              <p className="text-[11px] text-slate-400 dark:text-slate-500 mt-0.5 italic">
+                {p.subtitle}
+              </p>
+            </div>
+          </div>
+        ))}
       </div>
     </div>
   )

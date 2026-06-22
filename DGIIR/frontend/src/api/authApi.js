@@ -59,4 +59,14 @@ export const authApi = {
     const response = await axiosClient.post('/auth/logout');
     return response.data;
   },
+
+  updateProfile: async (profileData) => {
+    const response = await axiosClient.patch('/auth/profile', profileData);
+    return response.data;
+  },
+
+  changePassword: async (passwordData) => {
+    const response = await axiosClient.patch('/auth/change-password', passwordData);
+    return response.data;
+  },
 };

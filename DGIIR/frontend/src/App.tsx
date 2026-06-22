@@ -53,6 +53,26 @@ import CitizenDashboard from './citizen/pages/CitizenDashboard';
 import OperationsDashboard from './dashboard/pages/OperationsDashboard';
 // @ts-ignore
 import OfficerDashboard from './dashboard/officer/pages/OfficerDashboard';
+// @ts-ignore
+import OfficerLayout from './dashboard/officer/components/OfficerLayout';
+// @ts-ignore
+import MyIncidentsPage from './dashboard/officer/pages/MyIncidentsPage';
+// @ts-ignore
+import IncidentDetailsPage from './dashboard/officer/pages/IncidentDetailsPage';
+// @ts-ignore
+import AssignmentsPage from './dashboard/officer/pages/AssignmentsPage';
+// @ts-ignore
+import InProgressPage from './dashboard/officer/pages/InProgressPage';
+// @ts-ignore
+import SlaDeadlinesPage from './dashboard/officer/pages/SlaDeadlinesPage';
+// @ts-ignore
+import OfficerReportsPage from './dashboard/officer/pages/ReportsPage';
+// @ts-ignore
+import ProfilePage from './dashboard/officer/pages/ProfilePage';
+// @ts-ignore
+import OfficerNotificationsPage from './dashboard/officer/pages/NotificationsPage';
+// @ts-ignore
+import HelpSupportPage from './dashboard/officer/pages/HelpSupportPage';
 
 // Intake / CM Dashboard (from origin/main)
 import DashboardLayout from './layouts/DashboardLayout';
@@ -60,6 +80,14 @@ import OverviewPage from './dashboard/pages/OverviewPage';
 import ComplaintsPage from './dashboard/pages/ComplaintsPage';
 import ReportsPage from './dashboard/pages/ReportsPage';
 import ComplaintFormPage from './citizen/pages/ComplaintFormPage';
+// @ts-ignore
+import MyReportsPage from './citizen/pages/MyReportsPage';
+// @ts-ignore
+import SettingsPage from './citizen/pages/SettingsPage';
+// @ts-ignore
+import NotificationsPage from './citizen/pages/NotificationsPage';
+// @ts-ignore
+import SupportPage from './citizen/pages/SupportPage';
 
 export default function App() {
   return (
@@ -97,6 +125,11 @@ export default function App() {
         <Route element={<Layout />}>
           {/* Citizen Routes */}
           <Route path="/citizen" element={<CitizenDashboard />} />
+          <Route path="/citizen/report" element={<ComplaintFormPage />} />
+          <Route path="/citizen/my-reports" element={<MyReportsPage />} />
+          <Route path="/citizen/settings" element={<SettingsPage />} />
+          <Route path="/citizen/notifications" element={<NotificationsPage />} />
+          <Route path="/citizen/support" element={<SupportPage />} />
           <Route path="/citizen/*" element={<Navigate to="/citizen" replace />} />
 
           {/* Operations Routes */}
@@ -122,8 +155,22 @@ export default function App() {
         </Route>
 
         {/* Officer Routes - Uses its own specialized layout (Sidebar & Header) */}
-        <Route path="/dashboard/officer" element={<OfficerDashboard />} />
-        <Route path="/dashboard/officer/*" element={<Navigate to="/dashboard/officer" replace />} />
+        <Route path="/dashboard/officer/*" element={<Navigate to="/officer" replace />} />
+        
+        {/* Officer Nested Routes via OfficerLayout */}
+        <Route path="/officer" element={<OfficerLayout />}>
+          <Route index element={<OfficerDashboard />} />
+          <Route path="incidents" element={<MyIncidentsPage />} />
+          <Route path="incidents/:id" element={<IncidentDetailsPage />} />
+          <Route path="assignments" element={<AssignmentsPage />} />
+          <Route path="in-progress" element={<InProgressPage />} />
+          <Route path="sla" element={<SlaDeadlinesPage />} />
+          <Route path="reports" element={<OfficerReportsPage />} />
+          <Route path="profile" element={<ProfilePage />} />
+          <Route path="notifications" element={<OfficerNotificationsPage />} />
+          <Route path="help" element={<HelpSupportPage />} />
+          <Route path="*" element={<Navigate to="/officer" replace />} />
+        </Route>
       </Route>
 
       {/* Default Fallback Route */}

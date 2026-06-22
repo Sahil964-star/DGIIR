@@ -208,7 +208,7 @@ const RegisterForm = () => {
                 {errorMsg}
               </div>
             )}
-            <OTPVerification key="otp" onVerify={handleVerifyOTP} />
+            <OTPVerification key="otp" onVerify={handleVerifyOTP} isLoading={isLoading} />
           </div>
         )}
 

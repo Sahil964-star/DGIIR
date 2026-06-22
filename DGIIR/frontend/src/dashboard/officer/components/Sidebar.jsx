@@ -1,6 +1,6 @@
 import React from 'react';
 import { NavLink, useNavigate } from 'react-router-dom';
-import { LayoutDashboard, FileText, CheckSquare, Map, CheckCircle2, ShieldCheck, Bell, User, HelpCircle, LogOut } from 'lucide-react';
+import { LayoutDashboard, FileText, CheckSquare, Map, CheckCircle2, ShieldCheck, Bell, User, HelpCircle, LogOut, Clock, AlertTriangle } from 'lucide-react';
 import { useQueryClient } from '@tanstack/react-query';
 import { useAuth } from '../../../hooks/useAuth';
 
@@ -19,15 +19,15 @@ const Sidebar = ({ officerProfile }) => {
   };
 
   const navItems = [
-    { name: 'Dashboard', icon: LayoutDashboard, path: '/dashboard/officer' },
-    { name: 'My Incidents', icon: FileText, path: '/dashboard/officer/incidents' },
-    { name: 'Today\'s Tasks', icon: CheckSquare, path: '/dashboard/officer/tasks' },
-    { name: 'Map View', icon: Map, path: '/dashboard/officer/map' },
-    { name: 'Completed', icon: CheckCircle2, path: '/dashboard/officer/completed' },
-    { name: 'Verification Queue', icon: ShieldCheck, path: '/dashboard/officer/verification' },
-    { name: 'Notifications', icon: Bell, path: '/dashboard/officer/notifications', badge: 5 },
-    { name: 'Profile', icon: User, path: '/dashboard/officer/profile' },
-    { name: 'Help & Support', icon: HelpCircle, path: '/dashboard/officer/support' },
+    { name: 'Dashboard', icon: LayoutDashboard, path: '/officer' },
+    { name: 'My Incidents', icon: FileText, path: '/officer/incidents' },
+    { name: 'Assignments', icon: ShieldCheck, path: '/officer/assignments' },
+    { name: 'In Progress', icon: Clock, path: '/officer/in-progress' },
+    { name: 'SLA & Deadlines', icon: AlertTriangle, path: '/officer/sla' },
+    { name: 'Reports', icon: FileText, path: '/officer/reports' },
+    { name: 'Profile', icon: User, path: '/officer/profile' },
+    { name: 'Notifications', icon: Bell, path: '/officer/notifications', badge: 5 },
+    { name: 'Help & Support', icon: HelpCircle, path: '/officer/help' },
   ];
 
   return (
@@ -47,7 +47,7 @@ const Sidebar = ({ officerProfile }) => {
           <NavLink
             key={item.name}
             to={item.path}
-            end={item.path === '/dashboard/officer'}
+            end={item.path === '/officer'}
             className={({ isActive }) =>
               `flex items-center justify-between px-3 py-2.5 rounded-lg transition-colors ${
                 isActive 
@@ -71,11 +71,17 @@ const Sidebar = ({ officerProfile }) => {
 
       <div className="p-4 border-t border-slate-800">
         <div className="flex items-center gap-3 p-2 rounded-lg bg-slate-800/50 mb-2">
-          <img 
-            src={officerProfile.avatar} 
-            alt={officerProfile.name} 
-            className="w-10 h-10 rounded-full border border-slate-700"
-          />
+          {officerProfile.avatar ? (
+            <img 
+              src={officerProfile.avatar} 
+              alt={officerProfile.name} 
+              className="w-10 h-10 rounded-full border border-slate-700 object-cover shrink-0"
+            />
+          ) : (
+            <div className="w-10 h-10 rounded-full border border-slate-700 bg-slate-800 flex items-center justify-center font-bold text-white text-sm shrink-0">
+              {(officerProfile.name || 'O').charAt(0).toUpperCase()}
+            </div>
+          )}
           <div className="flex-1 min-w-0">
             <h3 className="text-sm font-medium text-white truncate">{officerProfile.name}</h3>
             <p className="text-xs text-slate-400 truncate">{officerProfile.designation}</p>

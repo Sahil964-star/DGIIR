@@ -81,7 +81,12 @@ const LoginForm = () => {
       login(user, actualRole, token);
       navigate(getRoleLandingPage(actualRole));
     } catch (error) {
-      setErrorMsg(error?.response?.data?.message || 'Invalid OTP. Please try again.');
+      const errMsg = error?.response?.data?.message;
+      if (errMsg === 'Name is required for new citizen registration') {
+        setErrorMsg('Account not found. Please click "Create New Account" below to register.');
+      } else {
+        setErrorMsg(errMsg || 'Invalid OTP. Please try again.');
+      }
     } finally {
       setIsLoading(false);
     }
@@ -100,7 +105,12 @@ const LoginForm = () => {
 
       {selectedRole === 'citizen' && otpSent ? (
         <div className="w-full">
-          <OTPVerification onVerify={handleVerifyOTP} />
+          {errorMsg && (
+            <div className="mb-4 p-3 bg-red-50 dark:bg-red-900/30 text-red-600 dark:text-red-400 text-sm rounded-lg border border-red-200 dark:border-red-800 text-center">
+              {errorMsg}
+            </div>
+          )}
+          <OTPVerification onVerify={handleVerifyOTP} isLoading={isLoading} />
           
           <div className="text-center mt-6">
             <button 

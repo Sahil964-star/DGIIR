@@ -39,10 +39,10 @@ const TopNav = ({ setMobileOpen }) => {
         <div className="flex items-center space-x-3">
           <div className="hidden md:block text-right">
             <div className="text-sm font-medium text-slate-900 dark:text-white">{user?.name || 'User'}</div>
-            <div className="text-xs text-slate-500 dark:text-slate-400 capitalize">{role === 'cm' ? 'Chief Minister' : role}</div>
+            <div className="text-xs text-slate-500 dark:text-slate-400 capitalize">{role === 'cm' ? 'Chief Minister' : (role || 'Guest')}</div>
           </div>
           <div className="w-9 h-9 rounded-full bg-green-100 dark:bg-green-900/50 border border-green-200 dark:border-green-800 flex items-center justify-center text-green-700 dark:text-green-400 font-bold text-sm">
-            {user?.name?.charAt(0).toUpperCase() || 'U'}
+            {(user?.name?.charAt(0) || 'U').toUpperCase()}
           </div>
         </div>
 

@@ -37,4 +37,19 @@ export const complaintApi = {
     const response = await axiosClient.patch(`/complaints/${id}/assign`, assignData);
     return response.data;
   },
+
+  acceptComplaint: async (id) => {
+    const response = await axiosClient.post(`/complaints/${id}/accept`);
+    return response.data;
+  },
+
+  rejectComplaint: async (id, rejectData) => {
+    const response = await axiosClient.post(`/complaints/${id}/reject`, rejectData);
+    return response.data;
+  },
+
+  escalateComplaint: async (id, escalateData) => {
+    const response = await axiosClient.post(`/complaints/${id}/escalate`, escalateData);
+    return response.data;
+  },
 };

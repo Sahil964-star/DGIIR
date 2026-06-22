@@ -30,15 +30,27 @@ const SupportCard = () => {
         {/* New Support Options */}
         <div className="pt-2 pb-1 border-t border-slate-100 dark:border-slate-700"></div>
         <div className="flex justify-between">
-          <button className="flex flex-col items-center gap-1.5 p-2 rounded-lg hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white">
+          <button 
+            disabled 
+            title="Coming Soon" 
+            className="flex flex-col items-center gap-1.5 p-2 rounded-lg opacity-50 cursor-not-allowed text-slate-600 dark:text-slate-300"
+          >
             <HelpCircle className="w-5 h-5" />
             <span className="text-[10px] font-medium">FAQ</span>
           </button>
-          <button className="flex flex-col items-center gap-1.5 p-2 rounded-lg hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white">
+          <button 
+            disabled 
+            title="Coming Soon" 
+            className="flex flex-col items-center gap-1.5 p-2 rounded-lg opacity-50 cursor-not-allowed text-slate-600 dark:text-slate-300"
+          >
             <MessageSquare className="w-5 h-5" />
             <span className="text-[10px] font-medium">Chat</span>
           </button>
-          <button className="flex flex-col items-center gap-1.5 p-2 rounded-lg hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white">
+          <button 
+            disabled 
+            title="Coming Soon" 
+            className="flex flex-col items-center gap-1.5 p-2 rounded-lg opacity-50 cursor-not-allowed text-slate-600 dark:text-slate-300"
+          >
             <Building2 className="w-5 h-5" />
             <span className="text-[10px] font-medium">Depts</span>
           </button>
