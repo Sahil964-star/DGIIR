@@ -58,9 +58,9 @@ const SummaryCards = ({ stats }) => {
         title="Performance Score"
         value={stats.performance}
         subtext={stats.performanceSubtext || "Good"}
-        subtextColor="text-emerald-600 dark:text-emerald-400"
+        subtextColor={stats.performanceSubtextColor || "text-emerald-600 dark:text-emerald-400"}
         icon={Trophy}
-        color={{ bg: 'bg-green-50 dark:bg-green-950/40', text: 'text-green-600 dark:text-green-400' }}
+        color={stats.performanceColor || { bg: 'bg-green-50 dark:bg-green-950/40', text: 'text-green-600 dark:text-green-400' }}
         delay={0.4}
       />
     </div>

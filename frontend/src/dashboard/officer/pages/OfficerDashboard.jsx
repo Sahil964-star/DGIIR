@@ -168,13 +168,33 @@ const OfficerDashboard = () => {
   const selectedComplaint = activeComplaintResp?.data?.complaint;
 
   // Render variables derived from database records
-  const totalAssigned = performance?.totalAssigned || complaints.length || 0;
-  const resolvedCount = performance?.resolved || complaints.filter(c => c.status === 'CLOSED' || c.status === 'RESOLVED').length || 0;
-  const performanceScore = totalAssigned > 0 ? Math.round((resolvedCount / totalAssigned) * 100) : 82;
-  const performanceSubtext = performanceScore >= 80 ? 'Good' : performanceScore >= 50 ? 'Average' : 'Action Required';
-
   const activeComplaintsCount = complaints.filter(c => c.status !== 'RESOLVED' && c.status !== 'CLOSED' && c.status !== 'REJECTED').length;
   const overdueCount = workload.overdue || complaints.filter(c => c.isOverdue).length || 0;
+  
+  const totalAssigned = performance?.totalAssigned || complaints.length || 0;
+  const performanceScore = totalAssigned > 0 ? Math.round(((totalAssigned - overdueCount) / totalAssigned) * 100) : 100;
+  
+  let performanceSubtext = '';
+  let performanceSubtextColor = '';
+  let performanceColor = { bg: '', text: '' };
+
+  if (performanceScore >= 90) {
+    performanceSubtext = 'Excellent';
+    performanceSubtextColor = 'text-emerald-600 dark:text-emerald-400';
+    performanceColor = { bg: 'bg-green-50 dark:bg-green-950/40', text: 'text-green-600 dark:text-green-400' };
+  } else if (performanceScore >= 75) {
+    performanceSubtext = 'Good';
+    performanceSubtextColor = 'text-blue-600 dark:text-blue-400';
+    performanceColor = { bg: 'bg-blue-50 dark:bg-blue-950/40', text: 'text-blue-600 dark:text-blue-400' };
+  } else if (performanceScore >= 50) {
+    performanceSubtext = 'Needs Attention';
+    performanceSubtextColor = 'text-amber-600 dark:text-amber-400';
+    performanceColor = { bg: 'bg-amber-50 dark:bg-amber-950/40', text: 'text-amber-600 dark:text-amber-400' };
+  } else {
+    performanceSubtext = 'Critical';
+    performanceSubtextColor = 'text-red-600 dark:text-red-400';
+    performanceColor = { bg: 'bg-red-50 dark:bg-red-950/40', text: 'text-red-600 dark:text-red-400' };
+  }
   
   // High priority active count
   const highPriorityActiveCount = complaints.filter(c => 
@@ -200,7 +220,9 @@ const OfficerDashboard = () => {
     overdue: overdueCount || 2,
     overdueSubtext: overdueCount > 0 ? "Need immediate action" : "All clear",
     performance: `${performanceScore}%`,
-    performanceSubtext: performanceSubtext
+    performanceSubtext,
+    performanceSubtextColor,
+    performanceColor
   };
 
   // ── 2. Today's Tasks Timeline Data ──
