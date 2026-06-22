@@ -257,14 +257,37 @@ const IncidentDetailsPage = () => {
         <div className="lg:col-span-8 space-y-8">
           
           {/* Metadata Card */}
-          <div className="bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800/80 rounded-3xl p-6 shadow-sm">
-            <h3 className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-4">Incident Information</h3>
+          <div className={`bg-white dark:bg-slate-900 border ${c.aiConfidence < 60 ? 'border-amber-400 dark:border-amber-600 shadow-amber-500/10' : 'border-slate-200/80 dark:border-slate-800/80'} rounded-3xl p-6 shadow-sm`}>
+            {c.aiConfidence < 60 && (
+              <div className="mb-4 flex items-center gap-2 bg-amber-50 dark:bg-amber-950/30 text-amber-700 dark:text-amber-400 p-2.5 rounded-xl text-xs font-bold border border-amber-200 dark:border-amber-800/50">
+                <AlertTriangle className="w-4 h-4 shrink-0" />
+                <span>AI Confidence is Low ({c.aiConfidence}%). Please verify citizen details carefully.</span>
+              </div>
+            )}
+            
+            <h3 className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-4 flex items-center justify-between">
+              <span>Incident Information</span>
+              {c.aiConfidence != null && (
+                <span className="flex items-center gap-1.5 text-[10px] bg-indigo-50 dark:bg-indigo-950/30 text-indigo-700 dark:text-indigo-400 px-2 py-0.5 rounded-full border border-indigo-200 dark:border-indigo-800/50">
+                  <Sparkles className="w-3 h-3" />
+                  AI CONFIDENCE: {c.aiConfidence}%
+                </span>
+              )}
+            </h3>
+            
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-y-4 gap-x-6 text-xs font-semibold text-slate-600 dark:text-slate-400">
               <div className="flex items-center gap-2.5">
                 <Building className="w-4 h-4 text-slate-400" />
                 <div>
                   <p className="text-slate-400 font-bold uppercase text-[9px] tracking-wide">Department</p>
                   <p className="text-slate-800 dark:text-slate-200 font-bold">{c.department?.name || 'General Response'}</p>
+                </div>
+              </div>
+              <div className="flex items-center gap-2.5">
+                <ShieldAlert className="w-4 h-4 text-slate-400" />
+                <div>
+                  <p className="text-slate-400 font-bold uppercase text-[9px] tracking-wide">Category (AI)</p>
+                  <p className="text-slate-800 dark:text-slate-200 font-bold">{c.category?.name || c.aiCategory || 'Other'}</p>
                 </div>
               </div>
               <div className="flex items-center gap-2.5">
@@ -275,21 +298,40 @@ const IncidentDetailsPage = () => {
                 </div>
               </div>
               <div className="flex items-center gap-2.5">
-                <Phone className="w-4 h-4 text-slate-400" />
-                <div>
-                  <p className="text-slate-400 font-bold uppercase text-[9px] tracking-wide">Citizen Contact</p>
-                  <p className="text-slate-800 dark:text-slate-200 font-bold">{c.citizen?.phone || 'No phone registered'}</p>
-                </div>
-              </div>
-              <div className="flex items-center gap-2.5">
                 <MapPin className="w-4 h-4 text-slate-400" />
                 <div>
                   <p className="text-slate-400 font-bold uppercase text-[9px] tracking-wide">Address</p>
-                  <p className="text-slate-800 dark:text-slate-200 font-bold">{c.address || 'Delhi'}</p>
+                  <p className="text-slate-800 dark:text-slate-200 font-bold truncate max-w-[200px]">{c.address || 'Delhi'}</p>
                 </div>
               </div>
             </div>
           </div>
+
+          {/* AI Recommended Action & Summary Card */}
+          {c.aiSummary && (
+            <div className="bg-gradient-to-r from-indigo-50 to-blue-50 dark:from-indigo-950/20 dark:to-blue-950/20 border border-indigo-100 dark:border-indigo-800/50 rounded-3xl p-6 shadow-sm relative overflow-hidden">
+              <div className="absolute top-0 right-0 p-4 opacity-10">
+                <Sparkles className="w-24 h-24 text-indigo-600 dark:text-indigo-400" />
+              </div>
+              <h3 className="text-xs font-bold text-indigo-800 dark:text-indigo-400 uppercase tracking-wider mb-2.5 flex items-center gap-1.5">
+                <Sparkles className="w-4 h-4" />
+                AI Summary & Recommended Action
+              </h3>
+              <p className="text-sm text-indigo-900 dark:text-indigo-200 leading-relaxed font-medium">
+                {c.aiSummary}
+              </p>
+              
+              {c.aiKeywords && c.aiKeywords.length > 0 && (
+                <div className="mt-4 flex flex-wrap gap-1.5">
+                  {c.aiKeywords.map((kw, i) => (
+                    <span key={i} className="text-[10px] bg-white/60 dark:bg-slate-900/50 border border-indigo-200 dark:border-indigo-700/50 text-indigo-700 dark:text-indigo-300 px-2 py-0.5 rounded-full font-bold uppercase tracking-wide">
+                      {kw}
+                    </span>
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
 
           {/* Description Card */}
           <div className="bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800/80 rounded-3xl p-6 shadow-sm">

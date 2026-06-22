@@ -47,6 +47,8 @@ const ProgressNodes = ({ currentStage }) => {
 
 const ComplaintList = () => {
   const navigate = useNavigate();
+  const [expandedId, setExpandedId] = React.useState(null);
+
   const { data, isLoading, isError } = useQuery({
     queryKey: ['my-complaints'],
     queryFn: () => complaintApi.getComplaints()
@@ -77,11 +79,13 @@ const ComplaintList = () => {
           {complaints.map((complaint) => {
             const { icon: IconComponent, color, bg } = getIconProps(complaint.category?.name);
             const displayId = complaint.id.split('-')[0].substring(0, 8).toUpperCase();
+            const isExpanded = expandedId === complaint.id;
             
             return (
               <Card 
                 key={complaint.id} 
-                className="bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 shadow-sm"
+                className={`bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 shadow-sm cursor-pointer transition-all ${isExpanded ? 'ring-2 ring-blue-500/50' : 'hover:border-blue-300 dark:hover:border-blue-700/50'}`}
+                onClick={() => setExpandedId(isExpanded ? null : complaint.id)}
               >
                 <div className="flex items-start md:items-center gap-4 flex-col md:flex-row relative">
                   {/* Icon */}
@@ -118,6 +122,57 @@ const ComplaintList = () => {
                     </div>
                     
                     <ProgressNodes currentStage={getStageFromStatus(complaint.status)} />
+                    
+                    {/* Expanded AI Details */}
+                    {isExpanded && complaint.aiConfidence && (
+                      <div className="mt-6 pt-4 border-t border-slate-100 dark:border-slate-700/50 cursor-default" onClick={e => e.stopPropagation()}>
+                        <h5 className="text-sm font-bold text-indigo-600 dark:text-indigo-400 mb-3 flex items-center gap-1.5">
+                          <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z" />
+                          </svg>
+                          AI Analysis Report
+                        </h5>
+                        
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm mb-4">
+                          <div className="bg-slate-50 dark:bg-slate-900/50 p-3 rounded-lg border border-slate-200 dark:border-slate-700/50">
+                            <span className="text-xs text-slate-500 block mb-1">AI Classification</span>
+                            <span className="font-semibold text-slate-800 dark:text-slate-200">{complaint.aiCategory || 'Pending'}</span>
+                          </div>
+                          <div className="bg-slate-50 dark:bg-slate-900/50 p-3 rounded-lg border border-slate-200 dark:border-slate-700/50">
+                            <span className="text-xs text-slate-500 block mb-1">Suggested Department</span>
+                            <span className="font-semibold text-slate-800 dark:text-slate-200">{complaint.aiDepartmentSuggestion || 'Pending'}</span>
+                          </div>
+                          <div className="bg-slate-50 dark:bg-slate-900/50 p-3 rounded-lg border border-slate-200 dark:border-slate-700/50">
+                            <span className="text-xs text-slate-500 block mb-1">AI Confidence Score</span>
+                            <span className="font-semibold text-slate-800 dark:text-slate-200">{Math.round(complaint.aiConfidence)}%</span>
+                          </div>
+                          <div className="bg-slate-50 dark:bg-slate-900/50 p-3 rounded-lg border border-slate-200 dark:border-slate-700/50">
+                            <span className="text-xs text-slate-500 block mb-1">Assessed Priority</span>
+                            <span className="font-semibold text-slate-800 dark:text-slate-200">{complaint.aiPriority || 'MEDIUM'}</span>
+                          </div>
+                        </div>
+
+                        {complaint.aiSummary && (
+                          <div className="mb-4">
+                            <span className="text-xs font-semibold text-slate-500 block mb-1">AI Reasoning / Summary</span>
+                            <p className="text-slate-700 dark:text-slate-300 italic">"{complaint.aiSummary}"</p>
+                          </div>
+                        )}
+
+                        {complaint.aiKeywords?.length > 0 && (
+                          <div>
+                            <span className="text-xs font-semibold text-slate-500 block mb-2">Keywords Detected</span>
+                            <div className="flex flex-wrap gap-1.5">
+                              {complaint.aiKeywords.map((kw, i) => (
+                                <span key={i} className="text-[10px] bg-indigo-50 dark:bg-indigo-900/30 text-indigo-700 dark:text-indigo-400 px-2 py-0.5 rounded-full border border-indigo-200 dark:border-indigo-800">
+                                  {kw}
+                                </span>
+                              ))}
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    )}
                   </div>
                 </div>
               </Card>

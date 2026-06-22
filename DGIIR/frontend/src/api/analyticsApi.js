@@ -40,4 +40,9 @@ export const analyticsApi = {
     const response = await axiosClient.get('/analytics/cm/priority', { params });
     return response.data;
   },
+
+  getCmAiAnalytics: async (params) => {
+    const response = await axiosClient.get('/analytics/cm/ai-analytics', { params });
+    return response.data;
+  },
 };

@@ -1,8 +1,33 @@
 import axiosClient from './axiosClient';
 
 export const complaintApi = {
+  /**
+   * Creates a complaint. Accepts either a plain object or a FormData instance.
+   * If a plain object is passed, the image (optional File) should be included
+   * as the `image` key — this fn will build the FormData automatically.
+   */
   createComplaint: async (data) => {
-    const response = await axiosClient.post('/complaints', data);
+    let payload;
+    let headers = {};
+
+    if (data instanceof FormData) {
+      payload = data;
+      headers = { 'Content-Type': 'multipart/form-data' };
+    } else {
+      // Build FormData so the server can handle text + optional image in one request
+      const fd = new FormData();
+      Object.entries(data).forEach(([key, value]) => {
+        if (key === 'image' && value instanceof File) {
+          fd.append('image', value);
+        } else if (value !== undefined && value !== null) {
+          fd.append(key, String(value));
+        }
+      });
+      payload = fd;
+      headers = { 'Content-Type': 'multipart/form-data' };
+    }
+
+    const response = await axiosClient.post('/complaints', payload, { headers });
     return response.data;
   },
 
@@ -28,8 +53,13 @@ export const complaintApi = {
     return response.data;
   },
 
-  updateStatus: async (id, statusData) => {
-    const response = await axiosClient.patch(`/complaints/${id}/status`, statusData);
+  updateStatus: async (id, data) => {
+    const response = await axiosClient.patch(`/complaints/${id}/status`, data);
+    return response.data;
+  },
+
+  overrideClassification: async (id, data) => {
+    const response = await axiosClient.patch(`/complaints/${id}/ai-override`, data);
     return response.data;
   },
 

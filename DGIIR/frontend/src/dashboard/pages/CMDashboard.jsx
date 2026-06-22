@@ -1,7 +1,7 @@
 import React from 'react';
 import { useQuery } from '@tanstack/react-query';
 import Card from '../../shared/components/Card';
-import { BarChart3, TrendingUp, AlertTriangle, Clock } from 'lucide-react';
+import { BarChart3, TrendingUp, AlertTriangle, Clock, Sparkles } from 'lucide-react';
 import { analyticsApi } from '../../api/analyticsApi';
 import Loader from '../../shared/components/Loader';
 import { 
@@ -37,19 +37,26 @@ const CMDashboard = () => {
     queryFn: () => analyticsApi.getCmPriority()
   });
 
-  if (isLoadingOverview || isLoadingConcerns || isLoadingRisk || isLoadingResolution || isLoadingPriority) {
+  const { data: aiAnalyticsResp, isLoading: isLoadingAi, isError: errAi } = useQuery({
+    queryKey: ['cmAiAnalytics'],
+    queryFn: () => analyticsApi.getCmAiAnalytics()
+  });
+
+  if (isLoadingOverview || isLoadingConcerns || isLoadingRisk || isLoadingResolution || isLoadingPriority || isLoadingAi) {
     return <div className="min-h-screen flex items-center justify-center"><Loader size={48} /></div>;
   }
 
-  if (errOverview || errConcerns || errRisk || errResolution || errPriority) {
+  if (errOverview || errConcerns || errRisk || errResolution || errPriority || errAi) {
     return <div className="min-h-screen flex items-center justify-center text-red-500">Failed to load Chief Minister data.</div>;
   }
 
+  const kpis = overviewResp?.data || {};
   const kpis = overviewResp?.data || {};
   const topConcerns = concernsResp?.data || [];
   const districtRisk = riskResp?.data || [];
   const resolutionTime = resolutionResp?.data || { averageDays: "0" };
   const rawPriority = priorityResp?.data || [];
+  const aiData = aiAnalyticsResp?.data || { accuracyRate: 0, autoRouted: 0, manualReview: 0, totalWithAi: 0 };
   const priorityAnalytics = rawPriority.map(p => ({
     name: p.priority,
     value: p._count?.id || 0
@@ -178,6 +185,73 @@ const CMDashboard = () => {
                   <RechartsTooltip contentStyle={{ borderRadius: '8px', border: 'none', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }} />
                   <Legend />
                 </PieChart>
+              </ResponsiveContainer>
+            ) : (
+              <div className="flex items-center justify-center h-full text-slate-500">No data available</div>
+            )}
+          </div>
+        </Card>
+      </div>
+
+      {/* AI Analytics Section */}
+      <div className="mt-12 mb-6">
+        <h2 className="text-xl font-bold text-slate-900 dark:text-white tracking-tight flex items-center gap-2">
+          <Sparkles className="text-indigo-500" /> AI Intelligence Hub
+        </h2>
+        <p className="text-sm text-slate-600 dark:text-slate-400">Automated classification, routing performance, and emerging trends.</p>
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
+        <Card className="p-6 bg-gradient-to-br from-indigo-50 to-white dark:from-indigo-900/20 dark:to-slate-900 border-indigo-100 dark:border-indigo-800/30">
+          <p className="text-xs font-bold text-indigo-600 dark:text-indigo-400 uppercase tracking-wider mb-2">AI Accuracy Rate</p>
+          <div className="flex items-end gap-2">
+            <span className="text-4xl font-extrabold text-slate-900 dark:text-white">{aiData.accuracyRate}%</span>
+          </div>
+          <p className="text-xs text-slate-500 mt-2 font-medium">Of {aiData.totalWithAi} AI-classified complaints</p>
+        </Card>
+
+        <Card className="p-6 bg-gradient-to-br from-emerald-50 to-white dark:from-emerald-900/20 dark:to-slate-900 border-emerald-100 dark:border-emerald-800/30">
+          <p className="text-xs font-bold text-emerald-600 dark:text-emerald-400 uppercase tracking-wider mb-2">Auto-Routed</p>
+          <div className="flex items-end gap-2">
+            <span className="text-4xl font-extrabold text-slate-900 dark:text-white">{aiData.autoRouted}</span>
+          </div>
+          <p className="text-xs text-slate-500 mt-2 font-medium">Auto-assigned without manual review</p>
+        </Card>
+
+        <Card className="p-6 bg-gradient-to-br from-amber-50 to-white dark:from-amber-900/20 dark:to-slate-900 border-amber-100 dark:border-amber-800/30">
+          <p className="text-xs font-bold text-amber-600 dark:text-amber-400 uppercase tracking-wider mb-2">Manual Review</p>
+          <div className="flex items-end gap-2">
+            <span className="text-4xl font-extrabold text-slate-900 dark:text-white">{aiData.manualReview}</span>
+          </div>
+          <p className="text-xs text-slate-500 mt-2 font-medium">Flagged for Ops (Confidence &lt; 90%)</p>
+        </Card>
+
+        <Card className="p-6 bg-gradient-to-br from-violet-50 to-white dark:from-violet-900/20 dark:to-slate-900 border-violet-100 dark:border-violet-800/30">
+          <p className="text-xs font-bold text-violet-600 dark:text-violet-400 uppercase tracking-wider mb-2">Emerging Keywords</p>
+          <div className="flex flex-wrap gap-1.5 mt-2">
+            {aiData.emergingKeywords?.slice(0, 5).map((kw, i) => (
+              <span key={i} className="text-[10px] px-2 py-0.5 bg-white dark:bg-slate-800 border border-violet-200 dark:border-violet-700/50 text-violet-700 dark:text-violet-300 rounded-full font-bold uppercase">
+                {kw.keyword} ({kw.count})
+              </span>
+            ))}
+          </div>
+          <p className="text-[10px] text-slate-400 mt-3 uppercase tracking-wider font-bold">Based on recent 50 complaints</p>
+        </Card>
+      </div>
+
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <Card className="p-6 h-80 flex flex-col">
+          <h2 className="text-sm font-bold text-slate-400 uppercase tracking-wider mb-4">AI Category Distribution</h2>
+          <div className="flex-1 bg-white dark:bg-[#0b1120] rounded-lg">
+            {aiData.aiCategoryDistribution?.length > 0 ? (
+              <ResponsiveContainer width="100%" height="100%">
+                <BarChart data={aiData.aiCategoryDistribution} margin={{ top: 5, right: 30, left: 0, bottom: 25 }}>
+                  <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="var(--border-color, #e2e8f0)" />
+                  <XAxis dataKey="name" angle={-45} textAnchor="end" height={60} tick={{ fontSize: 10 }} />
+                  <YAxis tick={{ fontSize: 10 }} />
+                  <RechartsTooltip cursor={{fill: 'transparent'}} contentStyle={{ borderRadius: '8px', border: 'none', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }} />
+                  <Bar dataKey="count" fill="#8b5cf6" radius={[4, 4, 0, 0]} />
+                </BarChart>
               </ResponsiveContainer>
             ) : (
               <div className="flex items-center justify-center h-full text-slate-500">No data available</div>
