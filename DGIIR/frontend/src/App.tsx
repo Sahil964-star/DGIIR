@@ -109,14 +109,16 @@ export default function App() {
         </Route>
 
         {/* CM Dashboard layout routes (from origin/main) */}
-        <Route path="/overview" element={<DashboardLayout />}>
-          <Route index element={<OverviewPage />} />
-        </Route>
-        <Route path="/complaints" element={<DashboardLayout />}>
-          <Route index element={<ComplaintsPage />} />
-        </Route>
-        <Route path="/reports" element={<DashboardLayout />}>
-          <Route index element={<ReportsPage />} />
+        <Route element={<ProtectedRoute allowedRoles={['CHIEF_MINISTER', 'SUPER_ADMIN']} />}>
+          <Route path="/overview" element={<DashboardLayout />}>
+            <Route index element={<OverviewPage />} />
+          </Route>
+          <Route path="/complaints" element={<DashboardLayout />}>
+            <Route index element={<ComplaintsPage />} />
+          </Route>
+          <Route path="/reports" element={<DashboardLayout />}>
+            <Route index element={<ReportsPage />} />
+          </Route>
         </Route>
 
         {/* Officer Routes - Uses its own specialized layout (Sidebar & Header) */}
