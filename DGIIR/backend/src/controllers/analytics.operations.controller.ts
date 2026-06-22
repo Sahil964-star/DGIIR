@@ -17,3 +17,52 @@ export const getSlaPerformance = asyncHandler(async (req: Request, res: Response
   
   res.status(200).json({ status: 'success', data: { total, breached, compliant, complianceRate: total ? ((compliant/total)*100).toFixed(2) : 0 } });
 });
+
+export const getOfficerWorkload = asyncHandler(async (req: Request, res: Response) => {
+  const officers = await prisma.user.findMany({
+    where: { role: 'FIELD_OFFICER', isActive: true },
+    select: {
+      id: true,
+      name: true,
+      role: true,
+      district: {
+        select: {
+          name: true,
+        },
+      },
+      _count: {
+        select: {
+          complaintsAssigned: {
+            where: {
+              status: {
+                in: ['ASSIGNED', 'IN_PROGRESS'],
+              },
+            },
+          },
+        },
+      },
+    },
+  });
+
+  const assignedCounts = await prisma.complaint.groupBy({
+    by: ['officerId'],
+    where: {
+      officerId: { in: officers.map(o => o.id) },
+      status: 'ASSIGNED',
+    },
+    _count: { id: true },
+  });
+
+  const assignedCountMap = new Map(assignedCounts.map(c => [c.officerId, c._count.id]));
+
+  const formattedOfficers = officers.map(officer => ({
+    officerId: officer.id,
+    officerName: officer.name,
+    officerRole: officer.role,
+    district: officer.district?.name || 'Unassigned',
+    activeComplaintCount: officer._count.complaintsAssigned,
+    assignedComplaintCount: assignedCountMap.get(officer.id) || 0,
+  }));
+
+  res.status(200).json({ status: 'success', data: { workload: formattedOfficers } });
+});

@@ -8,6 +8,8 @@ import {
   logout,
   forgotPassword,
   resetPassword,
+  updateProfile,
+  changePassword,
 } from '../controllers/auth.controller.js';
 import { protect } from '../middlewares/auth.js';
 import { authRateLimiter } from '../middlewares/security.js';
@@ -212,5 +214,7 @@ router.use(protect);
  *         description: User data
  */
 router.get('/me', getMe);
+router.patch('/profile', updateProfile);
+router.patch('/change-password', changePassword);
 
 export default router;

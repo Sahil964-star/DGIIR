@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import { getNotifications, markAsRead } from '../controllers/notification.controller.js';
+import { getNotifications, markAsRead, markAllRead } from '../controllers/notification.controller.js';
 import { protect } from '../middlewares/auth.js';
 
 const router = Router();
@@ -45,5 +45,6 @@ router.get('/', getNotifications);
  *         description: Notification marked as read
  */
 router.patch('/:id/read', markAsRead);
+router.patch('/read-all', markAllRead);
 
 export default router;

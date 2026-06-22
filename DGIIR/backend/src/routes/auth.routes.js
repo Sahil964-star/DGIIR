@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import { requestOtp, verifyOtp, loginAdmin, refreshToken, getMe, logout, forgotPassword, resetPassword, } from '../controllers/auth.controller.js';
+import { requestOtp, verifyOtp, loginAdmin, refreshToken, getMe, logout, forgotPassword, resetPassword, updateProfile, changePassword, } from '../controllers/auth.controller.js';
 import { protect } from '../middlewares/auth.js';
 import { authRateLimiter } from '../middlewares/security.js';
 const router = Router();
@@ -195,5 +195,7 @@ router.use(protect);
  *         description: User data
  */
 router.get('/me', getMe);
+router.patch('/profile', updateProfile);
+router.patch('/change-password', changePassword);
 export default router;
 //# sourceMappingURL=auth.routes.js.map

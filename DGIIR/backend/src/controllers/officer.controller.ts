@@ -5,7 +5,14 @@ import { asyncHandler } from '../utils/asyncHandler.js';
 export const getMyComplaints = asyncHandler(async (req: Request, res: Response) => {
   const complaints = await prisma.complaint.findMany({
     where: { officerId: req.user!.id },
-    include: { category: true, district: true },
+    include: { 
+      category: true, 
+      district: true,
+      events: {
+        orderBy: { createdAt: 'desc' },
+        include: { actor: { select: { name: true, role: true } } }
+      }
+    },
     orderBy: { createdAt: 'desc' },
   });
   

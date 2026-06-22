@@ -79,7 +79,7 @@ export const refreshToken = asyncHandler(async (req, res) => {
 export const getMe = asyncHandler(async (req, res) => {
     const user = await prisma.user.findUnique({
         where: { id: req.user.id },
-        select: { id: true, name: true, email: true, phone: true, role: true, departmentId: true, districtId: true },
+        include: { department: true, district: true },
     });
     res.status(200).json({ status: 'success', data: { user } });
 });
@@ -105,5 +105,50 @@ export const resetPassword = asyncHandler(async (req, res) => {
     const user = await AuthService.resetPassword(phone, otp, newPassword);
     await AuditService.log(user.id, 'RESET_PASSWORD', 'User', user.id, {});
     res.status(200).json({ status: 'success', message: 'Password reset successfully' });
+});
+export const updateProfile = asyncHandler(async (req, res) => {
+    const { name, email, phone } = req.body;
+    if (!name)
+        throw new AppError('Please provide a name', 400);
+    // Check if email is already taken by another user
+    if (email) {
+        const existingUser = await prisma.user.findFirst({
+            where: { email, NOT: { id: req.user.id } }
+        });
+        if (existingUser)
+            throw new AppError('Email is already taken', 400);
+    }
+    // Check if phone is already taken by another user
+    if (phone) {
+        const existingUser = await prisma.user.findFirst({
+            where: { phone, NOT: { id: req.user.id } }
+        });
+        if (existingUser)
+            throw new AppError('Phone number is already taken', 400);
+    }
+    const user = await prisma.user.update({
+        where: { id: req.user.id },
+        data: { name, email, phone },
+        include: { department: true, district: true }
+    });
+    res.status(200).json({ status: 'success', data: { user } });
+});
+export const changePassword = asyncHandler(async (req, res) => {
+    const { currentPassword, newPassword } = req.body;
+    if (!currentPassword || !newPassword) {
+        throw new AppError('Please provide both current and new passwords', 400);
+    }
+    const user = await prisma.user.findUnique({ where: { id: req.user.id } });
+    if (!user || !user.passwordHash)
+        throw new AppError('User not found', 404);
+    const isMatch = await bcrypt.compare(currentPassword, user.passwordHash);
+    if (!isMatch)
+        throw new AppError('Incorrect current password', 401);
+    const newPasswordHash = await bcrypt.hash(newPassword, 10);
+    await prisma.user.update({
+        where: { id: req.user.id },
+        data: { passwordHash: newPasswordHash },
+    });
+    res.status(200).json({ status: 'success', message: 'Password updated successfully' });
 });
 //# sourceMappingURL=auth.controller.js.map

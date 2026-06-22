@@ -10,10 +10,17 @@ export const getNotifications = asyncHandler(async (req, res) => {
 });
 export const markAsRead = asyncHandler(async (req, res) => {
     const { id } = req.params;
-    const notification = await prisma.notification.updateMany({
+    await prisma.notification.updateMany({
         where: { id: id, userId: req.user.id },
         data: { isRead: true },
     });
     res.status(200).json({ status: 'success', message: 'Notification marked as read' });
+});
+export const markAllRead = asyncHandler(async (req, res) => {
+    await prisma.notification.updateMany({
+        where: { userId: req.user.id, isRead: false },
+        data: { isRead: true },
+    });
+    res.status(200).json({ status: 'success', message: 'All notifications marked as read' });
 });
 //# sourceMappingURL=notification.controller.js.map

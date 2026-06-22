@@ -1,6 +1,6 @@
 import { Router } from 'express';
 import { getCmOverview, getTopConcerns, getDistrictRisk, getResolutionTime, getPriorityDistribution } from '../controllers/analytics.cm.controller.js';
-import { getOperationsOverview, getSlaPerformance } from '../controllers/analytics.operations.controller.js';
+import { getOperationsOverview, getSlaPerformance, getOfficerWorkload } from '../controllers/analytics.operations.controller.js';
 import { protect } from '../middlewares/auth.js';
 import { restrictTo } from '../middlewares/rbac.js';
 const router = Router();
@@ -104,5 +104,18 @@ router.get('/operations/overview', restrictTo('OPERATIONS', 'SUPER_ADMIN'), getO
  *         description: SLA performance data
  */
 router.get('/operations/sla', restrictTo('OPERATIONS', 'SUPER_ADMIN'), getSlaPerformance);
+/**
+ * @swagger
+ * /analytics/operations/officer-workload:
+ *   get:
+ *     summary: Get officer workload analytics
+ *     tags: [Analytics]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Officer workload data
+ */
+router.get('/operations/officer-workload', restrictTo('OPERATIONS', 'SUPER_ADMIN'), getOfficerWorkload);
 export default router;
 //# sourceMappingURL=analytics.routes.js.map

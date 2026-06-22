@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import { createComplaint, getComplaints, getComplaintById, updateStatus, assignComplaint, uploadMedia, verifyComplaint, } from '../controllers/complaint.controller.js';
+import { createComplaint, getComplaints, getComplaintById, updateStatus, assignComplaint, uploadMedia, verifyComplaint, acceptComplaint, rejectComplaint, escalateComplaint, } from '../controllers/complaint.controller.js';
 import { protect } from '../middlewares/auth.js';
 import { restrictTo } from '../middlewares/rbac.js';
 import { upload } from '../middlewares/upload.js';
@@ -130,5 +130,8 @@ router.post('/:id/media', upload.single('file'), uploadMedia);
  *         description: Complaint verified
  */
 router.post('/:id/verify', restrictTo('CITIZEN'), verifyComplaint);
+router.post('/:id/accept', restrictTo('FIELD_OFFICER'), acceptComplaint);
+router.post('/:id/reject', restrictTo('FIELD_OFFICER'), rejectComplaint);
+router.post('/:id/escalate', restrictTo('FIELD_OFFICER'), escalateComplaint);
 export default router;
 //# sourceMappingURL=complaint.routes.js.map
