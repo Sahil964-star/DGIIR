@@ -14,6 +14,10 @@ import metaRoutes from './routes/meta.routes.js';
 import notificationRoutes from './routes/notification.routes.js';
 import officerRoutes from './routes/officer.routes.js';
 dotenv.config();
+if (!process.env.JWT_REFRESH_SECRET) {
+    console.error('FATAL ERROR: JWT_REFRESH_SECRET is missing in environment variables.');
+    process.exit(1);
+}
 const app = express();
 const port = process.env.PORT || 5000;
 // Security & Utility Middlewares

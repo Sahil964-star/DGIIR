@@ -8,10 +8,38 @@ import { NotificationService } from '../services/notification.service.js';
 import { ComplaintStatus, MediaType } from '@prisma/client';
 
 export const createComplaint = asyncHandler(async (req: Request, res: Response) => {
-  const { title, description, districtId, categoryId, address, latitude, longitude } = req.body;
+  const { title, description, districtId, categoryId, address, latitude, longitude, citizenId: providedCitizenId } = req.body;
   
   if (!title || !description || !districtId || !categoryId || !address) {
     throw new AppError('Please provide all required fields', 400);
+  }
+
+  let lat: number | null = null;
+  let lng: number | null = null;
+
+  if (latitude !== undefined && latitude !== null) {
+    lat = Number(latitude);
+    if (isNaN(lat)) throw new AppError('Invalid latitude value', 400);
+  }
+
+  if (longitude !== undefined && longitude !== null) {
+    lng = Number(longitude);
+    if (isNaN(lng)) throw new AppError('Invalid longitude value', 400);
+  }
+
+  let targetCitizenId: string;
+
+  if (req.user!.role === 'OPERATIONS') {
+    if (!providedCitizenId) {
+      throw new AppError('citizenId is required when creating a complaint on behalf of a citizen.', 400);
+    }
+    const citizenUser = await prisma.user.findUnique({ where: { id: providedCitizenId } });
+    if (!citizenUser || citizenUser.role !== 'CITIZEN') {
+      throw new AppError('Invalid citizen identifier. The user must exist and have the CITIZEN role.', 400);
+    }
+    targetCitizenId = citizenUser.id;
+  } else {
+    targetCitizenId = req.user!.id;
   }
 
   // Generate Complaint No e.g. CMP-20231012-XXXX
@@ -28,10 +56,10 @@ export const createComplaint = asyncHandler(async (req: Request, res: Response) 
       districtId,
       categoryId,
       departmentId: category.departmentId,
-      citizenId: req.user!.id,
+      citizenId: targetCitizenId,
       address,
-      latitude,
-      longitude,
+      latitude: lat,
+      longitude: lng,
     },
   });
 
@@ -41,13 +69,18 @@ export const createComplaint = asyncHandler(async (req: Request, res: Response) 
       action: 'CREATED',
       newStatus: 'PENDING',
       actorId: req.user!.id,
-      comments: 'Complaint registered by citizen',
+      comments: req.user!.role === 'OPERATIONS' ? 'Complaint registered by Operations staff on behalf of citizen' : 'Complaint registered by citizen',
     },
   });
 
   await AuditService.log(req.user!.id, 'CREATE_COMPLAINT', 'Complaint', complaint.id);
-  await NotificationService.notify(req.user!.id, 'STATUS_UPDATE', 'Complaint Created', `Your complaint ${complaintNo} has been registered.`);
-
+  await NotificationService.notify(
+    targetCitizenId,
+    'SYSTEM_ALERT',
+    'Complaint Registered',
+    `Your complaint ${complaint.complaintNo} has been successfully registered.`,
+    `/citizen/complaints/${complaint.id}`
+  );
 
   res.status(201).json({ status: 'success', data: { complaint } });
 });
@@ -210,6 +243,10 @@ export const uploadMedia = asyncHandler(async (req: Request, res: Response) => {
 export const verifyComplaint = asyncHandler(async (req: Request, res: Response) => {
   const id = req.params.id as string;
   const { action, feedback, rating } = req.body; // action: 'APPROVE' | 'REJECT'
+
+  if (action !== 'APPROVE' && action !== 'REJECT') {
+    throw new AppError('Invalid action. Must be APPROVE or REJECT.', 400);
+  }
 
   const complaint = await prisma.complaint.findUnique({ where: { id } });
   if (!complaint) throw new AppError('Complaint not found', 404);

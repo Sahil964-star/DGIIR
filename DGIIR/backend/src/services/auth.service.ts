@@ -14,7 +14,7 @@ export class AuthService {
   }
 
   static generateRefreshToken(userId: string, role: string) {
-    return jwt.sign({ id: userId, role }, process.env.JWT_REFRESH_SECRET || 'fallback_refresh_secret', {
+    return jwt.sign({ id: userId, role }, process.env.JWT_REFRESH_SECRET!, {
       expiresIn: (process.env.JWT_REFRESH_EXPIRES_IN || '7d') as any,
     });
   }

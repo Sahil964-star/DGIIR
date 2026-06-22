@@ -74,7 +74,7 @@ export const refreshToken = asyncHandler(async (req: Request, res: Response) => 
   const { refreshToken } = req.cookies;
   if (!refreshToken) throw new AppError('Please provide a refresh token', 400);
 
-  const decoded = jwt.verify(refreshToken, process.env.JWT_REFRESH_SECRET || 'fallback_refresh_secret') as any;
+  const decoded = jwt.verify(refreshToken, process.env.JWT_REFRESH_SECRET!) as any;
   const user = await prisma.user.findUnique({ where: { id: decoded.id } });
 
   if (!user) throw new AppError('User not found', 404);
